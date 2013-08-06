@@ -13,6 +13,9 @@
       <name>Victor Miraldo</name>
     </contributor>
   </contributors>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <description>Transaction handling for Java applications</description>
   <dependencies>
     <dependency>
@@ -39,4 +42,13 @@
       </plugin>
     </plugins>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.10</version>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
