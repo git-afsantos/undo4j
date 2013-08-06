@@ -32,7 +32,6 @@ import org.bitbucket.jtransaction.common.IsolationLevel;
 */
 
 final class SimpleTransaction<T> extends AbstractTransaction<T> {
-    private static final String EMPTY = "empty transaction";
 
     // instance variables
     private final Callable<T> client;
