@@ -1,8 +1,8 @@
 package org.bitbucket.jtransaction.common;
 
 import static org.bitbucket.jtransaction.common.Check.checkNotNull;
+import static org.junit.Assert.assertNotNull;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -12,31 +12,17 @@ import org.junit.Test;
  * @version 2013
  */
 public class CheckNotNullTest {
-    /** */
-    public CheckNotNullTest() {}
 
-    /** */
     @Test
-    public void testNullIsNull() {
-        try {
-            checkNotNull(null);
-            fail("null passed non-null check");
-        } catch (NullPointerException ex) {
-            assertTrue(true);
-        }
+    public void testCheckNotNullWithNotNullObject() throws Exception {
+        Object o = new Object();
+        checkNotNull(o);
+
+        assertNotNull(o);
     }
 
-    /** */
-    @Test
-    public void testNotNull() {
-        Object o = new Object();
-        try {
-            checkNotNull(o);
-            if (o == null) { fail("null passed non-null check"); }
-            else { assertTrue(true); }
-        } catch (NullPointerException ex) {
-            if (o == null) { assertTrue(true); }
-            else { fail("non-null object failed non-null check"); }
-        }
+    @Test(expected = NullPointerException.class)
+    public void testCheckNotNullWithNullObject() throws Exception {
+        checkNotNull(null);
     }
 }
