@@ -1,7 +1,7 @@
-package org.bitbucket.afsantos.jtransaction.resources.collections;
+package org.bitbucket.jtransaction.resources.collections;
 
-import org.bitbucket.afsantos.jtransaction.common.Validator;
-import org.bitbucket.afsantos.jtransaction.resources.ResourceState;
+import org.bitbucket.jtransaction.common.Validator;
+import org.bitbucket.jtransaction.resources.ResourceState;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

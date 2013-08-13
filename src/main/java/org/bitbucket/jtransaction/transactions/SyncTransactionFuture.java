@@ -1,22 +1,3 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.transactions;
 
 import java.util.concurrent.ExecutionException;
@@ -45,54 +26,52 @@ final class SyncTransactionFuture<T> implements Future<TransactionResult<T>> {
         exception = ex;
     }
 
+
+
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    TransactionResult<T> getResult() {
-        return result;
-    }
+    TransactionResult<T> getResult() { return result; }
 
     /** */
-    Throwable getThrowable() {
-        return exception;
-    }
+    Throwable getThrowable() { return exception; }
+
+
 
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
     /** */
-    public boolean cancel(boolean mayInterrupt) {
-        return false;
-    }
+    @Override
+    public boolean cancel(boolean mayInterrupt) { return false; }
 
     /** */
-    public boolean isCancelled() {
-        return false;
-    }
+    @Override
+    public boolean isCancelled() { return false; }
 
     /** */
-    public boolean isDone() {
-        return true;
-    }
+    @Override
+    public boolean isDone() { return true; }
 
     /** */
+    @Override
     public TransactionResult<T> get() throws ExecutionException {
-        if (exception == null) {
-            return result;
-        }
+        if (exception == null) { return result; }
         throw new ExecutionException(exception);
     }
 
     /** */
-    public TransactionResult<T> get(long time, TimeUnit unit) throws ExecutionException {
-        if (exception == null) {
-            return result;
-        }
+    @Override
+    public TransactionResult<T> get(long time, TimeUnit unit)
+            throws ExecutionException {
+        if (exception == null) { return result; }
         throw new ExecutionException(exception);
     }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -109,11 +88,9 @@ final class SyncTransactionFuture<T> implements Future<TransactionResult<T>> {
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || this.getClass() != o.getClass())
-            return false;
-        SyncTransactionFuture<?> n = (SyncTransactionFuture<?>)o;
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        SyncTransactionFuture<?> n = (SyncTransactionFuture<?>) o;
         return result.equals(n.getResult());
     }
 

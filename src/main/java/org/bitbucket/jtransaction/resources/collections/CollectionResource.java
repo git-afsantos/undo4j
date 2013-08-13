@@ -1,7 +1,7 @@
-package org.bitbucket.afsantos.jtransaction.resources.collections;
+package org.bitbucket.jtransaction.resources.collections;
 
-import org.bitbucket.afsantos.jtransaction.resources.InternalResource;
-import org.bitbucket.afsantos.jtransaction.resources.StatelessResource;
+import org.bitbucket.jtransaction.resources.InternalResource;
+import org.bitbucket.jtransaction.resources.StatelessResource;
 
 /**
  * CollectionResource

@@ -1,10 +1,10 @@
-package org.bitbucket.afsantos.jtransaction.resources.collections;
+package org.bitbucket.jtransaction.resources.collections;
 
-import org.bitbucket.afsantos.jtransaction.common.Validator;
-import org.bitbucket.afsantos.jtransaction.resources.InternalResource;
-import org.bitbucket.afsantos.jtransaction.resources.ResourceState;
+import org.bitbucket.jtransaction.common.Validator;
+import org.bitbucket.jtransaction.resources.InternalResource;
+import org.bitbucket.jtransaction.resources.ResourceState;
 
-import static org.bitbucket.afsantos.jtransaction.common.Check.checkArgument;
+import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
 /**
  * InternalCollection
