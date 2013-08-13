@@ -1,5 +1,7 @@
 package org.bitbucket.jtransaction.resources;
 
+import org.bitbucket.jtransaction.common.LockManager;
+
 import static org.bitbucket.jtransaction.resources.StateUtil.*;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,16 +27,20 @@ public abstract class MultiWriterStatefulResource<T>
 
     /** Parameter constructor of objects of class MultiWriterStatefulResource.
      */
-    public MultiWriterStatefulResource(InternalResource<T> resource) {
-        super(resource);
+    public MultiWriterStatefulResource(
+		InternalResource<T> resource, LockManager lockManager
+	) {
+        super(resource, lockManager);
     }
 
     /** Parameter constructor of objects of class MultiWriterStatefulResource.
      */
     public MultiWriterStatefulResource(
-        InternalResource<T> resource, boolean buildsEachUpdate
+        InternalResource<T> resource,
+        LockManager lockManager,
+        boolean buildsEachUpdate
     ) {
-        super(resource, buildsEachUpdate);
+        super(resource, lockManager, buildsEachUpdate);
     }
 
 
@@ -72,9 +78,9 @@ public abstract class MultiWriterStatefulResource<T>
     public final InternalResource<T> getSynchronizedResource() {
         InternalResource<T> res = null;
         try {
-            this.lock.lock();
+            lock();
             res = getInternalResource();
-        } finally { this.lock.unlock(); }
+        } finally { unlock(); }
         return res;
     }
 

@@ -1,5 +1,7 @@
 package org.bitbucket.jtransaction.resources;
 
+import org.bitbucket.jtransaction.common.LockManager;
+
 import static org.bitbucket.jtransaction.resources.StateUtil.*;
 
 
@@ -22,8 +24,10 @@ public abstract class SingleWriterStatefulResource<T>
 
     /** Parameter constructor of objects of class SingleWriterStatefulResource.
      */
-    public SingleWriterStatefulResource(InternalResource<T> resource) {
-        super(resource);
+    public SingleWriterStatefulResource(
+		InternalResource<T> resource, LockManager lockManager
+	) {
+        super(resource, lockManager);
         this.status = Status.initialStatus();
         this.localCommit = getCheckpointReference();
     }
@@ -31,9 +35,11 @@ public abstract class SingleWriterStatefulResource<T>
     /** Parameter constructor of objects of class SingleWriterStatefulResource.
      */
     public SingleWriterStatefulResource(
-        InternalResource<T> resource, boolean buildsEachUpdate
+        InternalResource<T> resource,
+        LockManager lockManager,
+        boolean buildsEachUpdate
     ) {
-        super(resource, buildsEachUpdate);
+        super(resource, lockManager, buildsEachUpdate);
         this.status = Status.initialStatus();
         this.localCommit = getCheckpointReference();
     }
@@ -129,6 +135,7 @@ public abstract class SingleWriterStatefulResource<T>
                     // could modify the checkpoint after being set.
                     setCheckpoint(this.localCommit.clone());
                 }
+                // Set a NullState on lockCommit;
                 this.localCommit = identity(null);
             }
             this.status = Status.UPDATED;

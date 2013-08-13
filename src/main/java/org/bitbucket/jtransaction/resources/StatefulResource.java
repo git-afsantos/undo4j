@@ -1,7 +1,8 @@
 package org.bitbucket.jtransaction.resources;
 
-import static org.bitbucket.jtransaction.resources.StateUtil.*;
+import org.bitbucket.jtransaction.common.LockManager;
 
+import static org.bitbucket.jtransaction.resources.StateUtil.*;
 
 /**
  * StatefulResource
@@ -34,15 +35,19 @@ public abstract class StatefulResource<T> extends AbstractResource<T> {
     **************************************************************************/
 
     /** Parameter constructor of objects of class StatefulResource. */
-    public StatefulResource(InternalResource<T> resource) {
-        this(resource, false);
+    public StatefulResource(
+		InternalResource<T> resource, LockManager lockManager
+	) {
+        this(resource, lockManager, false);
     }
 
     /** Parameter constructor of objects of class StatefulResource. */
     public StatefulResource(
-        InternalResource<T> resource, boolean buildEachUpdate
+        InternalResource<T> resource,
+        LockManager lockManager,
+        boolean buildEachUpdate
     ) {
-        super(resource);
+        super(resource, lockManager);
         this.buildEach = buildEachUpdate;
         this.checkpoint = identity(null);
         this.previous = this.checkpoint;

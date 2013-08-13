@@ -8,7 +8,7 @@ package org.bitbucket.jtransaction.common;
  * @version 2013
 */
 
-public abstract class LockManager implements Acquirable {
+public abstract class LockManager implements Acquirable, Copyable<LockManager> {
     // instance variables
     private final IsolationLevel isolation;
 
@@ -19,6 +19,11 @@ public abstract class LockManager implements Acquirable {
     /** Parameter constructor of objects of class LockManager. */
     protected LockManager(IsolationLevel isolationLevel) {
         this.isolation = isolationLevel;
+    }
+
+    /** Copy constructor of objects of class LockManager. */
+    protected LockManager(LockManager instance) {
+        this.isolation = instance.getIsolationLevel();
     }
 
 
@@ -81,4 +86,9 @@ public abstract class LockManager implements Acquirable {
         sb.append(this.isolation);
         return sb.toString();
     }
+
+
+    /** */
+    @Override
+    public abstract LockManager clone();
 }

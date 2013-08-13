@@ -9,11 +9,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @version 2013
 */
 
-final class ReadWriteLockManager extends LockManager {
+final class ReadWriteLockManager extends StrategizedLockManager {
     // instance variables
     private volatile AccessMode currentMode;
     private final ReentrantReadWriteLock lock;
-    private final LockStrategy strategy;
 
     /**************************************************************************
      * Constructors
@@ -21,10 +20,17 @@ final class ReadWriteLockManager extends LockManager {
 
     /** Parameter constructor of objects of class ReadWriteLockManager. */
     ReadWriteLockManager(LockStrategy lockStrategy) {
-        super(IsolationLevel.READ_WRITE);
+        super(IsolationLevel.READ_WRITE, lockStrategy);
         currentMode = AccessMode.READ;
         lock = new ReentrantReadWriteLock();
-        strategy = lockStrategy;
+    }
+
+
+    /** Copy constructor of objects of class ReadWriteLockManager. */
+    ReadWriteLockManager(ReadWriteLockManager instance) {
+        super(instance);
+        currentMode = AccessMode.READ;
+        lock = new ReentrantReadWriteLock();
     }
 
 
@@ -38,11 +44,11 @@ final class ReadWriteLockManager extends LockManager {
         boolean locked = false;
         switch (mode) {
             case READ:
-            locked = strategy.acquire(lock.readLock());
+            locked = getLockStrategy().acquire(lock.readLock());
             break;
 
             case WRITE:
-            locked = strategy.acquire(lock.writeLock());
+            locked = getLockStrategy().acquire(lock.writeLock());
             break;
         }
         // Set current mode, if the lock has been acquired.
@@ -67,5 +73,12 @@ final class ReadWriteLockManager extends LockManager {
             lock.writeLock().unlock();
             return;
         }
+    }
+
+
+    /** */
+    @Override
+    public ReadWriteLockManager clone() {
+		return new ReadWriteLockManager(this);
     }
 }

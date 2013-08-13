@@ -1,5 +1,7 @@
 package org.bitbucket.jtransaction.resources;
 
+import org.bitbucket.jtransaction.common.LockManager;
+
 import static org.bitbucket.jtransaction.resources.StateUtil.*;
 
 /**
@@ -22,15 +24,19 @@ public final class MultiShadowResource<T>
     **************************************************************************/
 
     /** Parameter constructor of objects of class MultiShadowResource. */
-    public MultiShadowResource(InternalResource<T> resource) {
-        super(resource);
+    public MultiShadowResource(
+		InternalResource<T> resource, LockManager lockManager
+	) {
+        super(resource, lockManager);
     }
 
     /** Parameter constructor of objects of class MultiShadowResource. */
     public MultiShadowResource(
-        InternalResource<T> resource, boolean buildsEachUpdate
+        InternalResource<T> resource,
+        LockManager lockManager,
+        boolean buildsEachUpdate
     ) {
-        super(resource, buildsEachUpdate);
+        super(resource, lockManager, buildsEachUpdate);
     }
 
 

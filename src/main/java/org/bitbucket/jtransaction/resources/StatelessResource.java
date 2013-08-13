@@ -1,5 +1,6 @@
 package org.bitbucket.jtransaction.resources;
 
+import org.bitbucket.jtransaction.common.LockManager;
 
 /**
  * StatelessResource
@@ -8,14 +9,16 @@ package org.bitbucket.jtransaction.resources;
  * @version 2013
 */
 
-public abstract class StatelessResource<T> extends AbstractResource<T> {
+public class StatelessResource<T> extends AbstractResource<T> {
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
     /** Parameter constructor of objects of class StatelessResource. */
-    public StatelessResource(InternalResource<T> resource) {
-        super(resource);
+    public StatelessResource(
+		InternalResource<T> resource, LockManager lockManager
+	) {
+        super(resource, lockManager);
     }
 
 
@@ -47,4 +50,26 @@ public abstract class StatelessResource<T> extends AbstractResource<T> {
             throw new ResourceWriteException(e.getMessage(), e);
         }
     }
+
+
+    /** Overridable */
+	@Override
+	public void commit() {}
+
+
+	/** Overridable */
+	@Override
+	public void rollback() {}
+
+
+	/** Overridable */
+	@Override
+	public void update() {}
+
+
+	/** */
+	@Override
+	public StatelessResource<T> clone() {
+		return new StatelessResource<T>(this);
+	}
 }
