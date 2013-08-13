@@ -2,19 +2,30 @@ package org.bitbucket.jtransaction.resources;
 
 
 /**
- * NullState
+ * ImmutableState
  * 
  * @author afs
  * @version 2013
 */
 
-public final class NullState<T> extends AbstractState<T> {
+public final class ImmutableState<T> extends AbstractState<T> {
+    // instance variables
+    private final T value;
+
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Empty constructor of objects of class NullState. */
-    public NullState() {}
+    /** Parameter constructor of objects of class ImmutableState. */
+    public ImmutableState(T val) {
+        value = val;
+    }
+
+
+    /** Copy constructor of objects of class ImmutableState. */
+    private ImmutableState(ImmutableState<? extends T> instance) {
+        value = instance.get();
+    }
 
 
 
@@ -24,7 +35,7 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** */
     @Override
-    public T get() { return null; }
+    public T get() { return value; }
 
 
 
@@ -34,8 +45,8 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** */
     @Override
-    public void set(T value) {
-        throw new UnsupportedOperationException("null state");
+    public void set(T val) {
+        throw new UnsupportedOperationException("immutable state");
     }
 
 
@@ -46,7 +57,23 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** */
     @Override
-    public boolean isNull() { return true; }
+    public boolean isNull() { return value == null; }
+
+
+
+    /**************************************************************************
+     * Public Methods
+    **************************************************************************/
+
+    // ...
+
+
+
+    /**************************************************************************
+     * Private Methods
+    **************************************************************************/
+
+    // ...
 
 
 
@@ -56,5 +83,5 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public NullState<T> clone() { return new NullState<T>(); }
+    public ImmutableState<T> clone() { return new ImmutableState<T>(this); }
 }

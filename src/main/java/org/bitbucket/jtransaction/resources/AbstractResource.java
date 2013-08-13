@@ -1,29 +1,10 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.resources;
-
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
 import org.bitbucket.jtransaction.common.AccessMode;
 import org.bitbucket.jtransaction.common.Copyable;
 import org.bitbucket.jtransaction.common.IsolationLevel;
+
+import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
 /**
  * AbstractResource
@@ -32,9 +13,10 @@ import org.bitbucket.jtransaction.common.IsolationLevel;
  * @version 2013
 */
 
-public abstract class AbstractResource implements Resource, Copyable<AbstractResource> {
+public abstract class AbstractResource<T>
+        implements Resource<T>, Copyable<AbstractResource<T>> {
     // instance variables
-    private final InternalResource resource;
+    private final InternalResource<T> resource;
     private volatile boolean accessible, consistent;
 
     /**************************************************************************
@@ -43,19 +25,22 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
 
     /** Parameter constructor of objects of class AbstractResource.
      */
-    public AbstractResource(InternalResource r) {
+    public AbstractResource(InternalResource<T> r) {
         checkArgument("null resource", r);
         this.resource = r;
         this.accessible = false;
         this.consistent = true;
     }
 
+
     /** Copy constructor of objects of class AbstractResource. */
-    protected AbstractResource(AbstractResource instance) {
+    protected AbstractResource(AbstractResource<T> instance) {
         this.resource = instance.getInternalResource();
         this.accessible = instance.isAccessible();
         this.consistent = instance.isConsistent();
     }
+
+
 
     /**************************************************************************
      * Getters
@@ -65,50 +50,61 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
      * Implementations should override this method to define their
      * isolation level.
      */
+    @Override
     public IsolationLevel getIsolationLevel() {
         return IsolationLevel.NONE;
     }
 
+
     /** */
-    protected final InternalResource getInternalResource() {
+    protected final InternalResource<T> getInternalResource() {
         return this.resource;
     }
+
 
     /**
      * Subclasses providing concurrent access should override this
      * method to implement the desired synchronization mechanism.
      */
-    public InternalResource getSynchronizedResource() {
+    public InternalResource<T> getSynchronizedResource() {
         return this.resource;
     }
+
+
 
     /**************************************************************************
      * Setters
     **************************************************************************/
 
     /** */
+    @Override
     public final void setAccessible(boolean isAccessible) {
         this.accessible = isAccessible;
     }
 
+
     /** */
+    @Override
     public final void setConsistent(boolean isConsistent) {
         this.consistent = isConsistent;
     }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
     /** Checks whether this resource is accessible. */
-    public final boolean isAccessible() {
-        return this.accessible;
-    }
+    @Override
+    public final boolean isAccessible() { return this.accessible; }
+
 
     /** Checks whether this resource is in a consistent state. */
-    public final boolean isConsistent() {
-        return this.consistent;
-    }
+    @Override
+    public final boolean isConsistent() { return this.consistent; }
+
+
 
     /**************************************************************************
      * Public Methods
@@ -119,6 +115,7 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
      * Throws a ResourceInitializeException wrapping any exception thrown
      * by the internal resource's initialize.
      */
+    @Override
     public final void initialize() {
         // Initialize internal resource.
         initializeInternalResource();
@@ -128,11 +125,13 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
         this.accessible = true;
     }
 
+
     /** Invokes dispose on the internal resource,
      * and then sets the resource as inaccessible.
      * Throws a ResourceDisposeException wrapping any exception thrown
      * by the internal resource's dispose.
      */
+    @Override
     public final void dispose() {
         // Set the resource as inaccessible.
         this.accessible = false;
@@ -142,29 +141,36 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
         disposeDecorator();
     }
 
+
     /** Does nothing, by default.
      * Implementations should override to support concurrent access.
      */
+    @Override
     public void acquireFor(AccessMode mode) {}
+
 
     /** Returns true, by default.
      * Implementations should override to support concurrent access.
      */
+    @Override
     public boolean tryAcquireFor(AccessMode mode, long millis) {
         return true;
     }
 
+
     /** Returns true, by default.
      * Implementations should override to support concurrent access.
      */
-    public boolean tryAcquireFor(AccessMode mode) {
-        return true;
-    }
+    @Override
+    public boolean tryAcquireFor(AccessMode mode) { return true; }
+
 
     /** Does nothing, by default.
      * Implementations should override to support concurrent access.
      */
+    @Override
     public void release() {}
+
 
     /** Called in initialize.
      * Does nothing, by default.
@@ -172,11 +178,14 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
      */
     protected void initializeDecorator() {}
 
+
     /** Called in dispose.
      * Does nothing, by default.
      * Override for custom behaviour.
      */
     protected void disposeDecorator() {}
+
+
 
     /**************************************************************************
      * Private Methods
@@ -202,6 +211,8 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
         }
     }
 
+
+
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
     **************************************************************************/
@@ -217,12 +228,10 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof AbstractResource))
-            return false;
-        AbstractResource n = (AbstractResource)o;
-        return (this.resource.equals(n.getInternalResource()));
+        if (this == o) return true;
+        if (!(o instanceof AbstractResource)) return false;
+        AbstractResource<?> n = (AbstractResource<?>) o;
+        return this.resource.equals(n.getInternalResource());
     }
 
     /** Contract:
@@ -243,9 +252,7 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
         hash = prime * hash + codeForField
     */
     @Override
-    public int hashCode() {
-        return 37 + resource.hashCode();
-    }
+    public int hashCode() { return resource.hashCode(); }
 
     /** Returns a string representation of the object. */
     @Override
@@ -258,5 +265,5 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public abstract AbstractResource clone();
+    public abstract AbstractResource<T> clone();
 }

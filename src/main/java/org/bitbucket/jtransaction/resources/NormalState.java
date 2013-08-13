@@ -2,19 +2,36 @@ package org.bitbucket.jtransaction.resources;
 
 
 /**
- * NullState
+ * NormalState
  * 
  * @author afs
  * @version 2013
 */
 
-public final class NullState<T> extends AbstractState<T> {
+public final class NormalState<T> extends AbstractState<T> {
+    // instance variables
+    private T value;
+
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Empty constructor of objects of class NullState. */
-    public NullState() {}
+    /** Empty constructor of objects of class NormalState. */
+    public NormalState() {
+        value = null;
+    }
+
+
+    /** Parameter constructor of objects of class NormalState. */
+    public NormalState(T val) {
+        value = val;
+    }
+
+
+    /** Copy constructor of objects of class NormalState. */
+    private NormalState(NormalState<? extends T> instance) {
+        value = instance.get();
+    }
 
 
 
@@ -24,7 +41,7 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** */
     @Override
-    public T get() { return null; }
+    public T get() { return value; }
 
 
 
@@ -34,9 +51,7 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** */
     @Override
-    public void set(T value) {
-        throw new UnsupportedOperationException("null state");
-    }
+    public void set(T val) { value = val; }
 
 
 
@@ -46,7 +61,7 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** */
     @Override
-    public boolean isNull() { return true; }
+    public boolean isNull() { return value == null; }
 
 
 
@@ -56,5 +71,5 @@ public final class NullState<T> extends AbstractState<T> {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public NullState<T> clone() { return new NullState<T>(); }
+    public NormalState<T> clone() { return new NormalState<T>(this); }
 }

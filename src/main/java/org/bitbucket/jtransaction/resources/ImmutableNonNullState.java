@@ -3,30 +3,30 @@ package org.bitbucket.jtransaction.resources;
 import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
 /**
- * NonNullState
+ * ImmutableNonNullState
  * 
- * @author afs
+ * @author vmiraldo
  * @version 2013
 */
 
-public final class NonNullState<T> extends AbstractState<T> {
+public final class ImmutableNonNullState<T> extends AbstractState<T> {
     // instance variables
-    private T value;
+    private final T value;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Parameter constructor of objects of class NonNullState. */
-    public NonNullState(T val) {
+    /** Parameter constructor of objects of class ImmutableNonNullState. */
+    public ImmutableNonNullState(T val) {
         checkArgument(val);
         value = val;
     }
 
 
-    /** Copy constructor of objects of class NonNullState. */
-    private NonNullState(NonNullState<? extends T> instance) {
-        value = instance.get();
+    /** Copy constructor of objects of class ImmutableNonNullState. */
+    private ImmutableNonNullState(ImmutableNonNullState<? extends T> inns) {
+        value = inns.get();
     }
 
 
@@ -48,8 +48,7 @@ public final class NonNullState<T> extends AbstractState<T> {
     /** */
     @Override
     public void set(T val) {
-        checkArgument(val);
-        value = val;
+        throw new UnsupportedOperationException("immutable state");
     }
 
 
@@ -86,5 +85,7 @@ public final class NonNullState<T> extends AbstractState<T> {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public NonNullState<T> clone() { return new NonNullState<T>(this); }
+    public ImmutableNonNullState<T> clone() {
+        return new ImmutableNonNullState<T>(this);
+    }
 }

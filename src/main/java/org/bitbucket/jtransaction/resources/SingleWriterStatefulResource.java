@@ -1,23 +1,7 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.resources;
+
+import static org.bitbucket.jtransaction.resources.StateUtil.*;
+
 
 /**
  * SingleWriterStatefulResource
@@ -26,10 +10,11 @@ package org.bitbucket.jtransaction.resources;
  * @version 2013
 */
 
-public abstract class SingleWriterStatefulResource extends StatefulResource {
+public abstract class SingleWriterStatefulResource<T>
+        extends StatefulResource<T> {
     // instance variables
     private Status status;
-    private ResourceState localCommit;
+    private ResourceState<T> localCommit;
 
     /**************************************************************************
      * Constructors
@@ -37,59 +22,64 @@ public abstract class SingleWriterStatefulResource extends StatefulResource {
 
     /** Parameter constructor of objects of class SingleWriterStatefulResource.
      */
-    public SingleWriterStatefulResource(InternalResource resource) {
+    public SingleWriterStatefulResource(InternalResource<T> resource) {
         super(resource);
         this.status = Status.initialStatus();
-        this.localCommit = NULL_STATE;
+        this.localCommit = getCheckpointReference();
     }
 
     /** Parameter constructor of objects of class SingleWriterStatefulResource.
      */
-    public SingleWriterStatefulResource(InternalResource resource, boolean buildsEachUpdate) {
+    public SingleWriterStatefulResource(
+        InternalResource<T> resource, boolean buildsEachUpdate
+    ) {
         super(resource, buildsEachUpdate);
         this.status = Status.initialStatus();
-        this.localCommit = NULL_STATE;
+        this.localCommit = getCheckpointReference();
     }
 
+
     /** Copy constructor of objects of class SingleWriterStatefulResource. */
-    protected SingleWriterStatefulResource(SingleWriterStatefulResource r) {
+    protected SingleWriterStatefulResource(SingleWriterStatefulResource<T> r) {
         super(r);
         this.status = r.getStatus();
         this.localCommit = r.getLocalCommit();
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** Returns a copy of the local commit. */
-    protected final ResourceState getLocalCommit() {
-        return StateUtil.cloneSafely(this.localCommit);
+    protected final ResourceState<T> getLocalCommit() {
+        return cloneSafely(this.localCommit);
     }
 
     /** Returns a direct reference to the local commit. */
-    protected final ResourceState getLocalCommitReference() {
+    protected final ResourceState<T> getLocalCommitReference() {
         return this.localCommit;
     }
 
     /** Returns the current status. */
-    protected final Status getStatus() {
-        return this.status;
-    }
+    protected final Status getStatus() { return this.status; }
+
+
 
     /**************************************************************************
      * Setters
     **************************************************************************/
 
     /** */
-    protected final void setLocalCommit(ResourceState state) {
-        this.localCommit = (state == null ? NULL_STATE : state);
+    protected final void setLocalCommit(ResourceState<T> state) {
+        this.localCommit = identity(state);
     }
 
     /** */
-    protected final void setStatus(Status s) {
-        this.status = s;
-    }
+    protected final void setStatus(Status s) { this.status = s; }
+
+
 
     /**************************************************************************
      * Predicates
@@ -115,6 +105,8 @@ public abstract class SingleWriterStatefulResource extends StatefulResource {
         return this.status == Status.COMMITTED;
     }
 
+
+
     /**************************************************************************
      * Public Methods
     **************************************************************************/
@@ -125,6 +117,7 @@ public abstract class SingleWriterStatefulResource extends StatefulResource {
      * This guarantees that subsequent concurrent reads from the checkpoint
      * do not require synchronization on a monitor.
      */
+    @Override
     public final void update() {
         if (isCommitted()) {
             if (hasLocalCommit()) {
@@ -136,19 +129,22 @@ public abstract class SingleWriterStatefulResource extends StatefulResource {
                     // could modify the checkpoint after being set.
                     setCheckpoint(this.localCommit.clone());
                 }
-                this.localCommit = NULL_STATE;
+                this.localCommit = identity(null);
             }
             this.status = Status.UPDATED;
         }
     }
+
 
     /** Disposes of any stored states.
      */
     @Override
     protected void disposeDecorator() {
         super.disposeDecorator();
-        this.localCommit = NULL_STATE;
+        this.localCommit = getCheckpointReference();
     }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -164,5 +160,5 @@ public abstract class SingleWriterStatefulResource extends StatefulResource {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public abstract SingleWriterStatefulResource clone();
+    public abstract SingleWriterStatefulResource<T> clone();
 }
