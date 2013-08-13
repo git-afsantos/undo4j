@@ -1,30 +1,8 @@
-/*
-The MIT License (MIT)
+package org.bitbucket.afsantos.jtransaction.resources.collections;
 
-Copyright (c) 2013 Andre Santos, Victor Miraldo
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-
-package org.bitbucket.jtransaction.resources.collections;
-
-import org.bitbucket.jtransaction.common.Validator;
-import org.bitbucket.jtransaction.resources.Resource;
-import org.bitbucket.jtransaction.resources.ResourceState;
+import org.bitbucket.afsantos.jtransaction.common.Validator;
+import org.bitbucket.afsantos.jtransaction.resources.Resource;
+import org.bitbucket.afsantos.jtransaction.resources.ResourceState;
 
 /**
  * CollectionResources
@@ -50,20 +28,20 @@ public final class CollectionResources {
     **************************************************************************/
 
     /** */
-    public static Resource newInstantQueue() {
-        return new CollectionResource(new InternalInstantQueue());
+    public static <T> Resource<T> newInstantQueue(T type) {
+        return new CollectionResource<T>(new InternalInstantQueue<T>());
     }
 
     /** */
-    public static Resource newInstantQueue(int capacity) {
-        return new CollectionResource(new InternalInstantQueue(capacity));
+    public static <T> Resource<T> newInstantQueue(T type, int cap) {
+        return new CollectionResource<T>(new InternalInstantQueue<T>(cap));
     }
 
     /** */
-    public static Resource newInstantQueue(
-        int capacity, Validator<ResourceState> validator
+    public static <T> Resource<T> newInstantQueue(
+        int capacity, Validator<ResourceState<T>> validator
     ) {
-        return new CollectionResource(new InternalInstantQueue(
+        return new CollectionResource<T>(new InternalInstantQueue<T>(
             capacity, validator
         ));
     }
@@ -74,20 +52,20 @@ public final class CollectionResources {
     **************************************************************************/
 
     /** */
-    public static Resource newBlockingQueue() {
-        return new CollectionResource(new InternalBlockingQueue());
+    public static <T> Resource<T> newBlockingQueue(T type) {
+        return new CollectionResource<T>(new InternalBlockingQueue<T>());
     }
 
     /** */
-    public static Resource newBlockingQueue(int capacity) {
-        return new CollectionResource(new InternalBlockingQueue(capacity));
+    public static <T> Resource<T> newBlockingQueue(T type, int cap) {
+        return new CollectionResource<T>(new InternalBlockingQueue<T>(cap));
     }
 
     /** */
-    public static Resource newBlockingQueue(
-        int capacity, Validator<ResourceState> validator
+    public static <T> Resource<T> newBlockingQueue(
+        int capacity, Validator<ResourceState<T>> validator
     ) {
-        return new CollectionResource(new InternalBlockingQueue(
+        return new CollectionResource<T>(new InternalBlockingQueue<T>(
             capacity, validator
         ));
     }
@@ -99,20 +77,22 @@ public final class CollectionResources {
     **************************************************************************/
 
     /** */
-    public static Resource newTimedQueue() {
-        return new CollectionResource(new InternalTimedQueue());
+    public static <T> Resource<T> newTimedQueue(T type) {
+        return new CollectionResource<T>(new InternalTimedQueue<T>());
     }
 
     /** */
-    public static Resource newTimedQueue(int capacity, long wait) {
-        return new CollectionResource(new InternalTimedQueue(capacity, wait));
-    }
-
-    /** */
-    public static Resource newTimedQueue(
-        int capacity, long wait, Validator<ResourceState> validator
+    public static <T> Resource<T> newTimedQueue(
+        T type, int cap, long wait
     ) {
-        return new CollectionResource(new InternalTimedQueue(
+        return new CollectionResource<T>(new InternalTimedQueue<T>(cap, wait));
+    }
+
+    /** */
+    public static <T> Resource<T> newTimedQueue(
+        int capacity, long wait, Validator<ResourceState<T>> validator
+    ) {
+        return new CollectionResource<T>(new InternalTimedQueue<T>(
             capacity, wait, validator
         ));
     }

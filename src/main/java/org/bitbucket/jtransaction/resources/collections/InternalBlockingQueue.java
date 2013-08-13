@@ -1,29 +1,10 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
+package org.bitbucket.afsantos.jtransaction.resources.collections;
 
-package org.bitbucket.jtransaction.resources.collections;
+import org.bitbucket.afsantos.jtransaction.common.Validator;
+import org.bitbucket.afsantos.jtransaction.resources.ResourceState;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.bitbucket.jtransaction.common.Validator;
-import org.bitbucket.jtransaction.resources.ResourceState;
 
 /**
  * InternalBlockingQueue
@@ -32,30 +13,32 @@ import org.bitbucket.jtransaction.resources.ResourceState;
  * @version 2013
 */
 
-final class InternalBlockingQueue extends InternalConcurrentQueue {
+final class InternalBlockingQueue<T> extends InternalConcurrentQueue<T> {
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
     /** Empty constructor of objects of class InternalBlockingQueue. */
-    InternalBlockingQueue() {
-        this(Integer.MAX_VALUE);
-    }
+    InternalBlockingQueue() { this(Integer.MAX_VALUE); }
+
 
     /** Parameter constructor of objects of class InternalBlockingQueue. */
     InternalBlockingQueue(int cap) {
-        super(cap, new LinkedBlockingQueue<ResourceState>(cap));
+        super(cap, new LinkedBlockingQueue<ResourceState<T>>(cap));
     }
 
     /** Parameter constructor of objects of class InternalBlockingQueue. */
-    InternalBlockingQueue(int cap, Validator<ResourceState> val) {
-        super(cap, new LinkedBlockingQueue<ResourceState>(cap), val);
+    InternalBlockingQueue(int cap, Validator<ResourceState<T>> val) {
+        super(cap, new LinkedBlockingQueue<ResourceState<T>>(cap), val);
     }
 
+
     /** Copy constructor of objects of class InternalBlockingQueue. */
-    InternalBlockingQueue(InternalBlockingQueue instance) {
+    InternalBlockingQueue(InternalBlockingQueue<T> instance) {
         super(instance);
     }
+
+
 
     /**************************************************************************
      * Getters
@@ -63,42 +46,52 @@ final class InternalBlockingQueue extends InternalConcurrentQueue {
 
     /** */
     @Override
-    protected BlockingQueue<ResourceState> getQueue() {
+    protected BlockingQueue<ResourceState<T>> getQueue() {
         int cap = getCapacity();
-        BlockingQueue<ResourceState> queue = getQueueReference();
-        BlockingQueue<ResourceState> copy = new LinkedBlockingQueue<ResourceState>(cap);
-        for (ResourceState s : queue) {
-            copy.offer(s.clone());
-        }
+        BlockingQueue<ResourceState<T>> queue = getQueueReference();
+        BlockingQueue<ResourceState<T>> copy = new LinkedBlockingQueue<>(cap);
+        for (ResourceState<T> s : queue) { copy.offer(s.clone()); }
         return copy;
     }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
     /** */
-    public ResourceState buildState() throws InterruptedException {
+    @Override
+    public ResourceState<T> buildState() throws InterruptedException {
         return getQueueReference().take();
     }
 
     /** */
-    public void applyState(ResourceState state) throws InterruptedException {
+    @Override
+    public void applyState(ResourceState<T> state) throws InterruptedException {
         checkValidState(state);
         getQueueReference().put(state);
     }
+
+    
+
+
 
     /**************************************************************************
      * Private Methods
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -106,7 +99,7 @@ final class InternalBlockingQueue extends InternalConcurrentQueue {
 
     /** Returns a copy of the object. */
     @Override
-    public InternalBlockingQueue clone() {
-        return new InternalBlockingQueue(this);
+    public InternalBlockingQueue<T> clone() {
+        return new InternalBlockingQueue<T>(this);
     }
 }

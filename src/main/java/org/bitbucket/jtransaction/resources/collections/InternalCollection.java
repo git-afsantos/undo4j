@@ -1,29 +1,10 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
+package org.bitbucket.afsantos.jtransaction.resources.collections;
 
-package org.bitbucket.jtransaction.resources.collections;
+import org.bitbucket.afsantos.jtransaction.common.Validator;
+import org.bitbucket.afsantos.jtransaction.resources.InternalResource;
+import org.bitbucket.afsantos.jtransaction.resources.ResourceState;
 
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
-
-import org.bitbucket.jtransaction.common.Validator;
-import org.bitbucket.jtransaction.resources.InternalResource;
-import org.bitbucket.jtransaction.resources.ResourceState;
+import static org.bitbucket.afsantos.jtransaction.common.Check.checkArgument;
 
 /**
  * InternalCollection
@@ -32,9 +13,9 @@ import org.bitbucket.jtransaction.resources.ResourceState;
  * @version 2013
 */
 
-abstract class InternalCollection implements InternalResource {
+abstract class InternalCollection<T> implements InternalResource<T> {
     // instance variables
-    private final Validator<ResourceState> validator;
+    private final Validator<ResourceState<T>> validator;
 
     /**************************************************************************
      * Constructors
@@ -42,56 +23,71 @@ abstract class InternalCollection implements InternalResource {
 
     /** Empty constructor of objects of class InternalCollection. */
     protected InternalCollection() {
-        this.validator = new NullValidator();
+        this.validator = new NullValidator<T>();
     }
 
+
     /** Parameter constructor of objects of class InternalCollection. */
-    protected InternalCollection(Validator<ResourceState> val) {
+    protected InternalCollection(Validator<ResourceState<T>> val) {
         checkArgument(val);
         this.validator = val;
     }
 
+
     /** Copy constructor of objects of class InternalCollection. */
-    protected InternalCollection(InternalCollection instance) {
+    protected InternalCollection(InternalCollection<T> instance) {
         this.validator = instance.getValidator();
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    protected final Validator<ResourceState> getValidator() {
+    protected final Validator<ResourceState<T>> getValidator() {
         return this.validator;
     }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
     /** */
-    public final boolean isValidState(ResourceState state) {
+    @Override
+    public final boolean isValidState(ResourceState<T> state) {
         return this.validator.isValid(state);
     }
+
+
 
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
     /** */
+    @Override
     public void initialize() {}
 
     /** */
+    @Override
     public void dispose() {}
+
+
 
     /**************************************************************************
      * Private Methods
     **************************************************************************/
 
     /** */
-    protected final void checkValidState(ResourceState state) {
+    protected final void checkValidState(ResourceState<T> state) {
         checkArgument(this.validator.isValid(state));
     }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -108,12 +104,10 @@ abstract class InternalCollection implements InternalResource {
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof InternalCollection))
-            return false;
-        InternalCollection n = (InternalCollection)o;
-        return (this.validator == n.getValidator());
+        if (this == o) return true;
+        if (!(o instanceof InternalCollection)) return false;
+        InternalCollection<?> n = (InternalCollection<?>) o;
+        return this.validator.equals(n.getValidator());
     }
 
     /** Contract:
@@ -148,20 +142,22 @@ abstract class InternalCollection implements InternalResource {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public abstract InternalCollection clone();
+    public abstract InternalCollection<T> clone();
+
+
 
     /**************************************************************************
      * Nested Classes
     **************************************************************************/
 
     /** */
-    static final class NullValidator implements Validator<ResourceState> {
+    static final class NullValidator<T>
+            implements Validator<ResourceState<T>> {
         /** Constructor */
         NullValidator() {}
 
         /** */
-        public boolean isValid(ResourceState state) {
-            return true;
-        }
+        @Override
+        public boolean isValid(ResourceState<T> state) { return true; }
     }
 }
