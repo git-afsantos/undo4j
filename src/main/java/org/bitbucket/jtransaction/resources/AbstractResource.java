@@ -250,9 +250,6 @@ public abstract class AbstractResource implements Resource, Copyable<AbstractRes
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
-        /*StringBuilder sb = new StringBuilder();
-        sb.append(this.resource.toString());
-        return sb.toString();*/
         return this.resource.toString();
     }
 
