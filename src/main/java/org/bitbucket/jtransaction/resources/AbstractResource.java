@@ -17,8 +17,7 @@ import static org.bitbucket.jtransaction.common.Check.checkArgument;
 public abstract class AbstractResource<T>
         implements Resource<T>, Copyable<AbstractResource<T>> {
     // instance variables
-	private final ThreadLocal<ReadWriteListener> listener;
-    private final InternalResource<T> resource;
+	private final InternalResource<T> resource;
     private final LockManager lockManager;
     private volatile boolean accessible, consistent;
 
@@ -33,7 +32,6 @@ public abstract class AbstractResource<T>
         checkArgument("null lock manager", lm);
         this.resource = r;
         this.lockManager = lm;
-        this.listener = new ThreadLocal<ReadWriteListener>();
         this.accessible = false;
         this.consistent = true;
     }
@@ -43,7 +41,6 @@ public abstract class AbstractResource<T>
     protected AbstractResource(AbstractResource<T> instance) {
         this.resource = instance.getInternalResource();
         this.lockManager = instance.getLockManager();
-        this.listener = new ThreadLocal<ReadWriteListener>();
         this.accessible = instance.isAccessible();
         this.consistent = instance.isConsistent();
     }
@@ -109,14 +106,6 @@ public abstract class AbstractResource<T>
     @Override
     public final void setConsistent(boolean isConsistent) {
         this.consistent = isConsistent;
-    }
-
-
-    /** */
-    @Override
-    public final void setListener(ReadWriteListener rwl) {
-    	checkArgument(rwl);
-    	this.listener.set(rwl);
     }
 
 
@@ -187,15 +176,6 @@ public abstract class AbstractResource<T>
     @Override
     public final void release() {
     	this.lockManager.release();
-    }
-
-
-    /**
-     * 
-     */
-    @Override
-    public final void removeListener() {
-    	this.listener.remove();
     }
 
 

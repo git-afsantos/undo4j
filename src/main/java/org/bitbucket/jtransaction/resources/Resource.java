@@ -35,17 +35,4 @@ public interface Resource<T> extends Acquirable,
     /** Sets whether this resource is in a consistent state.
      */
     void setConsistent(boolean isConsistent);
-
-
-
-    /**
-     * Sets a ReadWriteListener on this resource.
-     */
-    void setListener(ReadWriteListener listener);
-
-
-    /**
-     * Removes the current listener from this resource.
-     */
-    void removeListener();
 }
