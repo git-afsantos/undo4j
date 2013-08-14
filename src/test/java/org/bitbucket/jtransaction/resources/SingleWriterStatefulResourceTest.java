@@ -60,7 +60,8 @@ public class SingleWriterStatefulResourceTest {
 			}
 		};
 		Deencapsulation.setField(swsr, "resource", ir2);
-		swsr.setLocalCommit(mock);
+		swsr.write(mock);
+		swsr.commit();
 		swsr.update();
 		assertEquals(Status.UPDATED, swsr.getStatus());
 	}
