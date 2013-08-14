@@ -80,7 +80,7 @@ public class SingleWriterStatefulResourceTest {
 
     private class SingleWriterStatefulResourceForTesting extends SingleWriterStatefulResource<String> {
 
-        public SingleWriterStatefulResourceForTesting(InternalResource resource, LockManager lockManager) {
+        public SingleWriterStatefulResourceForTesting(InternalResource<String> resource, LockManager lockManager) {
             super(resource, lockManager);
             // TODO Auto-generated constructor stub
         }
