@@ -1,5 +1,7 @@
 package org.bitbucket.jtransaction.resources;
 
+import org.bitbucket.jtransaction.common.LockManager;
+
 import static org.bitbucket.jtransaction.resources.StateUtil.*;
 
 /**
@@ -10,7 +12,7 @@ import static org.bitbucket.jtransaction.resources.StateUtil.*;
  * @version 2013
 */
 
-public class ShadowResource<T> extends SingleWriterStatefulResource<T> {
+public final class ShadowResource<T> extends SingleWriterStatefulResource<T> {
     // instance variables
     private ResourceState<T> shadow;
 
@@ -19,8 +21,10 @@ public class ShadowResource<T> extends SingleWriterStatefulResource<T> {
     **************************************************************************/
 
     /** Parameter constructor of objects of class ShadowResource. */
-    public ShadowResource(InternalResource<T> resource) {
-        super(resource);
+    public ShadowResource(
+		InternalResource<T> resource, LockManager lockManager
+	) {
+        super(resource, lockManager);
         this.shadow = getCheckpointReference();
     }
 

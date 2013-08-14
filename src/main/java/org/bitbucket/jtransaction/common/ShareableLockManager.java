@@ -9,10 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 2013
 */
 
-final class ShareableLockManager extends LockManager {
+final class ShareableLockManager extends StrategizedLockManager {
     // instance variables
     private final ReentrantLock lock;
-    private final LockStrategy strategy;
 
     /**************************************************************************
      * Constructors
@@ -20,9 +19,15 @@ final class ShareableLockManager extends LockManager {
 
     /** Parameter constructor of objects of class ShareableLockManager. */
     ShareableLockManager(LockStrategy lockStrategy) {
-        super(IsolationLevel.READ_COMMITTED);
+        super(IsolationLevel.READ_COMMITTED, lockStrategy);
         lock = new ReentrantLock();
-        strategy = lockStrategy;
+    }
+
+
+    /** Copy constructor of objects of class ShareableLockManager. */
+    ShareableLockManager(ShareableLockManager instance) {
+        super(instance);
+        lock = new ReentrantLock();
     }
 
 
@@ -33,7 +38,9 @@ final class ShareableLockManager extends LockManager {
     /** */
     @Override
     public boolean acquire(AccessMode mode) throws InterruptedException {
-        if (mode == AccessMode.WRITE) { return strategy.acquire(lock); }
+        if (mode == AccessMode.WRITE) {
+        	return getLockStrategy().acquire(lock);
+        }
         return mode == AccessMode.READ;
     }
 
@@ -41,5 +48,12 @@ final class ShareableLockManager extends LockManager {
     @Override
     public void release() {
         if (lock.isHeldByCurrentThread()) { lock.unlock(); }
+    }
+
+
+    /** */
+    @Override
+    public ShareableLockManager clone() {
+    	return new ShareableLockManager(this);
     }
 }

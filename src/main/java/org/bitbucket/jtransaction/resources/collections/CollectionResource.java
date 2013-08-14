@@ -1,5 +1,7 @@
 package org.bitbucket.jtransaction.resources.collections;
 
+import org.bitbucket.jtransaction.common.LockManager;
+
 import org.bitbucket.jtransaction.resources.InternalResource;
 import org.bitbucket.jtransaction.resources.StatelessResource;
 
@@ -16,21 +18,23 @@ final class CollectionResource<T> extends StatelessResource<T> {
     **************************************************************************/
 
     /** Parameter constructor of objects of class CollectionResource. */
-    CollectionResource(InternalCollection<T> collection) {
-        super(collection);
+    CollectionResource(
+		InternalCollection<T> collection, LockManager lockManager
+	) {
+        super(collection, lockManager);
     }
 
 
     /** Copy constructor of objects of class CollectionResource. */
     private CollectionResource(CollectionResource<T> instance) {
-        super(instance.getInternalCollection());
+        super(instance.getInternalCollection(), instance.getLockManager());
         setConsistent(isConsistent());
     }
 
 
 
     /**************************************************************************
-     * Predicates
+     * Getters
     **************************************************************************/
 
     /** */
@@ -45,32 +49,6 @@ final class CollectionResource<T> extends StatelessResource<T> {
 
     /**************************************************************************
      * Predicates
-    **************************************************************************/
-
-    // ...
-
-
-
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
-
-    /** */
-    @Override
-    public void commit() {}
-
-    /** */
-    @Override
-    public void update() {}
-
-    /** */
-    @Override
-    public void rollback() {}
-
-
-
-    /**************************************************************************
-     * Private Methods
     **************************************************************************/
 
     // ...

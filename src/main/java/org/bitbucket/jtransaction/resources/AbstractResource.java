@@ -3,6 +3,7 @@ package org.bitbucket.jtransaction.resources;
 import org.bitbucket.jtransaction.common.AccessMode;
 import org.bitbucket.jtransaction.common.Copyable;
 import org.bitbucket.jtransaction.common.IsolationLevel;
+import org.bitbucket.jtransaction.common.LockManager;
 
 import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
@@ -17,6 +18,7 @@ public abstract class AbstractResource<T>
         implements Resource<T>, Copyable<AbstractResource<T>> {
     // instance variables
     private final InternalResource<T> resource;
+    private final LockManager lockManager;
     private volatile boolean accessible, consistent;
 
     /**************************************************************************
@@ -25,9 +27,11 @@ public abstract class AbstractResource<T>
 
     /** Parameter constructor of objects of class AbstractResource.
      */
-    public AbstractResource(InternalResource<T> r) {
+    public AbstractResource(InternalResource<T> r, LockManager lm) {
         checkArgument("null resource", r);
+        checkArgument("null lock manager", lm);
         this.resource = r;
+        this.lockManager = lm;
         this.accessible = false;
         this.consistent = true;
     }
@@ -36,6 +40,7 @@ public abstract class AbstractResource<T>
     /** Copy constructor of objects of class AbstractResource. */
     protected AbstractResource(AbstractResource<T> instance) {
         this.resource = instance.getInternalResource();
+        this.lockManager = instance.getLockManager();
         this.accessible = instance.isAccessible();
         this.consistent = instance.isConsistent();
     }
@@ -52,7 +57,7 @@ public abstract class AbstractResource<T>
      */
     @Override
     public IsolationLevel getIsolationLevel() {
-        return IsolationLevel.NONE;
+        return this.lockManager.getIsolationLevel();
     }
 
 
@@ -68,6 +73,21 @@ public abstract class AbstractResource<T>
      */
     public InternalResource<T> getSynchronizedResource() {
         return this.resource;
+    }
+
+
+    /**
+     * 
+     */
+    protected final LockManager getLockManager() {
+    	return this.lockManager.clone();
+    }
+
+    /**
+     * 
+     */
+    protected final LockManager getLockManagerReference() {
+    	return this.lockManager;
     }
 
 
@@ -142,34 +162,22 @@ public abstract class AbstractResource<T>
     }
 
 
-    /** Does nothing, by default.
-     * Implementations should override to support concurrent access.
+    /**
+     * Acquire the resource, based on the internal locking scheme.
      */
     @Override
-    public void acquireFor(AccessMode mode) {}
-
-
-    /** Returns true, by default.
-     * Implementations should override to support concurrent access.
-     */
-    @Override
-    public boolean tryAcquireFor(AccessMode mode, long millis) {
-        return true;
+    public final boolean acquire(AccessMode mode) throws InterruptedException {
+    	return this.lockManager.acquire(mode);
     }
 
 
-    /** Returns true, by default.
-     * Implementations should override to support concurrent access.
+    /**
+     * Releases the resource, based on the internal locking scheme.
      */
     @Override
-    public boolean tryAcquireFor(AccessMode mode) { return true; }
-
-
-    /** Does nothing, by default.
-     * Implementations should override to support concurrent access.
-     */
-    @Override
-    public void release() {}
+    public final void release() {
+    	this.lockManager.release();
+    }
 
 
     /** Called in initialize.

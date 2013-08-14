@@ -35,6 +35,12 @@ public final class LockManagers {
     **************************************************************************/
 
     /** */
+    public static LockManager newNullLockManager() {
+    	return new NullLockManager();
+    }
+
+
+    /** */
     public static LockManager newLockManager(
         IsolationLevel isolation, AcquireStrategy strategy
     ) {

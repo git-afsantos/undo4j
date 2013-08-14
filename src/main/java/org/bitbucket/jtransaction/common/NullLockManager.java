@@ -28,4 +28,10 @@ final class NullLockManager extends LockManager {
     /** */
     @Override
     public void release() {}
+
+
+	@Override
+	public LockManager clone() {
+		return new NullLockManager();
+	}
 }

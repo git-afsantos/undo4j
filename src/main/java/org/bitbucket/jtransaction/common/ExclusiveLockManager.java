@@ -9,10 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 2013
 */
 
-final class ExclusiveLockManager extends LockManager {
+final class ExclusiveLockManager extends StrategizedLockManager {
     // instance variables
     private final ReentrantLock lock;
-    private final LockStrategy strategy;
 
     /**************************************************************************
      * Constructors
@@ -20,9 +19,15 @@ final class ExclusiveLockManager extends LockManager {
 
     /** Parameter constructor of objects of class ExclusiveLockManager. */
     ExclusiveLockManager(LockStrategy lockStrategy) {
-        super(IsolationLevel.EXCLUSIVE);
+        super(IsolationLevel.EXCLUSIVE, lockStrategy);
         lock = new ReentrantLock();
-        strategy = lockStrategy;
+    }
+
+
+    /** Copy constructor of objects of class ExclusiveLockManager. */
+    ExclusiveLockManager(ExclusiveLockManager instance) {
+        super(instance);
+        lock = new ReentrantLock();
     }
 
 
@@ -33,10 +38,17 @@ final class ExclusiveLockManager extends LockManager {
     /** */
     @Override
     public boolean acquire(AccessMode mode) throws InterruptedException {
-        return strategy.acquire(lock);
+        return getLockStrategy().acquire(lock);
     }
 
     /** */
     @Override
     public void release() { lock.unlock(); }
+
+
+    /** */
+    @Override
+    public ExclusiveLockManager clone() {
+    	return new ExclusiveLockManager(this);
+    }
 }
