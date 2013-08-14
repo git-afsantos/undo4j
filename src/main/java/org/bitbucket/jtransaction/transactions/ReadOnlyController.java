@@ -20,13 +20,7 @@ final class ReadOnlyController extends ResourceController {
     **************************************************************************/
 
     /** Parameter constructor of objects of class ReadOnlyController. */
-    ReadOnlyController(Resource r, String id) { super(r, id); }
-
-
-    /** Parameter constructor of objects of class ReadOnlyController. */
-    ReadOnlyController(Resource r, String id, ReadWriteListener rw) {
-        super(r, id, rw);
-    }
+    ReadOnlyController() { super(); }
 
 
     /** Copy constructor of objects of class ReadOnlyController. */
@@ -44,28 +38,29 @@ final class ReadOnlyController extends ResourceController {
      * This handle does not support write operations.
      */
     @Override
-    public void write(ResourceState state) throws ReadOnlyHandleException {
+    protected <T> void write(Resource<T> r, ResourceState<T> s)
+    		throws ReadOnlyHandleException {
         throw new ReadOnlyHandleException(READ_ONLY);
     }
 
 
     /** Does nothing. A reader has no changes to commit. */
     @Override
-    protected void commit() {
+    protected <T> void commit(Resource<T> resource) {
         checkCanCommit();
         setStatus(Status.COMMITTED);
     }
 
     /** Does nothing. A reader has no changes to roll back. */
     @Override
-    protected void rollback() {
+    protected <T> void rollback(Resource<T> resource) {
         checkCanRollback();
         setStatus(Status.EXPIRED);
     }
 
     /** Does nothing. A reader has no commits to update. */
     @Override
-    protected void update() {
+    protected <T> void update(Resource<T> resource) {
         checkCanUpdate();
         setStatus(Status.EXPIRED);
     }
@@ -73,8 +68,8 @@ final class ReadOnlyController extends ResourceController {
 
     /** */
     @Override
-    protected void acquireResource() {
-        acquireResource(AccessMode.READ);
+    protected <T> void acquireResource(Resource<T> resource) {
+        acquireResource(resource, AccessMode.READ);
     }
 
 

@@ -3,11 +3,8 @@ package org.bitbucket.jtransaction.transactions;
 import org.bitbucket.jtransaction.common.AccessMode;
 import org.bitbucket.jtransaction.common.Copyable;
 
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
-
 import org.bitbucket.jtransaction.resources.Resource;
 import org.bitbucket.jtransaction.resources.ResourceState;
-
 import org.bitbucket.jtransaction.resources.ResourceAcquireException;
 import org.bitbucket.jtransaction.resources.ResourceInaccessibleException;
 
@@ -18,11 +15,8 @@ import org.bitbucket.jtransaction.resources.ResourceInaccessibleException;
  * @version 2013
 */
 
-class ResourceController implements ResourceHandle,
-        Copyable<ResourceController> {
-    private static final NullListener NULL = new NullListener();
-
-    /** Controller status */
+class ResourceController implements Copyable<ResourceController> {
+	/** Controller status */
     static enum Status {
         UNUSED, READ, CHANGED, COMMITTED, EXPIRED, RELEASED;
     
@@ -33,34 +27,19 @@ class ResourceController implements ResourceHandle,
     // instance variables
     private boolean accessed = false, acquired = false;
     private Status status = Status.initialStatus();
-    private final String id;
-    private final Resource resource;
-    private final ReadWriteListener listener;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Parameter constructor of objects of class ResourceController. */
-    protected ResourceController(Resource r, String id) {
-        this(r, id, NULL);
-    }
-
-
-    /** Parameter constructor of objects of class ResourceController. */
-    protected ResourceController(Resource r, String id, ReadWriteListener rw) {
-        checkArgument("null resource", r);
-        checkArgument("null id", id);
-        checkArgument("null listener", rw);
-        this.resource = r;
-        this.id = id;
-        this.listener = rw;
-    }
-
+    /** Empty constructor of objects of class ResourceController. */
+    protected ResourceController() {}
 
     /** Copy constructor of objects of class ResourceController. */
     protected ResourceController(ResourceController instance) {
-        this(instance.getResource(), instance.getId(), instance.getListener());
+    	this.accessed = instance.isAccessed();
+    	this.acquired = instance.isAcquired();
+    	this.status = instance.getStatus();
     }
 
 
@@ -68,15 +47,6 @@ class ResourceController implements ResourceHandle,
     /**************************************************************************
      * Getters
     **************************************************************************/
-
-    /** */
-    protected final Resource getResource() { return this.resource; }
-
-    /** */
-    protected final String getId() { return this.id; }
-
-    /** */
-    protected final ReadWriteListener getListener() { return this.listener; }
 
     /** */
     protected final Status getStatus() { return this.status; }
@@ -107,8 +77,8 @@ class ResourceController implements ResourceHandle,
     **************************************************************************/
 
     /** */
-    protected final boolean isResourceAccessible() {
-        return this.resource.isAccessible();
+    protected final <T> boolean isResourceAccessible(Resource<T> resource) {
+        return resource.isAccessible();
     }
 
     /** */
@@ -164,21 +134,20 @@ class ResourceController implements ResourceHandle,
      * Throws ResourceAcquireException, if the resource can't be acquired.
      * Override for custom behaviour.
     */
-    @Override
-    public ResourceState read() {
+    protected <T> ResourceState<T> read(Resource<T> resource) {
         // Check for resource accessibility.
-        checkResourceAccessible();
+        checkResourceAccessible(resource);
         // Check if thread is interrupted.
         checkInterrupted();
         // Check if operation is allowed in current state.
         checkCanRead();
         // Acquire resource, if accessing it for the first time.
-        if (!this.accessed) { acquireResource(); }
+        if (!this.accessed) { acquireResource(resource); }
         // Read the resource and store locally.
-        ResourceState result = this.resource.read();
+        ResourceState<T> result = resource.read();
         // The resource has been read, set accessed and notify listener.
         this.accessed = true;
-        this.listener.readPerformed(this.id);
+        // this.listener.readPerformed(this.id);
         if (!isChanged()) { this.status = Status.READ; }
         // Return the read state.
         return result;
@@ -195,21 +164,20 @@ class ResourceController implements ResourceHandle,
      * Throws ResourceAcquireException, if the resource can't be acquired.
      * Override for custom behaviour.
     */
-    @Override
-    public void write(ResourceState state) {
+    protected <T> void write(Resource<T> resource, ResourceState<T> state) {
         // Check for resource accessiblity.
-        checkResourceAccessible();
+        checkResourceAccessible(resource);
         // Check if thread is interrupted.
         checkInterrupted();
         // Check if operation is allowed in current state.
         checkCanWrite();
         // Acquire resource, if accessing it for the first time.
-        if (!this.accessed) { acquireResource(); }
+        if (!this.accessed) { acquireResource(resource); }
         // Write on the resource.
-        this.resource.write(state);
+        resource.write(state);
         // The resource has been written, set accessed and notify listener.
         this.accessed = true;
-        this.listener.writePerformed(this.id);
+        // this.listener.writePerformed(this.id);
         this.status = Status.CHANGED;
     }
 
@@ -221,15 +189,15 @@ class ResourceController implements ResourceHandle,
      * Throws a ResourceInaccessibleException, if this operation is
      * invoked in a state where the resource is inaccessible.
      */
-    protected void commit() {
+    protected <T> void commit(Resource<T> resource) {
         // Check for resource accessibility.
-        checkResourceAccessible();
+        checkResourceAccessible(resource);
         // Check if thread is interrupted.
         checkInterrupted();
         // Check if operation is allowed in current state.
         checkCanCommit();
         // Commit changes.
-        this.resource.commit();
+        resource.commit();
         this.status = Status.COMMITTED;
     }
 
@@ -241,38 +209,38 @@ class ResourceController implements ResourceHandle,
      * Throws a ResourceInaccessibleException, if this operation is
      * invoked in a state where the resource is inaccessible.
      */
-    protected void rollback() {
+    protected <T> void rollback(Resource<T> resource) {
         // Check for resource accessibility.
-        checkResourceAccessible();
+        checkResourceAccessible(resource);
         // Check if thread is interrupted.
         checkInterrupted();
         // Check if operation is allowed in current state.
         checkCanRollback();
         if (this.accessed && !isRead()) {
-            // Rollback changes.
-            this.resource.rollback();
+            // Roll back changes.
+            resource.rollback();
         }
         this.status = Status.EXPIRED;
     }
 
 
     /** */
-    protected void update() {
+    protected <T> void update(Resource<T> resource) {
         // Check for resource accessibility.
-        checkResourceAccessible();
+        checkResourceAccessible(resource);
         // Check if thread is interrupted.
         checkInterrupted();
         // Check if operation is allowed in current state.
         checkCanUpdate();
         // Update changes.
-        this.resource.update();
+        resource.update();
         this.status = Status.EXPIRED;
     }
 
 
     /** Releases the underlying resource. */
-    protected final void release() {
-        if (this.acquired) { this.resource.release(); }
+    protected final <T> void release(Resource<T> resource) {
+        if (this.acquired) { resource.release(); }
         this.status = Status.RELEASED;
     }
 
@@ -280,20 +248,24 @@ class ResourceController implements ResourceHandle,
     /** Acquires the underlying resource for both read and write operations.
      * Throws ResourceAcquireException, if the resource can't be acquired.
      */
-    protected void acquireResource() {
-        acquireResource(AccessMode.WRITE);
+    protected <T> void acquireResource(Resource<T> resource) {
+        acquireResource(resource, AccessMode.WRITE);
     }
 
 
     /** Acquires the underlying resource for both read and write operations.
      * Throws ResourceAcquireException, if the resource can't be acquired.
      */
-    protected final void acquireResource(AccessMode am) {
-        if (this.resource.tryAcquireFor(am)) {
-            this.acquired = true;
-        } else {
-            throw new ResourceAcquireException(id);
-        }
+    protected final <T> void acquireResource(Resource<T> r, AccessMode am) {
+        try {
+			if (r.acquire(am)) {
+			    this.acquired = true;
+			} else {
+			    throw new ResourceAcquireException();
+			}
+		} catch (InterruptedException e) {
+			throw new ResourceAcquireException();
+		}
     }
 
 
@@ -303,8 +275,8 @@ class ResourceController implements ResourceHandle,
     **************************************************************************/
 
     /** */
-    protected final void checkResourceAccessible() {
-        if (!this.resource.isAccessible()) {
+    protected final <T> void checkResourceAccessible(Resource<T> resource) {
+        if (!resource.isAccessible()) {
             throw new ResourceInaccessibleException("Inaccessible resource");
         }
     }
@@ -321,32 +293,32 @@ class ResourceController implements ResourceHandle,
     /** */
     protected final void checkCanRead() {
         if (isCommitted() || isExpired() || isReleased()) {
-            throw new IllegalHandleStateException();
+            throw new IllegalResourceStateException();
         }
     }
 
     /** */
     protected final void checkCanWrite() {
         if (isCommitted() || isExpired() || isReleased()) {
-            throw new IllegalHandleStateException();
+            throw new IllegalResourceStateException();
         }
     }
 
     /** */
     protected final void checkCanCommit() {
         if (isUnused() || isCommitted() || isExpired() || isReleased()) {
-            throw new IllegalHandleStateException();
+            throw new IllegalResourceStateException();
         }
     }
 
     /** */
     protected final void checkCanRollback() {
-        if (isReleased()) { throw new IllegalHandleStateException(); }
+        if (isReleased()) { throw new IllegalResourceStateException(); }
     }
 
     /** */
     protected final void checkCanUpdate() {
-        if (!isCommitted()) { throw new IllegalHandleStateException(); }
+        if (!isCommitted()) { throw new IllegalResourceStateException(); }
     }
 
 
@@ -369,7 +341,7 @@ class ResourceController implements ResourceHandle,
         if (this == o) return true;
         if (!(o instanceof ResourceController)) return false;
         ResourceController n = (ResourceController) o;
-        return (this.resource == n.getResource());
+        return (this.status == n.getStatus());
     }
 
     /** Contract:
@@ -391,14 +363,14 @@ class ResourceController implements ResourceHandle,
     */
     @Override
     public int hashCode() {
-        return 37 + this.resource.hashCode();
+        return this.status.hashCode();
     }
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.resource.toString());
+        sb.append(this.status.toString());
         return sb.toString();
     }
 
@@ -415,15 +387,13 @@ class ResourceController implements ResourceHandle,
     **************************************************************************/
 
     /** Null ReadWriteListener */
-    static final class NullListener implements ReadWriteListener {
+    /*static final class NullListener implements ReadWriteListener {
         NullListener() {}
 
-        /** */
         @Override
         public void readPerformed(String resource) {}
 
-        /** */
         @Override
         public void writePerformed(String resource) {}
-    }
+    }*/
 }
