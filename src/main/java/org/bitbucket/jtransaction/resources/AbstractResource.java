@@ -17,6 +17,7 @@ import static org.bitbucket.jtransaction.common.Check.checkArgument;
 public abstract class AbstractResource<T>
         implements Resource<T>, Copyable<AbstractResource<T>> {
     // instance variables
+	private final ResourceId id = ResourceId.newResourceId();
 	private final InternalResource<T> resource;
     private final LockManager lockManager;
     private volatile boolean accessible, consistent;
@@ -50,6 +51,13 @@ public abstract class AbstractResource<T>
     /**************************************************************************
      * Getters
     **************************************************************************/
+
+    /**
+     * Returns this resource's unique identifier.
+     */
+    @Override
+    public ResourceId getId() { return this.id.clone(); }
+
 
     /**
      * Returns the isolation level defined upon construction.

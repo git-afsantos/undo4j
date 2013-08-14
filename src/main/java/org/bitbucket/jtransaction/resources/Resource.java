@@ -35,4 +35,8 @@ public interface Resource<T> extends Acquirable,
     /** Sets whether this resource is in a consistent state.
      */
     void setConsistent(boolean isConsistent);
+
+
+    /** Return this resource's unique identifier. */
+    ResourceId getId();
 }
