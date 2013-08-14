@@ -2,29 +2,33 @@ package org.bitbucket.jtransaction.resources;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import mockit.Expectations;
 import mockit.Injectable;
-import mockit.Tested;
 
-import org.bitbucket.jtransaction.common.IsolationLevel;
 import org.bitbucket.jtransaction.common.LockManager;
+import org.junit.Before;
 import org.junit.Test;
 
 public class AbstractResourceTest {
 
     @Injectable
-    private InternalResource<?> internalResource;
+    private InternalResource<String> internalResource;
 
     @Injectable
     private LockManager lockManager;
 
-    @Tested
-    private AbstractResource<?> absResource;
+    private AsbtractResourceForTesting absResource;
+
+    @Before
+    public void setup() {
+        absResource = new AsbtractResourceForTesting(internalResource, lockManager);
+    }
 
     @Test
     public void testGetIsolation() throws Exception {
-        assertEquals(IsolationLevel.NONE, absResource.getIsolationLevel());
+        assertNull(absResource.getIsolationLevel());
     }
 
     @Test
@@ -79,4 +83,47 @@ public class AbstractResourceTest {
         assertFalse(absResource.isAccessible());
     }
 
+    private class AsbtractResourceForTesting extends AbstractResource<String> {
+
+        public AsbtractResourceForTesting(InternalResource<String> r, LockManager lm) {
+            super(r, lm);
+        }
+
+        @Override
+        public ResourceState<String> read() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void write(ResourceState<String> state) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void commit() {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void rollback() {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void update() {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public AbstractResource<String> clone() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+    }
 }

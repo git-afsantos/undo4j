@@ -6,73 +6,79 @@ import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mock;
 import mockit.MockUp;
-import mockit.NonStrict;
-import mockit.Tested;
-import mockit.integration.junit4.JMockit;
 
+import org.bitbucket.jtransaction.common.LockManager;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(JMockit.class)
 public class StatelessResourceTest {
-	@Injectable
-	private InternalResource<String> ir;
 
-	@Tested
-	private StatelessResource<String> srt;
+    @Injectable
+    private InternalResource<String> ir;
 
-	private final InternalResource<String> irEx = new MockUp<InternalResource<String>>() {
-		@Mock
-		ResourceState<String> buildState() throws Exception {
-			throw new Exception();
-		}
+    @Injectable
+    private LockManager lockManager;
 
-		@Mock
-		void applyState(ResourceState<String> state) throws Exception {
-			throw new Exception();
-		}
-	}.getMockInstance();
+    @Injectable
+    private ResourceState<String> stringResource;
 
-	@Test
-	public void readTest() throws Exception {
-		new Expectations() {
-			{
-				ir.buildState();
-			}
-		};
+    private StatelessResource<String> srt;
 
-		srt.read();
-	}
+    @Before
+    public void setup() {
+        srt = new StatelessResource<String>(ir, lockManager);
+    }
 
-	@Test
-	public void readTestException() {
-		Deencapsulation.setField(srt, "resource", irEx);
-		try {
-			srt.read();
-			fail();
-		} catch (ResourceReadException e) {
-		}
-	}
+    private final InternalResource<String> irEx = new MockUp<InternalResource<String>>() {
+        @Mock
+        ResourceState<String> buildState() throws Exception {
+            throw new Exception();
+        }
 
-	@Test
-	public void writeTest(@NonStrict final ResourceState<String> mock)
-			throws Exception {
-		new Expectations() {
-			{
-				ir.applyState(mock);
-			}
-		};
+        @Mock
+        void applyState(ResourceState<String> state) throws Exception {
+            throw new Exception();
+        }
+    }.getMockInstance();
 
-		srt.write(mock);
-	}
+    @Test
+    public void readTest() throws Exception {
+        new Expectations() {
+            {
+                ir.buildState();
+            }
+        };
 
-	@Test
-	public void writeTestException(@NonStrict final ResourceState<String> mock) {
-		Deencapsulation.setField(srt, "resource", irEx);
-		try {
-			srt.write(mock);
-			fail();
-		} catch (ResourceWriteException e) {
-		}
-	}
+        srt.read();
+    }
+
+    @Test
+    public void readTestException() {
+        Deencapsulation.setField(srt, "resource", irEx);
+        try {
+            srt.read();
+            fail();
+        } catch (ResourceReadException e) {}
+    }
+
+    @Test
+    public void writeTest() throws Exception {
+        new Expectations() {
+            {
+                ir.applyState(stringResource);
+                minTimes = 1;
+            }
+        };
+
+        srt.write(stringResource);
+    }
+
+    @Test
+    public void writeTestException() {
+        Deencapsulation.setField(srt, "resource", irEx);
+        try {
+            srt.write(stringResource);
+            fail();
+        } catch (ResourceWriteException e) {}
+    }
 }
