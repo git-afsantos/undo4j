@@ -1,86 +1,92 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
+package org.bitbucket.jtransaction.functional;
 
-package org.bitbucket.jtransaction.common;
+import org.bitbucket.jtransaction.common.Copyable;
 
 /**
- * ComposedFunction
+ * ConditionalFunction
  * 
  * @author afs
  * @version 2013
 */
 
-final class ComposedFunction<A, B, C> implements Function<A, C>, Copyable<ComposedFunction<A, B, C>> {
+final class ConditionalFunction<A, B>
+        implements Function<A, B>, Copyable<ConditionalFunction<A, B>> {
     // instance variables
-    private final Function<A, B> first;
-    private final Function<B, C> second;
+    private final Predicate predicate;
+    private final Function<A, B> functionThen;
+    private final Function<A, B> functionElse;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Parameter constructor of objects of class ComposedFunction. */
-    ComposedFunction(Function<A, B> f, Function<B, C> g) {
-        assert f != null && g != null;
-        first = f;
-        second = g;
+    /** Parameter constructor of objects of class ConditionalFunction. */
+    ConditionalFunction(
+        Predicate p, Function<A, B> cThen, Function<A, B> cElse
+    ) {
+        assert p != null && cThen != null && cElse != null;
+        predicate = p;
+        functionThen = cThen;
+        functionElse = cElse;
     }
 
-    /** Copy constructor of objects of class ComposedFunction. */
-    private ComposedFunction(ComposedFunction<A, B, C> instance) {
-        this(instance.getFirst(), instance.getSecond());
+
+    /** Copy constructor of objects of class ConditionalFunction. */
+    private ConditionalFunction(ConditionalFunction<A, B> instance) {
+        this(
+            instance.getPredicate(),
+            instance.getThen(), instance.getElse()
+        );
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    Function<A, B> getFirst() {
-        return first;
-    }
+    Predicate getPredicate() { return predicate; }
 
     /** */
-    Function<B, C> getSecond() {
-        return second;
-    }
+    Function<A, B> getThen() { return functionThen; }
+
+    /** */
+    Function<A, B> getElse() { return functionElse; }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
     /** */
-    public C call(A a) throws Exception {
-        return second.call(first.call(a));
+    @Override
+    public B call(A arg) throws Exception {
+        if (predicate.evaluate()) {
+            return functionThen.call(arg);
+        } else {
+            return functionElse.call(arg);
+        }
     }
+
+
 
     /**************************************************************************
      * Private Methods
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -97,12 +103,12 @@ final class ComposedFunction<A, B, C> implements Function<A, C>, Copyable<Compos
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof ComposedFunction))
-            return false;
-        ComposedFunction<?, ?, ?> n = (ComposedFunction<?, ?, ?>)o;
-        return (first.equals(n.getFirst()) && second.equals(n.getSecond()));
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        ConditionalFunction<?, ?> n = (ConditionalFunction<?, ?>) o;
+        return (predicate.equals(n.getPredicate()) &&
+                functionThen.equals(n.getThen()) &&
+                functionElse.equals(n.getElse()));
     }
 
     /** Contract:
@@ -124,22 +130,22 @@ final class ComposedFunction<A, B, C> implements Function<A, C>, Copyable<Compos
     */
     @Override
     public int hashCode() {
-        return 37 * (37 + first.hashCode()) + second.hashCode();
+        int hash = 37 + predicate.hashCode();
+        hash = 37 * hash + functionThen.hashCode();
+        return 37 * hash + functionElse.hashCode();
     }
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(second);
-        sb.append('.');
-        sb.append(first);
+        sb.append(predicate);
         return sb.toString();
     }
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public ComposedFunction<A, B, C> clone() {
-        return new ComposedFunction<A, B, C>(this);
+    public ConditionalFunction<A, B> clone() {
+        return new ConditionalFunction<A, B>(this);
     }
 }

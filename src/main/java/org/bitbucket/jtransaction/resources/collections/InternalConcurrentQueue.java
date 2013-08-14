@@ -1,25 +1,3 @@
-/*
-The MIT License (MIT)
-
-Copyright (c) 2013 Andre Santos, Victor Miraldo
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-
 package org.bitbucket.jtransaction.resources.collections;
 
 import org.bitbucket.jtransaction.common.Validator;
@@ -34,10 +12,10 @@ import java.util.concurrent.BlockingQueue;
  * @version 2013
 */
 
-abstract class InternalConcurrentQueue extends InternalCollection {
+abstract class InternalConcurrentQueue<T> extends InternalCollection<T> {
     // instance variables
     private final int capacity;
-    private final BlockingQueue<ResourceState> queue;
+    private final BlockingQueue<ResourceState<T>> queue;
 
     /**************************************************************************
      * Constructors
@@ -45,7 +23,7 @@ abstract class InternalConcurrentQueue extends InternalCollection {
 
     /** Parameter constructor of objects of class InternalConcurrentQueue. */
     protected InternalConcurrentQueue(
-        int capacity, BlockingQueue<ResourceState> queue
+        int capacity, BlockingQueue<ResourceState<T>> queue
     ) {
         super();
         this.capacity = capacity;
@@ -55,8 +33,8 @@ abstract class InternalConcurrentQueue extends InternalCollection {
     /** Parameter constructor of objects of class InternalConcurrentQueue. */
     protected InternalConcurrentQueue(
         int capacity,
-        BlockingQueue<ResourceState> queue,
-        Validator<ResourceState> validator
+        BlockingQueue<ResourceState<T>> queue,
+        Validator<ResourceState<T>> validator
     ) {
         super(validator);
         this.capacity = capacity;
@@ -65,7 +43,7 @@ abstract class InternalConcurrentQueue extends InternalCollection {
 
 
     /** Copy constructor of objects of class InternalConcurrentQueue. */
-    protected InternalConcurrentQueue(InternalConcurrentQueue instance) {
+    protected InternalConcurrentQueue(InternalConcurrentQueue<T> instance) {
         super(instance);
         this.capacity = instance.getCapacity();
         this.queue = instance.getQueue();
@@ -82,10 +60,10 @@ abstract class InternalConcurrentQueue extends InternalCollection {
 
 
     /** */
-    protected abstract BlockingQueue<ResourceState> getQueue();
+    protected abstract BlockingQueue<ResourceState<T>> getQueue();
 
     /** */
-    protected final BlockingQueue<ResourceState> getQueueReference() {
+    protected final BlockingQueue<ResourceState<T>> getQueueReference() {
         return this.queue;
     }
 
@@ -95,7 +73,7 @@ abstract class InternalConcurrentQueue extends InternalCollection {
      * Predicates
     **************************************************************************/
 
-    // ..
+    // ...
 
 
 
@@ -113,7 +91,7 @@ abstract class InternalConcurrentQueue extends InternalCollection {
      * Private Methods
     **************************************************************************/
 
-    // ..
+    // ...
 
 
 
@@ -134,7 +112,7 @@ abstract class InternalConcurrentQueue extends InternalCollection {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof InternalConcurrentQueue)) return false;
-        InternalConcurrentQueue n = (InternalConcurrentQueue) o;
+        InternalConcurrentQueue<?> n = (InternalConcurrentQueue<?>) o;
         return this.queue.equals(n.getQueue());
     }
 
@@ -164,5 +142,5 @@ abstract class InternalConcurrentQueue extends InternalCollection {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public abstract InternalConcurrentQueue clone();
+    public abstract InternalConcurrentQueue<T> clone();
 }

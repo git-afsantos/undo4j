@@ -1,22 +1,3 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.transactions;
 
 import org.bitbucket.jtransaction.common.Copyable;
@@ -28,7 +9,8 @@ import org.bitbucket.jtransaction.common.Copyable;
  * @version 2013
 */
 
-public final class TransactionResult<T> implements Copyable<TransactionResult<T>> {
+public final class TransactionResult<T>
+        implements Copyable<TransactionResult<T>> {
     // instance variables
     private final T result;
     private final TransactionStatistics stats;
@@ -38,9 +20,8 @@ public final class TransactionResult<T> implements Copyable<TransactionResult<T>
     **************************************************************************/
 
     /** Empty constructor of objects of class TransactionResult. */
-    TransactionResult() {
-        this(null, new TransactionStatistics());
-    }
+    TransactionResult() { this(null, new TransactionStatistics()); }
+
 
     /** Parameter constructor of objects of class TransactionResult. */
     TransactionResult(T res, TransactionStatistics tStats) {
@@ -48,33 +29,34 @@ public final class TransactionResult<T> implements Copyable<TransactionResult<T>
         stats = tStats;
     }
 
+
     /** Copy constructor of objects of class TransactionResult. */
     private TransactionResult(TransactionResult<T> instance) {
         this(instance.getResult(), instance.getStatistics());
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    public T getResult() {
-        return result;
-    }
+    public T getResult() { return result; }
 
     /** */
-    public TransactionStatistics getStatistics() {
-        return stats.clone();
-    }
+    public TransactionStatistics getStatistics() { return stats.clone(); }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
     /** */
-    public boolean hasResult() {
-        return result != null;
-    }
+    public boolean hasResult() { return result != null; }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -91,11 +73,9 @@ public final class TransactionResult<T> implements Copyable<TransactionResult<T>
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || this.getClass() != o.getClass())
-            return false;
-        TransactionResult<?> n = (TransactionResult<?>)o;
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        TransactionResult n = (TransactionResult) o;
         return result.equals(n.getResult());
     }
 
@@ -131,7 +111,5 @@ public final class TransactionResult<T> implements Copyable<TransactionResult<T>
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public TransactionResult<T> clone() {
-        return new TransactionResult<T>(this);
-    }
+    public TransactionResult<T> clone() { return new TransactionResult<T>(this); }
 }

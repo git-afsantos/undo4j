@@ -1,99 +1,80 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
+package org.bitbucket.jtransaction.functional;
 
-package org.bitbucket.jtransaction.common;
+import org.bitbucket.jtransaction.common.Copyable;
 
 import java.util.concurrent.Callable;
 
 /**
- * ConditionalCallable
+ * ComposedCallable
  * 
  * @author afs
  * @version 2013
 */
 
-final class ConditionalCallable<T> implements Callable<T>, Copyable<ConditionalCallable<T>> {
+final class ComposedCallable<A, B>
+        implements Callable<B>, Copyable<ComposedCallable<A, B>> {
     // instance variables
-    private final Predicate predicate;
-    private final Callable<T> callableThen;
-    private final Callable<T> callableElse;
+    private final Callable<A> callable;
+    private final Function<A, B> function;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Parameter constructor of objects of class ConditionalCallable. */
-    ConditionalCallable(Predicate p, Callable<T> cThen, Callable<T> cElse) {
-        assert p != null && cThen != null && cElse != null;
-        predicate = p;
-        callableThen = cThen;
-        callableElse = cElse;
+    /** Parameter constructor of objects of class ComposedCallable. */
+    ComposedCallable(Callable<A> c, Function<A, B> f) {
+        assert c != null && f != null;
+        callable = c;
+        function = f;
     }
 
-    /** Copy constructor of objects of class ConditionalCallable. */
-    private ConditionalCallable(ConditionalCallable<T> instance) {
-        this(instance.getPredicate(), instance.getThen(), instance.getElse());
+
+    /** Copy constructor of objects of class ComposedCallable. */
+    private ComposedCallable(ComposedCallable<A, B> instance) {
+        this(instance.getCallable(), instance.getFunction());
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    public Predicate getPredicate() {
-        return predicate;
-    }
+    Callable<A> getCallable() { return callable; }
 
     /** */
-    public Callable<T> getThen() {
-        return callableThen;
-    }
+    Function<A, B> getFunction() { return function; }
 
-    /** */
-    public Callable<T> getElse() {
-        return callableElse;
-    }
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
     /** */
-    public T call() throws Exception {
-        if (predicate.evaluate()) {
-            return callableThen.call();
-        } else {
-            return callableElse.call();
-        }
+    @Override
+    public B call() throws Exception {
+        return function.call(callable.call());
     }
+
+
 
     /**************************************************************************
      * Private Methods
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -110,13 +91,10 @@ final class ConditionalCallable<T> implements Callable<T>, Copyable<ConditionalC
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || this.getClass() != o.getClass())
-            return false;
-        ConditionalCallable<?> n = (ConditionalCallable<?>)o;
-        return (predicate.equals(n.getPredicate()) && callableThen.equals(n.getThen()) && callableElse.equals(n
-            .getElse()));
+        if (this == o) return true;
+        if (!(o instanceof ComposedCallable)) return false;
+        ComposedCallable<?, ?> n = (ComposedCallable<?, ?>) o;
+        return (callable.equals(n.getCallable()) && function.equals(n.getFunction()));
     }
 
     /** Contract:
@@ -138,22 +116,22 @@ final class ConditionalCallable<T> implements Callable<T>, Copyable<ConditionalC
     */
     @Override
     public int hashCode() {
-        int hash = 37 + predicate.hashCode();
-        hash = 37 * hash + callableThen.hashCode();
-        return 37 * hash + callableElse.hashCode();
+        return 37 * (37 + callable.hashCode()) + function.hashCode();
     }
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(predicate);
+        sb.append(function);
+        sb.append('.');
+        sb.append(callable);
         return sb.toString();
     }
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public ConditionalCallable<T> clone() {
-        return new ConditionalCallable<T>(this);
+    public ComposedCallable<A, B> clone() {
+        return new ComposedCallable<A, B>(this);
     }
 }

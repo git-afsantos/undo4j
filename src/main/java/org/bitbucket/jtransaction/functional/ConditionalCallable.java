@@ -1,89 +1,89 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
+package org.bitbucket.jtransaction.functional;
 
-package org.bitbucket.jtransaction.resources;
+import org.bitbucket.jtransaction.common.Copyable;
+
+import java.util.concurrent.Callable;
 
 /**
- * ShortState
+ * ConditionalCallable
  * 
  * @author afs
  * @version 2013
 */
 
-public final class ShortState extends NonNullState {
+final class ConditionalCallable<T>
+        implements Callable<T>, Copyable<ConditionalCallable<T>> {
     // instance variables
-    private short value;
+    private final Predicate predicate;
+    private final Callable<T> callableThen;
+    private final Callable<T> callableElse;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Empty constructor of objects of class ShortState. */
-    public ShortState() {
-        value = 0;
+    /** Parameter constructor of objects of class ConditionalCallable. */
+    ConditionalCallable(Predicate p, Callable<T> cThen, Callable<T> cElse) {
+        assert p != null && cThen != null && cElse != null;
+        predicate = p;
+        callableThen = cThen;
+        callableElse = cElse;
     }
 
-    /** Parameter constructor of objects of class ShortState. */
-    public ShortState(short a) {
-        value = a;
+
+    /** Copy constructor of objects of class ConditionalCallable. */
+    private ConditionalCallable(ConditionalCallable<T> instance) {
+        this(instance.getPredicate(), instance.getThen(), instance.getElse());
     }
 
-    /** Copy constructor of objects of class ShortState. */
-    private ShortState(ShortState instance) {
-        value = instance.getValue();
-    }
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    public short getValue() {
-        return value;
-    }
-
-    /**************************************************************************
-     * Setters
-    **************************************************************************/
+    Predicate getPredicate() { return predicate; }
 
     /** */
-    public void setValue(short a) {
-        value = a;
-    }
+    Callable<T> getThen() { return callableThen; }
+
+    /** */
+    Callable<T> getElse() { return callableElse; }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
-    // ..
+    /** */
+    @Override
+    public T call() throws Exception {
+        if (predicate.evaluate()) {
+            return callableThen.call();
+        } else {
+            return callableElse.call();
+        }
+    }
+
+
 
     /**************************************************************************
      * Private Methods
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -100,12 +100,12 @@ public final class ShortState extends NonNullState {
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || this.getClass() != o.getClass())
-            return false;
-        ShortState n = (ShortState)o;
-        return (value == n.getValue());
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        ConditionalCallable<?> n = (ConditionalCallable<?>) o;
+        return (predicate.equals(n.getPredicate()) &&
+                callableThen.equals(n.getThen()) &&
+                callableElse.equals(n.getElse()));
     }
 
     /** Contract:
@@ -127,20 +127,22 @@ public final class ShortState extends NonNullState {
     */
     @Override
     public int hashCode() {
-        return 37 + value;
+        int hash = 37 + predicate.hashCode();
+        hash = 37 * hash + callableThen.hashCode();
+        return 37 * hash + callableElse.hashCode();
     }
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(value);
+        sb.append(predicate);
         return sb.toString();
     }
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public ShortState clone() {
-        return new ShortState(this);
+    public ConditionalCallable<T> clone() {
+        return new ConditionalCallable<T>(this);
     }
 }

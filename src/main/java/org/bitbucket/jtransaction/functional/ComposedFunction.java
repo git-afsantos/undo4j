@@ -1,89 +1,78 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
+package org.bitbucket.jtransaction.functional;
 
-package org.bitbucket.jtransaction.resources;
+import org.bitbucket.jtransaction.common.Copyable;
 
 /**
- * ByteState
+ * ComposedFunction
  * 
  * @author afs
  * @version 2013
 */
 
-public final class ByteState extends NonNullState {
+final class ComposedFunction<A, B, C>
+        implements Function<A, C>, Copyable<ComposedFunction<A, B, C>> {
     // instance variables
-    private byte value;
+    private final Function<A, B> first;
+    private final Function<B, C> second;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Empty constructor of objects of class ByteState. */
-    public ByteState() {
-        value = 0;
+    /** Parameter constructor of objects of class ComposedFunction. */
+    ComposedFunction(Function<A, B> f, Function<B, C> g) {
+        assert f != null && g != null;
+        first = f;
+        second = g;
     }
 
-    /** Parameter constructor of objects of class ByteState. */
-    public ByteState(byte a) {
-        value = a;
+
+    /** Copy constructor of objects of class ComposedFunction. */
+    private ComposedFunction(ComposedFunction<A, B, C> instance) {
+        this(instance.getFirst(), instance.getSecond());
     }
 
-    /** Copy constructor of objects of class ByteState. */
-    private ByteState(ByteState instance) {
-        value = instance.getValue();
-    }
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    public byte getValue() {
-        return value;
-    }
-
-    /**************************************************************************
-     * Setters
-    **************************************************************************/
+    Function<A, B> getFirst() { return first; }
 
     /** */
-    public void setValue(byte a) {
-        value = a;
-    }
+    Function<B, C> getSecond() { return second; }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
-    // ..
+    /** */
+    @Override
+    public C call(A a) throws Exception {
+        return second.call(first.call(a));
+    }
+
+
 
     /**************************************************************************
      * Private Methods
     **************************************************************************/
 
-    // ..
+    // ...
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -100,12 +89,10 @@ public final class ByteState extends NonNullState {
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || this.getClass() != o.getClass())
-            return false;
-        ByteState n = (ByteState)o;
-        return (value == n.getValue());
+        if (this == o) return true;
+        if (!(o instanceof ComposedFunction)) return false;
+        ComposedFunction<?, ?, ?> n = (ComposedFunction<?, ?, ?>) o;
+        return (first.equals(n.getFirst()) && second.equals(n.getSecond()));
     }
 
     /** Contract:
@@ -127,20 +114,22 @@ public final class ByteState extends NonNullState {
     */
     @Override
     public int hashCode() {
-        return 37 + value;
+        return 37 * (37 + first.hashCode()) + second.hashCode();
     }
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(value);
+        sb.append(second);
+        sb.append('.');
+        sb.append(first);
         return sb.toString();
     }
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public ByteState clone() {
-        return new ByteState(this);
+    public ComposedFunction<A, B, C> clone() {
+        return new ComposedFunction<A, B, C>(this);
     }
 }

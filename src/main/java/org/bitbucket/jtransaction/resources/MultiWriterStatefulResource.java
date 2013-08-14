@@ -1,23 +1,6 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.resources;
+
+import static org.bitbucket.jtransaction.resources.StateUtil.*;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,11 +11,13 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 2013
 */
 
-public abstract class MultiWriterStatefulResource extends StatefulResource {
+public abstract class MultiWriterStatefulResource<T>
+        extends StatefulResource<T> {
     // instance variables
     private final ReentrantLock lock = new ReentrantLock();
     private final ThreadLocalStatus status = new ThreadLocalStatus();
-    private final ThreadLocalResourceState localCommit = new ThreadLocalResourceState();
+    private final ThreadLocalResourceState<T> localCommit =
+            new ThreadLocalResourceState<T>();
 
     /**************************************************************************
      * Constructors
@@ -40,67 +25,74 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
 
     /** Parameter constructor of objects of class MultiWriterStatefulResource.
      */
-    public MultiWriterStatefulResource(InternalResource resource) {
+    public MultiWriterStatefulResource(InternalResource<T> resource) {
         super(resource);
     }
 
     /** Parameter constructor of objects of class MultiWriterStatefulResource.
      */
-    public MultiWriterStatefulResource(InternalResource resource, boolean buildsEachUpdate) {
+    public MultiWriterStatefulResource(
+        InternalResource<T> resource, boolean buildsEachUpdate
+    ) {
         super(resource, buildsEachUpdate);
     }
 
+
     /** Copy constructor of objects of class MultiWriterStatefulResource. */
-    protected MultiWriterStatefulResource(MultiWriterStatefulResource r) {
+    protected MultiWriterStatefulResource(MultiWriterStatefulResource<T> r) {
         super(r);
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** Returns a copy of the local commit, for the current thread. */
-    protected final ResourceState getLocalCommit() {
-        return StateUtil.cloneSafely(this.localCommit.get());
+    protected final ResourceState<T> getLocalCommit() {
+        return cloneSafely(this.localCommit.get());
     }
 
     /** Returns a direct reference to the local commit, for the current thread.
      */
-    protected final ResourceState getLocalCommitReference() {
+    protected final ResourceState<T> getLocalCommitReference() {
         return this.localCommit.get();
     }
 
+
     /** Returns a direct reference of the ThreadLocal commit. */
-    protected final ThreadLocalResourceState getThreadLocalCommit() {
+    protected final ThreadLocalResourceState<T> getThreadLocalCommit() {
         return this.localCommit;
     }
 
+
     /** */
     @Override
-    public final InternalResource getSynchronizedResource() {
-        InternalResource res = null;
+    public final InternalResource<T> getSynchronizedResource() {
+        InternalResource<T> res = null;
         try {
             this.lock.lock();
             res = getInternalResource();
-        } finally {
-            this.lock.unlock();
-        }
+        } finally { this.lock.unlock(); }
         return res;
     }
+
+
 
     /**************************************************************************
      * Setters
     **************************************************************************/
 
     /** */
-    protected final void setLocalCommit(ResourceState state) {
-        this.localCommit.set(state == null ? NULL_STATE : state);
+    protected final void setLocalCommit(ResourceState<T> state) {
+        this.localCommit.set(identity(state));
     }
 
     /** */
-    protected final void setStatus(Status s) {
-        this.status.set(s);
-    }
+    protected final void setStatus(Status s) { this.status.set(s); }
+
+
 
     /**************************************************************************
      * Predicates
@@ -126,11 +118,14 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
         return this.status.get() == Status.COMMITTED;
     }
 
+
+
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
     /** */
+    @Override
     public void update() {
         if (isCommitted()) {
             if (hasLocalCommit()) {
@@ -145,14 +140,13 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
                         setCheckpoint(this.localCommit.get().clone());
                     }
                     setConsistent(true);
-                } finally {
-                    unlock();
-                }
+                } finally { unlock(); }
                 this.localCommit.remove();
             }
             this.status.remove();
         }
     }
+
 
     /** */
     @Override
@@ -160,9 +154,7 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
         try {
             lock();
             super.initializeDecorator();
-        } finally {
-            unlock();
-        }
+        } finally { unlock(); }
     }
 
     /** Disposes of any stored states.
@@ -172,11 +164,10 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
         try {
             lock();
             super.disposeDecorator();
-        } finally {
-            unlock();
-        }
-        this.localCommit.set(NULL_STATE);
+        } finally { unlock(); }
+        this.localCommit.remove();
     }
+
 
     /** */
     @Override
@@ -185,10 +176,9 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
             lock();
             super.rollbackToCheckpoint();
             setConsistent(true);
-        } finally {
-            unlock();
-        }
+        } finally { unlock(); }
     }
+
 
     /** */
     @Override
@@ -197,50 +187,43 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
             lock();
             super.rollbackToPrevious();
             setConsistent(true);
-        } finally {
-            unlock();
-        }
+        } finally { unlock(); }
     }
 
-    /** */
-    protected final void removeStatus() {
-        this.status.remove();
-    }
 
     /** */
-    protected final void removeLocalCommit() {
-        this.localCommit.remove();
-    }
+    protected final void removeStatus() { this.status.remove(); }
 
     /** */
-    protected final void lock() {
-        this.lock.lock();
-    }
+    protected final void removeLocalCommit() { this.localCommit.remove(); }
+
 
     /** */
-    protected final void unlock() {
-        this.lock.unlock();
-    }
+    protected final void lock() { this.lock.lock(); }
 
     /** */
-    protected final void applyState(ResourceState state) throws Exception {
+    protected final void unlock() { this.lock.unlock(); }
+
+
+    /** */
+    protected final void applyState(ResourceState<T> state) throws Exception {
         try {
             lock();
             getInternalResource().applyState(state);
-        } finally {
-            unlock();
-        }
+        } finally { unlock(); }
     }
+
 
     /** Apply any changes made in the current local commit. */
     private void applyLocalCommit() {
-        try {
-            getInternalResource().applyState(this.localCommit.get());
-        } catch (Exception e) {
+        try { getInternalResource().applyState(this.localCommit.get()); }
+        catch (Exception e) {
             setConsistent(false);
             throw new ResourceUpdateException(e.getMessage(), e);
         }
     }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -256,7 +239,9 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public abstract MultiWriterStatefulResource clone();
+    public abstract MultiWriterStatefulResource<T> clone();
+
+
 
     /**************************************************************************
      * Nested Classes
@@ -264,25 +249,18 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
 
     /** */
     static final class ThreadLocalStatus extends ThreadLocal<Status> {
-        ThreadLocalStatus() {
-            super();
-        }
+        ThreadLocalStatus() { super(); }
 
         @Override
-        protected Status initialValue() {
-            return Status.UPDATED;
-        }
+        protected Status initialValue() { return Status.UPDATED; }
     }
 
     /** */
-    static final class ThreadLocalResourceState extends ThreadLocal<ResourceState> {
-        ThreadLocalResourceState() {
-            super();
-        }
+    static final class ThreadLocalResourceState<T>
+            extends ThreadLocal<ResourceState<T>> {
+        ThreadLocalResourceState() { super(); }
 
         @Override
-        protected ResourceState initialValue() {
-            return NULL_STATE;
-        }
+        protected ResourceState<T> initialValue() { return identity(null); }
     }
 }

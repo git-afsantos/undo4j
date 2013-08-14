@@ -1,32 +1,15 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.transactions;
-
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
 import org.bitbucket.jtransaction.common.AccessMode;
 import org.bitbucket.jtransaction.common.Copyable;
+
+import static org.bitbucket.jtransaction.common.Check.checkArgument;
+
 import org.bitbucket.jtransaction.resources.Resource;
+import org.bitbucket.jtransaction.resources.ResourceState;
+
 import org.bitbucket.jtransaction.resources.ResourceAcquireException;
 import org.bitbucket.jtransaction.resources.ResourceInaccessibleException;
-import org.bitbucket.jtransaction.resources.ResourceState;
 
 /**
  * ResourceController allows for reading and writing on a resource.
@@ -35,17 +18,16 @@ import org.bitbucket.jtransaction.resources.ResourceState;
  * @version 2013
 */
 
-class ResourceController implements ResourceHandle, Copyable<ResourceController> {
+class ResourceController implements ResourceHandle,
+        Copyable<ResourceController> {
     private static final NullListener NULL = new NullListener();
 
     /** Controller status */
     static enum Status {
         UNUSED, READ, CHANGED, COMMITTED, EXPIRED, RELEASED;
-
+    
         /** */
-        static Status initialStatus() {
-            return UNUSED;
-        }
+        static Status initialStatus() { return UNUSED; }
     }
 
     // instance variables
@@ -64,6 +46,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         this(r, id, NULL);
     }
 
+
     /** Parameter constructor of objects of class ResourceController. */
     protected ResourceController(Resource r, String id, ReadWriteListener rw) {
         checkArgument("null resource", r);
@@ -74,43 +57,38 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         this.listener = rw;
     }
 
+
     /** Copy constructor of objects of class ResourceController. */
     protected ResourceController(ResourceController instance) {
         this(instance.getResource(), instance.getId(), instance.getListener());
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    protected final Resource getResource() {
-        return this.resource;
-    }
+    protected final Resource getResource() { return this.resource; }
 
     /** */
-    protected final String getId() {
-        return this.id;
-    }
+    protected final String getId() { return this.id; }
 
     /** */
-    protected final ReadWriteListener getListener() {
-        return this.listener;
-    }
+    protected final ReadWriteListener getListener() { return this.listener; }
 
     /** */
-    protected final Status getStatus() {
-        return this.status;
-    }
+    protected final Status getStatus() { return this.status; }
+
+
 
     /**************************************************************************
      * Setters
     **************************************************************************/
 
     /** */
-    protected final void setStatus(Status s) {
-        this.status = s;
-    }
+    protected final void setStatus(Status s) { this.status = s; }
 
     /** */
     protected final void setAccessed(boolean isAccessed) {
@@ -122,6 +100,8 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         this.acquired = isAcquired;
     }
 
+
+
     /**************************************************************************
      * Predicates
     **************************************************************************/
@@ -132,14 +112,10 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
     }
 
     /** */
-    protected final boolean isAccessed() {
-        return this.accessed;
-    }
+    protected final boolean isAccessed() { return this.accessed; }
 
     /** */
-    protected final boolean isAcquired() {
-        return this.acquired;
-    }
+    protected final boolean isAcquired() { return this.acquired; }
 
     /** */
     protected final boolean isUnused() {
@@ -171,6 +147,8 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         return this.status == Status.RELEASED;
     }
 
+
+
     /**************************************************************************
      * Public or Overridable Methods
     **************************************************************************/
@@ -186,6 +164,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
      * Throws ResourceAcquireException, if the resource can't be acquired.
      * Override for custom behaviour.
     */
+    @Override
     public ResourceState read() {
         // Check for resource accessibility.
         checkResourceAccessible();
@@ -194,20 +173,17 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         // Check if operation is allowed in current state.
         checkCanRead();
         // Acquire resource, if accessing it for the first time.
-        if (!this.accessed) {
-            acquireResource();
-        }
+        if (!this.accessed) { acquireResource(); }
         // Read the resource and store locally.
         ResourceState result = this.resource.read();
         // The resource has been read, set accessed and notify listener.
         this.accessed = true;
         this.listener.readPerformed(this.id);
-        if (!isChanged()) {
-            this.status = Status.READ;
-        }
+        if (!isChanged()) { this.status = Status.READ; }
         // Return the read state.
         return result;
     }
+
 
     /** Writes on the resource, then increments the write counter,
      * and sets the accessed flag.
@@ -219,6 +195,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
      * Throws ResourceAcquireException, if the resource can't be acquired.
      * Override for custom behaviour.
     */
+    @Override
     public void write(ResourceState state) {
         // Check for resource accessiblity.
         checkResourceAccessible();
@@ -227,9 +204,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         // Check if operation is allowed in current state.
         checkCanWrite();
         // Acquire resource, if accessing it for the first time.
-        if (!this.accessed) {
-            acquireResource();
-        }
+        if (!this.accessed) { acquireResource(); }
         // Write on the resource.
         this.resource.write(state);
         // The resource has been written, set accessed and notify listener.
@@ -237,6 +212,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         this.listener.writePerformed(this.id);
         this.status = Status.CHANGED;
     }
+
 
     /** Commits the changes made on the resource.
      * Throws any ResourceCommitException thrown by the resource's commit.
@@ -256,6 +232,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         this.resource.commit();
         this.status = Status.COMMITTED;
     }
+
 
     /** Rolls back the changes made on the resource.
      * Throws any ResourceRollbackException thrown by the resource's rollback.
@@ -278,6 +255,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         this.status = Status.EXPIRED;
     }
 
+
     /** */
     protected void update() {
         // Check for resource accessibility.
@@ -291,13 +269,13 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         this.status = Status.EXPIRED;
     }
 
+
     /** Releases the underlying resource. */
     protected final void release() {
-        if (this.acquired) {
-            this.resource.release();
-        }
+        if (this.acquired) { this.resource.release(); }
         this.status = Status.RELEASED;
     }
+
 
     /** Acquires the underlying resource for both read and write operations.
      * Throws ResourceAcquireException, if the resource can't be acquired.
@@ -305,6 +283,7 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
     protected void acquireResource() {
         acquireResource(AccessMode.WRITE);
     }
+
 
     /** Acquires the underlying resource for both read and write operations.
      * Throws ResourceAcquireException, if the resource can't be acquired.
@@ -317,6 +296,8 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         }
     }
 
+
+
     /**************************************************************************
      * Checks
     **************************************************************************/
@@ -328,12 +309,14 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         }
     }
 
+
     /** */
     protected final void checkInterrupted() {
         if (Thread.interrupted()) {
             throw new TransactionInterruptedException("interrupted");
         }
     }
+
 
     /** */
     protected final void checkCanRead() {
@@ -358,17 +341,15 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
 
     /** */
     protected final void checkCanRollback() {
-        if (isReleased()) {
-            throw new IllegalHandleStateException();
-        }
+        if (isReleased()) { throw new IllegalHandleStateException(); }
     }
 
     /** */
     protected final void checkCanUpdate() {
-        if (!isCommitted()) {
-            throw new IllegalHandleStateException();
-        }
+        if (!isCommitted()) { throw new IllegalHandleStateException(); }
     }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -385,11 +366,9 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof ResourceController))
-            return false;
-        ResourceController n = (ResourceController)o;
+        if (this == o) return true;
+        if (!(o instanceof ResourceController)) return false;
+        ResourceController n = (ResourceController) o;
         return (this.resource == n.getResource());
     }
 
@@ -429,6 +408,8 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         return new ResourceController(this);
     }
 
+
+
     /**************************************************************************
      * Nested Classes
     **************************************************************************/
@@ -438,9 +419,11 @@ class ResourceController implements ResourceHandle, Copyable<ResourceController>
         NullListener() {}
 
         /** */
+        @Override
         public void readPerformed(String resource) {}
 
         /** */
+        @Override
         public void writePerformed(String resource) {}
     }
 }

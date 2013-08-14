@@ -1,32 +1,14 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.transactions;
+
+import org.bitbucket.jtransaction.common.AccessMode;
+import org.bitbucket.jtransaction.common.IsolationLevel;
+
+import org.bitbucket.jtransaction.resources.Resource;
 
 import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-
-import org.bitbucket.jtransaction.common.AccessMode;
-import org.bitbucket.jtransaction.common.IsolationLevel;
-import org.bitbucket.jtransaction.resources.Resource;
 
 /**
  * AbstractTransactionManager
@@ -35,10 +17,12 @@ import org.bitbucket.jtransaction.resources.Resource;
  * @version 2013
 */
 
-abstract class AbstractTransactionManager implements TransactionManager, TransactionListener {
+abstract class AbstractTransactionManager
+        implements TransactionManager, TransactionListener {
     // instance variables
     private final ResourceManager resourceManager;
-    private final ThreadLocal<Transaction<?>> transactions = new ThreadLocal<Transaction<?>>();
+    private final ThreadLocal<Transaction<?>> transactions =
+            new ThreadLocal<Transaction<?>>();
 
     /**************************************************************************
      * Constructors
@@ -51,11 +35,14 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
         this.resourceManager = rm;
     }
 
+
+
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
+    @Override
     public final ResourceHandle getHandleFor(String resource) {
         // Only transactions may use this method.
         checkTransaction();
@@ -75,6 +62,7 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
         return ctrl;
     }
 
+
     /** */
     protected final ResourceManager getResourceManager() {
         return this.resourceManager;
@@ -90,6 +78,8 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
         return this.transactions.get();
     }
 
+
+
     /**************************************************************************
      * Setters
     **************************************************************************/
@@ -98,6 +88,8 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
     protected final <T> void setTransaction(Transaction<T> t) {
         this.transactions.set(t);
     }
+
+
 
     /**************************************************************************
      * Predicates
@@ -109,11 +101,14 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
         return this.transactions.get() != null;
     }
 
+
+
     /**************************************************************************
      * Public Methods
     **************************************************************************/
 
     /** Only non-transactional threads may call this method. */
+    @Override
     public void putResource(String id, Resource resource) {
         // Throw exception if a transaction tries to add a resource.
         checkNotTransaction();
@@ -122,6 +117,7 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
     }
 
     /** Only non-transactional threads may call this method. */
+    @Override
     public void removeResource(String id) {
         // Throw exception if a transaction tries to remove a resource.
         checkNotTransaction();
@@ -129,10 +125,12 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
         this.resourceManager.removeResource(id);
     }
 
+
     /** Submits the transaction of execution.
      * Assumes default access mode: write.
      * Assumes default isolation level: none.
      */
+    @Override
     public <T> Future<TransactionResult<T>> submit(Callable<T> task) {
         return submit(task, AccessMode.WRITE, IsolationLevel.NONE);
     }
@@ -140,19 +138,27 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
     /** Submits the transaction for execution.
      * Assumes default isolation level: none.
      */
-    public <T> Future<TransactionResult<T>> submit(Callable<T> task, AccessMode mode) {
+    @Override
+    public <T> Future<TransactionResult<T>> submit(
+        Callable<T> task, AccessMode mode
+    ) {
         return submit(task, mode, IsolationLevel.NONE);
     }
 
+
     /** Registers the current thread as a transaction. */
+    @Override
     public <T> void bind(Transaction<T> t) {
         this.transactions.set(t);
     }
 
     /** Unregisters the current thread as a transaction. */
+    @Override
     public void terminate() {
         this.transactions.remove();
     }
+
+
 
     /**************************************************************************
      * Private Methods
@@ -165,12 +171,15 @@ abstract class AbstractTransactionManager implements TransactionManager, Transac
         }
     }
 
+
     /** */
     protected final void checkNotTransaction() {
         if (isTransaction()) {
             throw new TransactionContextException("thread is a transaction");
         }
     }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone

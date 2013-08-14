@@ -1,58 +1,35 @@
-/*
-The MIT License (MIT)
+package org.bitbucket.jtransaction.functional;
 
-Copyright (c) 2013 Andre Santos, Victor Miraldo
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-
-package org.bitbucket.jtransaction.resources;
-
+import java.util.concurrent.Callable;
 
 /**
- * LongState
+ * CallableFunction
  * 
  * @author afs
  * @version 2013
 */
 
-public final class LongState extends NonNullState {
+final class CallableFunction<A, B> implements Callable<B> {
     // instance variables
-    private long value;
+    private final A argument;
+    private final Function<A, B> function;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Empty constructor of objects of class LongState. */
-    public LongState() {
-        value = 0;
+    /** Parameter constructor of objects of class CallableFunction. */
+    public CallableFunction(Function<A, B> f, A arg) {
+        assert f != null && arg != null;
+        function = f;
+        argument = arg;
     }
 
 
-    /** Parameter constructor of objects of class LongState. */
-    public LongState(long a) {
-        value = a;
-    }
-
-
-    /** Copy constructor of objects of class LongState. */
-    private LongState(LongState instance) {
-        value = instance.getValue();
+    /** Copy constructor of objects of class CallableFunction. */
+    private CallableFunction(CallableFunction<A, B> instance) {
+        function = instance.getFunction();
+        argument = instance.getArgument();
     }
 
 
@@ -62,24 +39,10 @@ public final class LongState extends NonNullState {
     **************************************************************************/
 
     /** */
-    public long getValue() { return value; }
-
-
-
-    /**************************************************************************
-     * Setters
-    **************************************************************************/
+    A getArgument() { return argument; }
 
     /** */
-    public void setValue(long a) { value = a; }
-
-
-
-    /**************************************************************************
-     * Predicates
-    **************************************************************************/
-
-    // ..
+    Function<A, B> getFunction() { return function; }
 
 
 
@@ -87,15 +50,11 @@ public final class LongState extends NonNullState {
      * Public Methods
     **************************************************************************/
 
-    // ..
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    // ..
+    /** */
+    @Override
+    public B call() throws Exception {
+        return function.call(argument);
+    }
 
 
 
@@ -116,8 +75,9 @@ public final class LongState extends NonNullState {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        LongState n = (LongState) o;
-        return (value == n.getValue());
+        CallableFunction<?, ?> n = (CallableFunction<?, ?>) o;
+        return function.equals(n.getFunction()) &&
+                argument.equals(n.getArgument());
     }
 
     /** Contract:
@@ -139,18 +99,21 @@ public final class LongState extends NonNullState {
     */
     @Override
     public int hashCode() {
-        return 37 + (int) (value ^ (value >>> 32));
+        return 37 * function.hashCode() + argument.hashCode();
     }
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(value);
+        sb.append(function);
+        sb.append(argument);
         return sb.toString();
     }
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public LongState clone() { return new LongState(this); }
+    public CallableFunction<A, B> clone() {
+        return new CallableFunction<A, B>(this);
+    }
 }

@@ -1,23 +1,7 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.resources;
+
+import static org.bitbucket.jtransaction.resources.StateUtil.*;
+
 
 /**
  * StatefulResource
@@ -26,73 +10,98 @@ package org.bitbucket.jtransaction.resources;
  * @version 2013
 */
 
-public abstract class StatefulResource extends AbstractResource {
+public abstract class StatefulResource<T> extends AbstractResource<T> {
+    /** Resource status enumeration. */
+    enum Status {
+        UPDATED, CHANGED, COMMITTED;
+
+        /** Returns the initial status. */
+        static Status initialStatus() { return UPDATED; }
+    }
+
     // instance variables
+    /**
+     * Flag to tell whether each update is built from the internal resource.
+     * Checkpoints may be set directly from the committed state, or
+     * by reading again the internal resource, since the commit operation
+     * modifies it.
+     */
     private final boolean buildEach;
-    private volatile ResourceState previous, checkpoint;
+    private volatile ResourceState<T> previous, checkpoint;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
     /** Parameter constructor of objects of class StatefulResource. */
-    public StatefulResource(InternalResource resource) {
+    public StatefulResource(InternalResource<T> resource) {
         this(resource, false);
     }
 
     /** Parameter constructor of objects of class StatefulResource. */
-    public StatefulResource(InternalResource resource, boolean buildEachUpdate) {
+    public StatefulResource(
+        InternalResource<T> resource, boolean buildEachUpdate
+    ) {
         super(resource);
         this.buildEach = buildEachUpdate;
-        this.checkpoint = NULL_STATE;
-        this.previous = NULL_STATE;
+        this.checkpoint = identity(null);
+        this.previous = this.checkpoint;
     }
 
+
     /** Copy constructor of objects of class StatefulResource. */
-    protected StatefulResource(StatefulResource instance) {
+    protected StatefulResource(StatefulResource<T> instance) {
         super(instance);
         this.buildEach = instance.buildsEachUpdate();
         this.checkpoint = instance.getCheckpoint();
         this.previous = instance.getPreviousCheckpoint();
     }
 
+
+
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** Returns a copy of the checkpoint. */
-    protected final ResourceState getCheckpoint() {
-        return StateUtil.cloneSafely(this.checkpoint);
+    protected final ResourceState<T> getCheckpoint() {
+        return cloneSafely(this.checkpoint);
     }
 
     /** Returns a direct reference to the checkpoint. */
-    protected final ResourceState getCheckpointReference() {
+    protected final ResourceState<T> getCheckpointReference() {
         return this.checkpoint;
     }
 
+
     /** Returns a copy of the previous checkpoint. */
-    protected final ResourceState getPreviousCheckpoint() {
-        return StateUtil.cloneSafely(this.previous);
+    protected final ResourceState<T> getPreviousCheckpoint() {
+        return cloneSafely(this.previous);
     }
 
     /** Returns a direct reference to the previous checkpoint. */
-    protected final ResourceState getPreviousCheckpointReference() {
+    protected final ResourceState<T> getPreviousCheckpointReference() {
         return this.previous;
     }
+
+
 
     /**************************************************************************
      * Setters
     **************************************************************************/
 
     /** */
-    protected final void setCheckpoint(ResourceState state) {
-        this.checkpoint = (state == null ? NULL_STATE : state);
+    protected final void setCheckpoint(ResourceState<T> state) {
+        this.checkpoint = identity(state);
     }
 
+
     /** */
-    protected final void setPreviousCheckpoint(ResourceState state) {
-        this.previous = (state == null ? NULL_STATE : state);
+    protected final void setPreviousCheckpoint(ResourceState<T> state) {
+        this.previous = identity(state);
     }
+
+
 
     /**************************************************************************
      * Predicates
@@ -103,6 +112,7 @@ public abstract class StatefulResource extends AbstractResource {
         return !this.checkpoint.isNull();
     }
 
+
     /** */
     protected final boolean hasPreviousCheckpoint() {
         return !this.previous.isNull();
@@ -110,13 +120,17 @@ public abstract class StatefulResource extends AbstractResource {
 
     /** */
     protected final boolean hasDifferentPreviousCheckpoint() {
-        return !this.previous.isNull() && !this.previous.equals(this.checkpoint);
+        return !this.previous.isNull() &&
+                !this.previous.equals(this.checkpoint);
     }
+
 
     /** */
     protected final boolean buildsEachUpdate() {
         return this.buildEach;
     }
+
+
 
     /**************************************************************************
      * Public Methods
@@ -130,9 +144,9 @@ public abstract class StatefulResource extends AbstractResource {
      * granted that no writers are able to modify the object
      * referenced by the checkpoint.
      */
-    public final ResourceState read() {
-        return getCheckpoint();
-    }
+    @Override
+    public final ResourceState<T> read() { return getCheckpoint(); }
+
 
     /** */
     protected final void updatePreviousCheckpoint() {
@@ -146,9 +160,8 @@ public abstract class StatefulResource extends AbstractResource {
 
     /** */
     protected final void updateCheckpoint() {
-        try {
-            buildCheckpoint();
-        } catch (Exception e) {
+        try { buildCheckpoint(); }
+        catch (Exception e) {
             setConsistent(false);
             throw new ResourceUpdateException(e.getMessage(), e);
         }
@@ -181,29 +194,33 @@ public abstract class StatefulResource extends AbstractResource {
         }
     }
 
+
     /** */
     protected final void buildCheckpoint() throws Exception {
-        this.checkpoint = getInternalResource().buildState();
+        this.checkpoint = identity(getInternalResource().buildState());
     }
+
 
     /** Creates the initial checkpoint.
      */
     @Override
     protected void initializeDecorator() {
-        try {
-            buildCheckpoint();
-        } catch (Exception e) {
+        try { buildCheckpoint(); }
+        catch (Exception e) {
             throw new ResourceInitializeException(e.getMessage(), e);
         }
     }
+
 
     /** Disposes of any stored states.
      */
     @Override
     protected void disposeDecorator() {
-        this.checkpoint = NULL_STATE;
-        this.previous = NULL_STATE;
+        this.checkpoint = identity(null);
+        this.previous = this.checkpoint;
     }
+
+
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
@@ -220,12 +237,11 @@ public abstract class StatefulResource extends AbstractResource {
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof StatefulResource))
-            return false;
-        StatefulResource n = (StatefulResource)o;
-        return (getInternalResource() == n.getInternalResource() && this.checkpoint.equals(n.getCheckpointReference()));
+        if (this == o) return true;
+        if (!(o instanceof StatefulResource)) return false;
+        StatefulResource<?> n = (StatefulResource<?>) o;
+        return (getInternalResource().equals(n.getInternalResource()) &&
+                this.checkpoint.equals(n.getCheckpointReference()));
     }
 
     /** Contract:
@@ -260,5 +276,5 @@ public abstract class StatefulResource extends AbstractResource {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public abstract StatefulResource clone();
+    public abstract StatefulResource<T> clone();
 }

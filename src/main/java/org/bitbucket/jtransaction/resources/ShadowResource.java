@@ -1,23 +1,6 @@
-/*
- * The MIT License (MIT)
- * 
- * Copyright (c) 2013 Andre Santos, Victor Miraldo
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify, merge,
- * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
- * to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
- * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 package org.bitbucket.jtransaction.resources;
+
+import static org.bitbucket.jtransaction.resources.StateUtil.*;
 
 /**
  * ShadowResource is not thread-safe.
@@ -27,57 +10,64 @@ package org.bitbucket.jtransaction.resources;
  * @version 2013
 */
 
-public class ShadowResource extends SingleWriterStatefulResource {
+public class ShadowResource<T> extends SingleWriterStatefulResource<T> {
     // instance variables
-    private ResourceState shadow;
+    private ResourceState<T> shadow;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
     /** Parameter constructor of objects of class ShadowResource. */
-    public ShadowResource(InternalResource resource) {
+    public ShadowResource(InternalResource<T> resource) {
         super(resource);
-        this.shadow = NULL_STATE;
+        this.shadow = getCheckpointReference();
     }
 
+
     /** Copy constructor of objects of class ShadowResource. */
-    protected ShadowResource(ShadowResource instance) {
+    protected ShadowResource(ShadowResource<T> instance) {
         super(instance);
         this.shadow = instance.getShadow();
     }
+
+
 
     /**************************************************************************
      * Getters
     **************************************************************************/
 
     /** */
-    protected final ResourceState getShadow() {
-        return StateUtil.cloneSafely(this.shadow);
+    protected final ResourceState<T> getShadow() {
+        return cloneSafely(this.shadow);
     }
 
     /** */
-    protected final ResourceState getShadowReference() {
+    protected final ResourceState<T> getShadowReference() {
         return this.shadow;
     }
+
+
 
     /**************************************************************************
      * Setters
     **************************************************************************/
 
     /** */
-    protected final void setShadow(ResourceState state) {
-        this.shadow = (state == null ? NULL_STATE : state);
+    protected final void setShadow(ResourceState<T> state) {
+        this.shadow = identity(state);
     }
+
+
 
     /**************************************************************************
      * Predicates
     **************************************************************************/
 
     /** */
-    protected final boolean hasShadow() {
-        return !this.shadow.isNull();
-    }
+    protected final boolean hasShadow() { return !this.shadow.isNull(); }
+
+
 
     /**************************************************************************
      * Public Methods
@@ -87,10 +77,12 @@ public class ShadowResource extends SingleWriterStatefulResource {
      * The effective write happens on commit, applying the shadow state.
      * This method assumes the resource has been acquired.
      */
-    public final void write(ResourceState state) {
+    @Override
+    public final void write(ResourceState<T> state) {
         setShadow(state);
         setStatus(Status.CHANGED);
     }
+
 
     /** Attempts to commit the changes made on this resource,
      * invoking applyState on the internal resource.
@@ -99,6 +91,7 @@ public class ShadowResource extends SingleWriterStatefulResource {
      * while applying the changes.
      * This method assumes the resource has been acquired.
      */
+    @Override
     public final void commit() {
         // If there's a shadow, apply it, update local commit, and discard it.
         if (isChanged()) {
@@ -107,12 +100,13 @@ public class ShadowResource extends SingleWriterStatefulResource {
                 // A clone of the shadow is set as the local commit.
                 // No writer may alter the referenced object after commit.
                 setLocalCommit(this.shadow.clone());
-                this.shadow = NULL_STATE;
+                this.shadow = identity(null);
             }
             setStatus(Status.COMMITTED);
             setConsistent(true);
         }
     }
+
 
     /** Reverts the changes made on this resource.
      * Throws a ResourceRollbackException, if any exception occurs
@@ -122,37 +116,36 @@ public class ShadowResource extends SingleWriterStatefulResource {
      * for readers) is beyond the scope of this class.
      * This method assumes the resource has been acquired.
      */
+    @Override
     public final void rollback() {
         switch (getStatus()) {
-        case COMMITTED:
-            if (hasLocalCommit()) {
-                rollbackToCheckpoint();
-            }
+            case COMMITTED:
+            if (hasLocalCommit()) { rollbackToCheckpoint(); }
             break;
-
-        case UPDATED:
-            if (hasDifferentPreviousCheckpoint()) {
-                rollbackToPrevious();
-            }
+            
+            case UPDATED:
+            if (hasDifferentPreviousCheckpoint()) { rollbackToPrevious(); }
             break;
-
-        default:
-            break;
+            
+            default: break;
         }
         // Discard the shadow and the local commit.
-        this.shadow = NULL_STATE;
-        setLocalCommit(NULL_STATE);
+        this.shadow = identity(null);
+        setLocalCommit(this.shadow);
         setStatus(Status.UPDATED);
         setConsistent(true);
     }
+
 
     /** Disposes of any stored states.
      */
     @Override
     protected void disposeDecorator() {
         super.disposeDecorator();
-        this.shadow = NULL_STATE;
+        this.shadow = getCheckpointReference();
     }
+
+
 
     /**************************************************************************
      * Private Methods
@@ -160,13 +153,14 @@ public class ShadowResource extends SingleWriterStatefulResource {
 
     /** Validate any changes made, by applying the current shadow. */
     private void applyShadow() {
-        try {
-            getInternalResource().applyState(this.shadow);
-        } catch (Exception e) {
+        try { getInternalResource().applyState(this.shadow); }
+        catch (Exception e) {
             setConsistent(false);
             throw new ResourceCommitException(e.getMessage(), e);
         }
     }
+
+
 
     /**************************************************************************
      * Clone
@@ -174,7 +168,5 @@ public class ShadowResource extends SingleWriterStatefulResource {
 
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public ShadowResource clone() {
-        return new ShadowResource(this);
-    }
+    public ShadowResource<T> clone() { return new ShadowResource<T>(this); }
 }
