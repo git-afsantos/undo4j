@@ -1,7 +1,5 @@
 package org.bitbucket.jtransaction.transactions;
 
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -29,23 +27,19 @@ public final class RunTransactionTest {
         Assert.assertEquals("Hello", s);
     }
 
-    @Test
-    public void testResourceHidingEmptyTransaction() throws InterruptedException, ExecutionException {
+    @Test(expected = ExecutionException.class)
+    public void testResourceHidingEmptyTransaction() throws Exception {
 
         ManagedResource<String> mr = ManagedResource.from(new ShadowResource<String>(new StringResource(), LockManagers
             .newNullLockManager()));
 
-        try {
-            TransactionManager tm = TransactionManagers.newSynchronousManager();
-            Future<String> f = tm.submit(new ResourceHidingEmptyTransaction("Hello", mr));
-            String s = f.get();
-            fail();
-            System.out.println(s);
-        } catch (ExecutionException e) {}
+        TransactionManager tm = TransactionManagers.newSynchronousManager();
+        Future<String> f = tm.submit(new ResourceHidingEmptyTransaction("Hello", mr));
+        f.get();
     }
 
-    @Test
-    public void testResourceHidingTransaction() throws InterruptedException {
+    @Test(expected = ExecutionException.class)
+    public void testResourceHidingTransaction() throws Exception {
 
         ManagedResource<String> mr = ManagedResource.from(new ShadowResource<String>(new StringResource(), LockManagers
             .newNullLockManager()));
@@ -53,12 +47,7 @@ public final class RunTransactionTest {
             LockManagers.newNullLockManager()));
         TransactionManager tm = TransactionManagers.newSynchronousManager();
         Future<String> f = tm.submit(new ResourceHidingTransaction("Hello", mr, mrHidden));
-
-        try {
-            String s = f.get();
-            fail();
-            System.out.println(s);
-        } catch (ExecutionException ex) {}
+        f.get();
     }
 
     class WriteTransaction implements TransactionalCallable<String> {
