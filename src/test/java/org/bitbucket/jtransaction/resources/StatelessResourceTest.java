@@ -1,10 +1,13 @@
 package org.bitbucket.jtransaction.resources;
 
 import static org.junit.Assert.fail;
+import mockit.Deencapsulation;
 import mockit.Expectations;
+import mockit.Injectable;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.NonStrict;
+import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 
 import org.junit.Test;
@@ -12,25 +15,26 @@ import org.junit.runner.RunWith;
 
 @RunWith(JMockit.class)
 public class StatelessResourceTest {
+	@Injectable
+	private InternalResource<String> ir;
 
-	private InternalResource ir = new MockUp<InternalResource>() {
-	}.getMockInstance();
+	@Tested
+	private StatelessResource<String> srt;
 
-	private final InternalResource irEx = new MockUp<InternalResource>() {
+	private final InternalResource<String> irEx = new MockUp<InternalResource<String>>() {
 		@Mock
-		ResourceState buildState() throws Exception {
+		ResourceState<String> buildState() throws Exception {
 			throw new Exception();
 		}
 
 		@Mock
-		void applyState(ResourceState state) throws Exception {
+		void applyState(ResourceState<String> state) throws Exception {
 			throw new Exception();
 		}
 	}.getMockInstance();
 
 	@Test
 	public void readTest() throws Exception {
-		StatelessResourceForTesting srt = new StatelessResourceForTesting(ir);
 		new Expectations() {
 			{
 				ir.buildState();
@@ -42,8 +46,7 @@ public class StatelessResourceTest {
 
 	@Test
 	public void readTestException() {
-		StatelessResourceForTesting srt = new StatelessResourceForTesting(irEx);
-
+		Deencapsulation.setField(srt, "resource", irEx);
 		try {
 			srt.read();
 			fail();
@@ -52,8 +55,8 @@ public class StatelessResourceTest {
 	}
 
 	@Test
-	public void writeTest(@NonStrict final ResourceState mock) throws Exception {
-		StatelessResourceForTesting srt = new StatelessResourceForTesting(ir);
+	public void writeTest(@NonStrict final ResourceState<String> mock)
+			throws Exception {
 		new Expectations() {
 			{
 				ir.applyState(mock);
@@ -64,37 +67,12 @@ public class StatelessResourceTest {
 	}
 
 	@Test
-	public void writeTestException(@NonStrict final ResourceState mock) {
-		StatelessResourceForTesting srt = new StatelessResourceForTesting(irEx);
-
+	public void writeTestException(@NonStrict final ResourceState<String> mock) {
+		Deencapsulation.setField(srt, "resource", irEx);
 		try {
 			srt.write(mock);
 			fail();
 		} catch (ResourceWriteException e) {
-		}
-	}
-
-	public class StatelessResourceForTesting extends StatelessResource {
-
-		public StatelessResourceForTesting(InternalResource resource) {
-			super(resource);
-		}
-
-		@Override
-		public void commit() {
-		}
-
-		@Override
-		public void rollback() {
-		}
-
-		@Override
-		public void update() {
-		}
-
-		@Override
-		public AbstractResource clone() {
-			return null;
 		}
 	}
 }

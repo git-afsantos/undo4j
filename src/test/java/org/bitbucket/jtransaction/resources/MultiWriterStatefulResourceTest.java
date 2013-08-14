@@ -11,247 +11,284 @@ import mockit.Expectations;
 import mockit.Injectable;
 import mockit.NonStrict;
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 
+import org.bitbucket.jtransaction.common.IsolationLevel;
+import org.bitbucket.jtransaction.common.LockManager;
 import org.bitbucket.jtransaction.resources.MultiWriterStatefulResource.ThreadLocalResourceState;
 import org.bitbucket.jtransaction.resources.MultiWriterStatefulResource.ThreadLocalStatus;
-import org.bitbucket.jtransaction.resources.Resource.Status;
+import org.bitbucket.jtransaction.resources.StatefulResource.Status;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(JMockit.class)
 public class MultiWriterStatefulResourceTest {
+	@Injectable
+	private IsolationLevel isolationLevel;
 
-    @Injectable
-    private InternalResource resource;
+	@Injectable
+	private LockManager lock;
 
-    @Tested
-    private MultiWriterStatefulResource multiWriterStatefulResource;
+	@Injectable
+	private InternalResource<String> resource;
 
-    @Test
-    public void testGetLocalComit() throws Exception {
-        ThreadLocalResourceState localCommit = Deencapsulation.getField(multiWriterStatefulResource, "localCommit");
-        assertNotSame(localCommit.get(), multiWriterStatefulResource.getLocalCommit());
-    }
+	@Tested
+	private MultiWriterStatefulResource<String> multiWriterStatefulResource;
 
-    @Test
-    public void testGetLocalComitReference() throws Exception {
-        ThreadLocalResourceState localCommit = Deencapsulation.getField(multiWriterStatefulResource, "localCommit");
-        assertSame(localCommit.get(), multiWriterStatefulResource.getLocalCommitReference());
-    }
+	@Test
+	public void testGetLocalComit() throws Exception {
+		ThreadLocalResourceState<?> localCommit = Deencapsulation.getField(
+				multiWriterStatefulResource, "localCommit");
+		assertNotSame(localCommit.get(),
+				multiWriterStatefulResource.getLocalCommit());
+	}
 
-    @Test
-    public void testGetThreadedLocalComit() throws Exception {
-        ThreadLocalResourceState localCommit = Deencapsulation.getField(multiWriterStatefulResource, "localCommit");
-        assertSame(localCommit, multiWriterStatefulResource.getThreadLocalCommit());
-    }
+	@Test
+	public void testGetLocalComitReference() throws Exception {
+		ThreadLocalResourceState<?> localCommit = Deencapsulation.getField(
+				multiWriterStatefulResource, "localCommit");
+		assertSame(localCommit.get(),
+				multiWriterStatefulResource.getLocalCommitReference());
+	}
 
-    @Test
-    public void testGetSynchronizedResource() throws Exception {
-        assertSame(resource, multiWriterStatefulResource.getSynchronizedResource());
-    }
+	@Test
+	public void testGetThreadedLocalComit() throws Exception {
+		ThreadLocalResourceState<?> localCommit = Deencapsulation.getField(
+				multiWriterStatefulResource, "localCommit");
+		assertSame(localCommit,
+				multiWriterStatefulResource.getThreadLocalCommit());
+	}
 
-    @Test
-    public void testSetLocalCommitNull() throws Exception {
-        multiWriterStatefulResource.setLocalCommit(null);
-        assertTrue(multiWriterStatefulResource.getLocalCommit() instanceof NullState);
-    }
+	@Test
+	public void testGetSynchronizedResource() throws Exception {
+		assertSame(resource,
+				multiWriterStatefulResource.getSynchronizedResource());
+	}
 
-    @Test
-    public void testSetLocalCommitNotNull(@NonStrict
-    final ResourceState rs) throws Exception {
-        multiWriterStatefulResource.setLocalCommit(rs);
-        ThreadLocalResourceState localCommit = Deencapsulation.getField(multiWriterStatefulResource, "localCommit");
-        assertSame(localCommit.get(), rs);
-    }
+	@Test
+	public void testSetLocalCommitNull() throws Exception {
+		multiWriterStatefulResource.setLocalCommit(null);
+		assertTrue(multiWriterStatefulResource.getLocalCommit() instanceof NullState);
+	}
 
-    @Test
-    public void testSetStatus() throws Exception {
-        Status initialStatus = Status.initialStatus();
-        multiWriterStatefulResource.setStatus(initialStatus);
-        ThreadLocalStatus status = Deencapsulation.getField(multiWriterStatefulResource, "status");
-        assertEquals(initialStatus, status.get());
-    }
+	@Test
+	public void testSetLocalCommitNotNull(
+			@NonStrict final ResourceState<String> rs) throws Exception {
+		multiWriterStatefulResource.setLocalCommit(rs);
+		ThreadLocalResourceState<?> localCommit = Deencapsulation.getField(
+				multiWriterStatefulResource, "localCommit");
+		assertSame(localCommit.get(), rs);
+	}
 
-    @Test
-    public void tetsHasLocalCommitNull() throws Exception {
-        assertFalse(multiWriterStatefulResource.hasLocalCommit());
-    }
+	@Test
+	public void testSetStatus() throws Exception {
+		Status initialStatus = Status.initialStatus();
+		multiWriterStatefulResource.setStatus(initialStatus);
+		ThreadLocalStatus status = Deencapsulation.getField(
+				multiWriterStatefulResource, "status");
+		assertEquals(initialStatus, status.get());
+	}
 
-    @Test
-    public void tetsHasLocalCommitNotNull(@NonStrict
-    final ResourceState rs) throws Exception {
-        multiWriterStatefulResource.setLocalCommit(rs);
-        assertTrue(multiWriterStatefulResource.hasLocalCommit());
-    }
+	@Test
+	public void tetsHasLocalCommitNull() throws Exception {
+		assertFalse(multiWriterStatefulResource.hasLocalCommit());
+	}
 
-    @Test
-    public void testIsUpdated() throws Exception {
-        multiWriterStatefulResource.setStatus(Status.UPDATED);
-        assertTrue(multiWriterStatefulResource.isUpdated());
-    }
+	@Test
+	public void tetsHasLocalCommitNotNull(
+			@NonStrict final ResourceState<String> rs) throws Exception {
+		multiWriterStatefulResource.setLocalCommit(rs);
+		assertTrue(multiWriterStatefulResource.hasLocalCommit());
+	}
 
-    @Test
-    public void testIsNotChanged() throws Exception {
-        assertFalse(multiWriterStatefulResource.isChanged());
-    }
+	@Test
+	public void testIsUpdated() throws Exception {
+		multiWriterStatefulResource.setStatus(Status.UPDATED);
+		assertTrue(multiWriterStatefulResource.isUpdated());
+	}
 
-    @Test
-    public void testIsChanged() throws Exception {
-        multiWriterStatefulResource.setStatus(Status.CHANGED);
-        assertTrue(multiWriterStatefulResource.isChanged());
-    }
+	@Test
+	public void testIsNotChanged() throws Exception {
+		assertFalse(multiWriterStatefulResource.isChanged());
+	}
 
-    @Test
-    public void testIsNotCommitted() throws Exception {
-        assertFalse(multiWriterStatefulResource.isCommitted());
-    }
+	@Test
+	public void testIsChanged() throws Exception {
+		multiWriterStatefulResource.setStatus(Status.CHANGED);
+		assertTrue(multiWriterStatefulResource.isChanged());
+	}
 
-    @Test
-    public void testIsCommitted() throws Exception {
-        multiWriterStatefulResource.setStatus(Status.COMMITTED);
-        assertTrue(multiWriterStatefulResource.isCommitted());
-    }
+	@Test
+	public void testIsNotCommitted() throws Exception {
+		assertFalse(multiWriterStatefulResource.isCommitted());
+	}
 
-    @Test
-    public void testUpdateNotCommitted() throws Exception {
-        ResourceState before = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        multiWriterStatefulResource.update();
-        ResourceState after = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        assertEquals(before, after);
-    }
+	@Test
+	public void testIsCommitted() throws Exception {
+		multiWriterStatefulResource.setStatus(Status.COMMITTED);
+		assertTrue(multiWriterStatefulResource.isCommitted());
+	}
 
-    @Test
-    public void testUpdateNoLocalCommit() throws Exception {
-        multiWriterStatefulResource.setStatus(Status.COMMITTED);
-        ResourceState before = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        multiWriterStatefulResource.update();
-        ResourceState after = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        assertEquals(before, after);
-    }
+	@Test
+	public void testUpdateNotCommitted() throws Exception {
+		ResourceState<String> before = Deencapsulation.getField(
+				multiWriterStatefulResource, "checkpoint");
+		multiWriterStatefulResource.update();
+		ResourceState<String> after = Deencapsulation.getField(
+				multiWriterStatefulResource, "checkpoint");
+		assertEquals(before, after);
+	}
 
-    @Test
-    public void testUpdate(@NonStrict
-    final ResourceState rs) throws Exception {
-        new Expectations() {
-            {
-                rs.clone();
-                result = rs;
-                minTimes = 1;
-            }
-        };
+	@Test
+	public void testUpdateNoLocalCommit() throws Exception {
+		multiWriterStatefulResource.setStatus(Status.COMMITTED);
+		ResourceState<String> before = Deencapsulation.getField(
+				multiWriterStatefulResource, "checkpoint");
+		multiWriterStatefulResource.update();
+		ResourceState<String> after = Deencapsulation.getField(
+				multiWriterStatefulResource, "checkpoint");
+		assertEquals(before, after);
+	}
 
-        multiWriterStatefulResource.setStatus(Status.COMMITTED);
-        multiWriterStatefulResource.setLocalCommit(rs);
-        ResourceState beforeCheckPoint = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        multiWriterStatefulResource.update();
-        ResourceState afterCheckPoint = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        ResourceState afterPrevious = Deencapsulation.getField(multiWriterStatefulResource, "previous");
+	@Test
+	public void testUpdate(@NonStrict final ResourceState<String> rs)
+			throws Exception {
+		new Expectations() {
+			{
+				rs.clone();
+				result = rs;
+				minTimes = 1;
+			}
+		};
 
-        assertNotEquals(beforeCheckPoint, afterCheckPoint);
-        assertSame(beforeCheckPoint, afterPrevious);
-        assertTrue(multiWriterStatefulResource.isConsistent());
-    }
+		multiWriterStatefulResource.setStatus(Status.COMMITTED);
+		multiWriterStatefulResource.setLocalCommit(rs);
+		ResourceState<String> beforeCheckPoint = Deencapsulation.getField(
+				multiWriterStatefulResource, "checkpoint");
+		multiWriterStatefulResource.update();
+		ResourceState<String> afterCheckPoint = Deencapsulation.getField(
+				multiWriterStatefulResource, "checkpoint");
+		ResourceState<String> afterPrevious = Deencapsulation.getField(
+				multiWriterStatefulResource, "previous");
 
-    @Test
-    public void tetsInitializeDecorator() throws Exception {
-        new Expectations() {
-            {
-                multiWriterStatefulResource.buildCheckpoint();
-                minTimes = 1;
-            }
-        };
-        multiWriterStatefulResource.initializeDecorator();
-    }
+		assertNotEquals(beforeCheckPoint, afterCheckPoint);
+		assertSame(beforeCheckPoint, afterPrevious);
+		assertTrue(multiWriterStatefulResource.isConsistent());
+	}
 
-    @Test
-    public void testDisposeDecorator() throws Exception {
-        multiWriterStatefulResource.disposeDecorator();
-        ResourceState checkpoint = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        ResourceState previous = Deencapsulation.getField(multiWriterStatefulResource, "previous");
+	@Test
+	public void tetsInitializeDecorator() throws Exception {
+		new Expectations() {
+			{
+				multiWriterStatefulResource.buildCheckpoint();
+				minTimes = 1;
+			}
+		};
+		multiWriterStatefulResource.initializeDecorator();
+	}
 
-        assertTrue(checkpoint.isNull());
-        assertTrue(previous.isNull());
-    }
+	@Test
+	public void testDisposeDecorator() throws Exception {
+		multiWriterStatefulResource.disposeDecorator();
+		ResourceState<String> checkpoint = Deencapsulation.getField(
+				multiWriterStatefulResource, "checkpoint");
+		ResourceState<String> previous = Deencapsulation.getField(
+				multiWriterStatefulResource, "previous");
 
-    @Test
-    public void testRollBackToCheckpoint(@NonStrict
-    final ResourceState rs) throws Exception {
-        Deencapsulation.setField(multiWriterStatefulResource, "checkpoint", rs);
-        new Expectations() {
-            {
-                InternalResource resource = Deencapsulation.getField(multiWriterStatefulResource, "resource");
-                ResourceState checkpoint = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-                resource.applyState(checkpoint);
-                minTimes = 1;
-            }
-        };
+		assertTrue(checkpoint.isNull());
+		assertTrue(previous.isNull());
+	}
 
-        multiWriterStatefulResource.rollbackToCheckpoint();
-        assertTrue(multiWriterStatefulResource.isConsistent());
-    }
+	@Test
+	public void testRollBackToCheckpoint(
+			@NonStrict final ResourceState<String> rs) throws Exception {
+		Deencapsulation.setField(multiWriterStatefulResource, "checkpoint", rs);
+		new Expectations() {
+			{
+				InternalResource<String> resource = Deencapsulation.getField(
+						multiWriterStatefulResource, "resource");
+				ResourceState<String> checkpoint = Deencapsulation.getField(
+						multiWriterStatefulResource, "checkpoint");
+				resource.applyState(checkpoint);
+				minTimes = 1;
+			}
+		};
 
-    @Test
-    public void testRollBackToPrevious(@NonStrict
-    final ResourceState rs) throws Exception {
-        Deencapsulation.setField(multiWriterStatefulResource, "previous", rs);
-        new Expectations() {
-            {
-                InternalResource resource = Deencapsulation.getField(multiWriterStatefulResource, "resource");
-                ResourceState previous = Deencapsulation.getField(multiWriterStatefulResource, "previous");
-                resource.applyState(previous);
-                minTimes = 1;
-            }
-        };
+		multiWriterStatefulResource.rollbackToCheckpoint();
+		assertTrue(multiWriterStatefulResource.isConsistent());
+	}
 
-        multiWriterStatefulResource.rollbackToPrevious();
-        assertTrue(multiWriterStatefulResource.isConsistent());
-    }
+	@Test
+	public void testRollBackToPrevious(@NonStrict final ResourceState<String> rs)
+			throws Exception {
+		Deencapsulation.setField(multiWriterStatefulResource, "previous", rs);
+		new Expectations() {
+			{
+				InternalResource<String> resource = Deencapsulation.getField(
+						multiWriterStatefulResource, "resource");
+				ResourceState<String> previous = Deencapsulation.getField(
+						multiWriterStatefulResource, "previous");
+				resource.applyState(previous);
+				minTimes = 1;
+			}
+		};
 
-    @Test
-    public void testRemoveStatus() throws Exception {
-        ThreadLocalStatus statusBefore = Deencapsulation.getField(multiWriterStatefulResource, "status");
-        statusBefore.set(Status.CHANGED);
-        multiWriterStatefulResource.removeStatus();
-        ThreadLocalStatus statusAfter = Deencapsulation.getField(multiWriterStatefulResource, "status");
+		multiWriterStatefulResource.rollbackToPrevious();
+		assertTrue(multiWriterStatefulResource.isConsistent());
+	}
 
-        Status actual = statusAfter.get();
-        assertEquals(actual, Status.UPDATED);
-    }
+	@Test
+	public void testRemoveStatus() throws Exception {
+		ThreadLocalStatus statusBefore = Deencapsulation.getField(
+				multiWriterStatefulResource, "status");
+		statusBefore.set(Status.CHANGED);
+		multiWriterStatefulResource.removeStatus();
+		ThreadLocalStatus statusAfter = Deencapsulation.getField(
+				multiWriterStatefulResource, "status");
 
-    @Test
-    public void testRemoveLocalCommit(@NonStrict
-    final ResourceState rs) throws Exception {
-        ThreadLocalResourceState localCommitBefore = Deencapsulation.getField(multiWriterStatefulResource,
-            "localCommit");
-        localCommitBefore.set(rs);
-        multiWriterStatefulResource.removeLocalCommit();
-        ThreadLocalResourceState localCommitAfter = Deencapsulation
-            .getField(multiWriterStatefulResource, "localCommit");
+		Status actual = statusAfter.get();
+		assertEquals(actual, Status.UPDATED);
+	}
 
-        assertNotSame(rs, localCommitAfter.get());
-    }
+	@Test
+	public void testRemoveLocalCommit(@NonStrict final ResourceState<String> rs)
+			throws Exception {
+		ThreadLocalResourceState<String> localCommitBefore = Deencapsulation
+				.getField(multiWriterStatefulResource, "localCommit");
+		localCommitBefore.set(rs);
+		multiWriterStatefulResource.removeLocalCommit();
+		ThreadLocalResourceState<?> localCommitAfter = Deencapsulation
+				.getField(multiWriterStatefulResource, "localCommit");
 
-    @Test
-    public void testApplyLocalCommit(@NonStrict
-    final ResourceState rs) throws Exception {
-        new Expectations() {
-            {
-                InternalResource resource = Deencapsulation.getField(multiWriterStatefulResource, "resource");
-                resource.applyState(rs);
-                minTimes = 1;
-            }
-        };
-        multiWriterStatefulResource.applyState(rs);
-    }
+		assertNotSame(rs, localCommitAfter.get());
+	}
 
-    @Test
-    public void testApplyLocalCommit() throws Exception {
-        new Expectations() {
-            {
+	@Test
+	public void testApplyLocalCommit(@NonStrict final ResourceState<String> rs)
+			throws Exception {
+		new Expectations() {
+			{
+				InternalResource<String> resource = Deencapsulation.getField(
+						multiWriterStatefulResource, "resource");
+				resource.applyState(rs);
+				minTimes = 1;
+			}
+		};
+		multiWriterStatefulResource.applyState(rs);
+	}
 
-                InternalResource resource = Deencapsulation.getField(multiWriterStatefulResource, "resource");
-                resource.applyState(multiWriterStatefulResource.getLocalCommit());
-                minTimes = 1;
-            }
-        };
-        Deencapsulation.invoke(multiWriterStatefulResource, "applyLocalCommit");
-    }
+	@Test
+	public void testApplyLocalCommit() throws Exception {
+		new Expectations() {
+			{
+
+				InternalResource<String> resource = Deencapsulation.getField(
+						multiWriterStatefulResource, "resource");
+				resource.applyState(multiWriterStatefulResource
+						.getLocalCommit());
+				minTimes = 1;
+			}
+		};
+		Deencapsulation.invoke(multiWriterStatefulResource, "applyLocalCommit");
+	}
 }

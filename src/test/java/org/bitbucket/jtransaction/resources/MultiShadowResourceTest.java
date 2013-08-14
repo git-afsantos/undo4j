@@ -12,7 +12,7 @@ import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 
 import org.bitbucket.jtransaction.resources.MultiWriterStatefulResource.ThreadLocalStatus;
-import org.bitbucket.jtransaction.resources.Resource.Status;
+import org.bitbucket.jtransaction.resources.StatefulResource.Status;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -20,21 +20,21 @@ import org.junit.runner.RunWith;
 public class MultiShadowResourceTest {
 
 	@Injectable
-	private InternalResource ir;
+	private InternalResource<?> ir;
 
 	@Tested
-	private MultiShadowResource msr;
+	private MultiShadowResource<String> msr;
 
 	@Test
-	public void setgetShadowReferenceTest(@NonStrict final ResourceState mock)
-			throws Exception {
+	public void setgetShadowReferenceTest(
+			@NonStrict final ResourceState<String> mock) throws Exception {
 
 		msr.setShadow(mock);
 		assertEquals(mock, msr.getShadowReference());
 	}
 
 	@Test
-	public void setShadowTest(@NonStrict final ResourceState mock)
+	public void setShadowTest(@NonStrict final ResourceState<String> mock)
 			throws Exception {
 
 		assertFalse(msr.hasShadow());
@@ -46,11 +46,11 @@ public class MultiShadowResourceTest {
 	public void setgetShadowNullTest() throws Exception {
 
 		msr.setShadow(null);
-		assertEquals(new NullState(), msr.getShadow());
+		assertEquals(new NullState<String>(), msr.getShadow());
 	}
 
 	@Test
-	public void writeTest(@NonStrict final ResourceState mock) {
+	public void writeTest(@NonStrict final ResourceState<String> mock) {
 		msr.write(mock);
 		assertEquals(mock, msr.getShadowReference());
 	}
@@ -61,10 +61,10 @@ public class MultiShadowResourceTest {
 	}
 
 	@Test
-	public void writeCommitTest(@NonStrict final ResourceState mock) {
-		final InternalResource ir2 = new MockUp<InternalResource>() {
+	public void writeCommitTest(@NonStrict final ResourceState<String> mock) {
+		final InternalResource<String> ir2 = new MockUp<InternalResource<String>>() {
 			@Mock
-			boolean isValidState(ResourceState s) {
+			boolean isValidState(ResourceState<String> s) {
 				return true;
 			}
 		}.getMockInstance();

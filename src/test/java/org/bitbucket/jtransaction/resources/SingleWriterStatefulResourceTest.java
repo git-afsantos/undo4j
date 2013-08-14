@@ -12,27 +12,27 @@ import mockit.NonStrict;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 
-import org.bitbucket.jtransaction.resources.Resource.Status;
+import org.bitbucket.jtransaction.resources.StatefulResource.Status;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(JMockit.class)
 public class SingleWriterStatefulResourceTest {
 	@Injectable
-	private InternalResource resource;
+	private InternalResource<String> resource;
 	@Tested
-	private SingleWriterStatefulResource swsr;
+	private SingleWriterStatefulResource<String> swsr;
 
 	@Test
-	public void setgetLocalCommitTest(@NonStrict final ResourceState mock)
-			throws Exception {
+	public void setgetLocalCommitTest(
+			@NonStrict final ResourceState<String> mock) throws Exception {
 		swsr.setLocalCommit(mock);
 		assertTrue(swsr.hasLocalCommit());
 	}
 
 	@Test
 	public void setgetLocalCommitReferenceTest(
-			@NonStrict final ResourceState mock) throws Exception {
+			@NonStrict final ResourceState<String> mock) throws Exception {
 		swsr.setLocalCommit(mock);
 		assertEquals(mock, swsr.getLocalCommitReference());
 	}
@@ -44,11 +44,11 @@ public class SingleWriterStatefulResourceTest {
 	}
 
 	@Test
-	public void writeUpdateTest(@NonStrict final ResourceState mock)
+	public void writeUpdateTest(@NonStrict final ResourceState<String> mock)
 			throws Exception {
-		final InternalResource ir2 = new MockUp<InternalResource>() {
+		final InternalResource<String> ir2 = new MockUp<InternalResource<String>>() {
 			@Mock
-			boolean isValidState(ResourceState s) {
+			boolean isValidState(ResourceState<String> s) {
 				return true;
 			}
 		}.getMockInstance();
