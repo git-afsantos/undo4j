@@ -1,5 +1,7 @@
 package org.bitbucket.jtransaction.transactions;
 
+import static org.bitbucket.jtransaction.common.Check.checkArgument;
+
 import org.bitbucket.jtransaction.common.Copyable;
 import org.bitbucket.jtransaction.resources.Resource;
 import org.bitbucket.jtransaction.resources.ResourceId;
@@ -17,6 +19,7 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	// instance variables
 	private final Resource<T> resource;
 	private final ThreadLocal<ResourceController> controllers;
+	private final ResourceListener listener;
 
 
 	/**************************************************************************
@@ -24,9 +27,10 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
     **************************************************************************/
 
 	/** Parameter constructor */
-	ManagedResource(Resource<T> r) {
+	ManagedResource(Resource<T> r, ResourceListener rl) {
 		resource = r;
 		controllers = new ThreadLocal<ResourceController>();
+		listener = rl;
 	}
 
 
@@ -34,6 +38,7 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	private ManagedResource(ManagedResource<T> instance) {
 		resource = instance.getResource();
 		controllers = new ThreadLocal<ResourceController>();
+		listener = instance.getListener();
 	}
 
 
@@ -49,6 +54,10 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	public ResourceId getId() { return resource.getId(); }
 
 
+	/** */
+	public ResourceListener getListener() { return listener; }
+
+
 	/**************************************************************************
      * Predicates
     **************************************************************************/
@@ -61,21 +70,36 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	/** */
 	public ResourceState<T> read() {
 		checkHasController();
-		return controllers.get().read(resource);
+		listener.readCalled(resource);
+		ResourceState<T> s = controllers.get().read(resource);
+		listener.readPerformed(resource);
+		return s;
 	}
 
 
 	/** */
 	public void write(ResourceState<T> state) {
 		checkHasController();
-		controllers.get().write(resource, state);;
+		listener.writeCalled(resource);
+		controllers.get().write(resource, state);
+		listener.writePerformed(resource);
 	}
 
 
 
 	/** */
 	public static <T> ManagedResource<T> from(Resource<T> resource) {
-		return new ManagedResource<T>(resource);
+		return ManagedResource.from(resource, new NullResourceListener());
+	}
+
+
+	/** */
+	public static <T> ManagedResource<T> from(
+			Resource<T> resource, ResourceListener listener
+	) {
+		checkArgument(resource);
+		checkArgument(listener);
+		return new ManagedResource<T>(resource, listener);
 	}
 
 
@@ -85,19 +109,25 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 
 	/** */
 	void commit() {
+		listener.commitCalled(resource);
 		controllers.get().commit(resource);
+		listener.commitPerformed(resource);
 	}
 
 
 	/** */
 	void rollback() {
+		listener.rollbackCalled(resource);
 		controllers.get().rollback(resource);
+		listener.rollbackPerformed(resource);
 	}
 
 
 	/** */
 	void update() {
+		listener.updateCalled(resource);
 		controllers.get().update(resource);
+		listener.updatePerformed(resource);
 	}
 
 
