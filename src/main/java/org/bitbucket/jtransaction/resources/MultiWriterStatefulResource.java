@@ -78,12 +78,14 @@ public abstract class MultiWriterStatefulResource extends StatefulResource {
     /** */
     @Override
     public final InternalResource getSynchronizedResource() {
+        InternalResource res = null;
         try {
             this.lock.lock();
-            return getInternalResource();
+            res = getInternalResource();
         } finally {
             this.lock.unlock();
         }
+        return res;
     }
 
     /**************************************************************************
