@@ -13,6 +13,8 @@ import mockit.NonStrict;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 
+import org.bitbucket.jtransaction.common.IsolationLevel;
+import org.bitbucket.jtransaction.common.LockManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,7 +34,13 @@ public class StatefulResourceTest {
 	}.getMockInstance();
 
 	@Injectable
-	private InternalResource<String> ir;
+	private InternalResource<String> resource;
+
+	@Injectable
+	private IsolationLevel isolation;
+
+	@Injectable
+	private LockManager lockManager;
 
 	@Tested
 	private StatefulResource<String> srt;
@@ -113,7 +121,7 @@ public class StatefulResourceTest {
 	public void updateCheckpointTest() throws Exception {
 		new Expectations() {
 			{
-				ir.buildState();
+				resource.buildState();
 			}
 		};
 
@@ -125,7 +133,7 @@ public class StatefulResourceTest {
 			@NonStrict final ResourceState<String> mock) throws Exception {
 		new Expectations() {
 			{
-				ir.applyState(mock);
+				resource.applyState(mock);
 			}
 		};
 
@@ -146,7 +154,7 @@ public class StatefulResourceTest {
 	public void initializeDecoratorTest() throws Exception {
 		new Expectations() {
 			{
-				ir.buildState();
+				resource.buildState();
 			}
 		};
 

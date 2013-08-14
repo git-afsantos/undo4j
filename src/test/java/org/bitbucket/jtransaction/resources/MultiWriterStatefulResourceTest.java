@@ -11,16 +11,26 @@ import mockit.Expectations;
 import mockit.Injectable;
 import mockit.NonStrict;
 import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 
+import org.bitbucket.jtransaction.common.IsolationLevel;
+import org.bitbucket.jtransaction.common.LockManager;
 import org.bitbucket.jtransaction.resources.MultiWriterStatefulResource.ThreadLocalResourceState;
 import org.bitbucket.jtransaction.resources.MultiWriterStatefulResource.ThreadLocalStatus;
 import org.bitbucket.jtransaction.resources.StatefulResource.Status;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(JMockit.class)
 public class MultiWriterStatefulResourceTest {
+	@Injectable
+	private IsolationLevel isolationLevel;
 
 	@Injectable
-	private InternalResource<?> resource;
+	private LockManager lock;
+
+	@Injectable
+	private InternalResource<String> resource;
 
 	@Tested
 	private MultiWriterStatefulResource<String> multiWriterStatefulResource;
