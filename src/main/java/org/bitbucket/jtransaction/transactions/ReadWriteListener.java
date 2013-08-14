@@ -1,5 +1,6 @@
 package org.bitbucket.jtransaction.transactions;
 
+import org.bitbucket.jtransaction.resources.Resource;
 
 /**
  * ReadWriteListener
@@ -9,6 +10,8 @@ package org.bitbucket.jtransaction.transactions;
 */
 
 interface ReadWriteListener {
-    void readPerformed(String resource);
-    void writePerformed(String resource);
+	<T> void readCalled(Resource<T> resource);
+	<T> void writeCalled(Resource<T> resource);
+    <T> void readPerformed(Resource<T> resource);
+    <T> void writePerformed(Resource<T> resource);
 }
