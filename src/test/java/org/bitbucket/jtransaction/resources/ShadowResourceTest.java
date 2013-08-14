@@ -11,6 +11,7 @@ import mockit.Injectable;
 
 import org.bitbucket.jtransaction.common.LockManager;
 import org.bitbucket.jtransaction.resources.StatefulResource.Status;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -35,6 +36,11 @@ public class ShadowResourceTest {
     private ResourceState<String> stringResource2;
     @Injectable
     private ResourceState<String> stringResource3;
+
+    @Before
+    public void setup() {
+        resource = new ShadowResource<String>(internalResource, lockManager);
+    }
 
     @Test
     public void testGetShadow() throws Exception {
