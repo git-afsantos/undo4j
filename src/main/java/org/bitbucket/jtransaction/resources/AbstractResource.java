@@ -1,11 +1,11 @@
 package org.bitbucket.jtransaction.resources;
 
+import static org.bitbucket.jtransaction.common.Check.checkArgument;
+
 import org.bitbucket.jtransaction.common.AccessMode;
 import org.bitbucket.jtransaction.common.Copyable;
 import org.bitbucket.jtransaction.common.IsolationLevel;
 import org.bitbucket.jtransaction.common.LockManager;
-
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
 /**
  * AbstractResource
@@ -14,9 +14,8 @@ import static org.bitbucket.jtransaction.common.Check.checkArgument;
  * @version 2013
 */
 
-public abstract class AbstractResource<T>
-        implements Resource<T>, Copyable<AbstractResource<T>> {
-    // instance variables
+public abstract class AbstractResource<T> implements Resource<T>, Copyable<AbstractResource<T>> {
+
     private final InternalResource<T> resource;
     private final LockManager lockManager;
     private volatile boolean accessible, consistent;
@@ -36,7 +35,6 @@ public abstract class AbstractResource<T>
         this.consistent = true;
     }
 
-
     /** Copy constructor of objects of class AbstractResource. */
     protected AbstractResource(AbstractResource<T> instance) {
         this.resource = instance.getInternalResource();
@@ -44,8 +42,6 @@ public abstract class AbstractResource<T>
         this.accessible = instance.isAccessible();
         this.consistent = instance.isConsistent();
     }
-
-
 
     /**************************************************************************
      * Getters
@@ -60,12 +56,10 @@ public abstract class AbstractResource<T>
         return this.lockManager.getIsolationLevel();
     }
 
-
     /** */
     protected final InternalResource<T> getInternalResource() {
         return this.resource;
     }
-
 
     /**
      * Subclasses providing concurrent access should override this
@@ -75,22 +69,19 @@ public abstract class AbstractResource<T>
         return this.resource;
     }
 
-
     /**
      * 
      */
     protected final LockManager getLockManager() {
-    	return this.lockManager.clone();
+        return this.lockManager.clone();
     }
 
     /**
      * 
      */
     protected final LockManager getLockManagerReference() {
-    	return this.lockManager;
+        return this.lockManager;
     }
-
-
 
     /**************************************************************************
      * Setters
@@ -102,14 +93,11 @@ public abstract class AbstractResource<T>
         this.accessible = isAccessible;
     }
 
-
     /** */
     @Override
     public final void setConsistent(boolean isConsistent) {
         this.consistent = isConsistent;
     }
-
-
 
     /**************************************************************************
      * Predicates
@@ -117,14 +105,15 @@ public abstract class AbstractResource<T>
 
     /** Checks whether this resource is accessible. */
     @Override
-    public final boolean isAccessible() { return this.accessible; }
-
+    public final boolean isAccessible() {
+        return this.accessible;
+    }
 
     /** Checks whether this resource is in a consistent state. */
     @Override
-    public final boolean isConsistent() { return this.consistent; }
-
-
+    public final boolean isConsistent() {
+        return this.consistent;
+    }
 
     /**************************************************************************
      * Public Methods
@@ -145,7 +134,6 @@ public abstract class AbstractResource<T>
         this.accessible = true;
     }
 
-
     /** Invokes dispose on the internal resource,
      * and then sets the resource as inaccessible.
      * Throws a ResourceDisposeException wrapping any exception thrown
@@ -161,24 +149,21 @@ public abstract class AbstractResource<T>
         disposeDecorator();
     }
 
-
     /**
      * Acquire the resource, based on the internal locking scheme.
      */
     @Override
     public final boolean acquire(AccessMode mode) throws InterruptedException {
-    	return this.lockManager.acquire(mode);
+        return this.lockManager.acquire(mode);
     }
-
 
     /**
      * Releases the resource, based on the internal locking scheme.
      */
     @Override
     public final void release() {
-    	this.lockManager.release();
+        this.lockManager.release();
     }
-
 
     /** Called in initialize.
      * Does nothing, by default.
@@ -186,14 +171,11 @@ public abstract class AbstractResource<T>
      */
     protected void initializeDecorator() {}
 
-
     /** Called in dispose.
      * Does nothing, by default.
      * Override for custom behaviour.
      */
     protected void disposeDecorator() {}
-
-
 
     /**************************************************************************
      * Private Methods
@@ -219,8 +201,6 @@ public abstract class AbstractResource<T>
         }
     }
 
-
-
     /**************************************************************************
      * Equals, HashCode, ToString & Clone
     **************************************************************************/
@@ -236,9 +216,11 @@ public abstract class AbstractResource<T>
     */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AbstractResource)) return false;
-        AbstractResource<?> n = (AbstractResource<?>) o;
+        if (this == o)
+            return true;
+        if (!(o instanceof AbstractResource))
+            return false;
+        AbstractResource<?> n = (AbstractResource<?>)o;
         return this.resource.equals(n.getInternalResource());
     }
 
@@ -260,7 +242,9 @@ public abstract class AbstractResource<T>
         hash = prime * hash + codeForField
     */
     @Override
-    public int hashCode() { return resource.hashCode(); }
+    public int hashCode() {
+        return resource.hashCode();
+    }
 
     /** Returns a string representation of the object. */
     @Override
