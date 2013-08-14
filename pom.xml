@@ -29,7 +29,11 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
-  
+    <dependency>
+    	<groupId>com.github.jmkgreen.morphia</groupId>
+    	<artifactId>morphia</artifactId>
+    	<version>1.2.3</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -45,6 +49,25 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>1.7</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/demo</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
