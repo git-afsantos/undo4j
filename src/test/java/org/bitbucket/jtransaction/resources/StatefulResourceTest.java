@@ -2,6 +2,7 @@ package org.bitbucket.jtransaction.resources;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import mockit.Expectations;
 import mockit.Mock;
@@ -24,18 +25,16 @@ public class StatefulResourceTest {
 		StatefulResourceForTesting srt = new StatefulResourceForTesting(ir);
 
 		srt.setCheckpoint(mock);
-		if (mock.equals(new NullState()))
-			assertEquals(mock, srt.getCheckpoint());
+		assertTrue(srt.hasCheckpoint());
 	}
 
 	@Test
-	public void setgetPreviousCheckpoint(@NonStrict final ResourceState mock)
+	public void setgetPreviousCheckpointTest(@NonStrict final ResourceState mock)
 			throws Exception {
 		StatefulResourceForTesting srt = new StatefulResourceForTesting(ir);
 
 		srt.setPreviousCheckpoint(mock);
-		if (mock.equals(new NullState()))
-			assertEquals(mock, srt.getPreviousCheckpoint());
+		assertTrue(srt.hasPreviousCheckpoint());
 
 	}
 
