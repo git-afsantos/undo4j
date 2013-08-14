@@ -156,27 +156,6 @@ public abstract class MultiWriterStatefulResource<T>
 
     /** */
     @Override
-    protected void initializeDecorator() {
-        try {
-            lock();
-            super.initializeDecorator();
-        } finally { unlock(); }
-    }
-
-    /** Disposes of any stored states.
-     */
-    @Override
-    protected void disposeDecorator() {
-        try {
-            lock();
-            super.disposeDecorator();
-        } finally { unlock(); }
-        this.localCommit.remove();
-    }
-
-
-    /** */
-    @Override
     protected final void rollbackToCheckpoint() {
         try {
             lock();

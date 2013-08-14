@@ -10,18 +10,6 @@ package org.bitbucket.jtransaction.resources;
 */
 
 public interface InternalResource<T> {
-    /** Performs any necessary resource initialization.
-     * This method is allowed to throw any exception.
-    */
-    void initialize() throws Exception;
-
-
-    /** Performs any necessary resource clean up.
-     * This method is allowed to throw any exception.
-    */
-    void dispose() throws Exception;
-
-
     /** Tests whether the given state is valid.
      */
     boolean isValidState(ResourceState<T> state);

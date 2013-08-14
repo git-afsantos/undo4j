@@ -146,33 +146,6 @@ public class StatefulResourceTest {
         }
     }
 
-    @Test
-    public void initializeDecoratorTest() throws Exception {
-        new Expectations() {
-            {
-                resource.buildState();
-            }
-        };
-
-        srt.initializeDecorator();
-    }
-
-    @Test
-    public void initializeDecoratorTestException() {
-        Deencapsulation.setField(srt, "resource", irEx);
-        try {
-            srt.initializeDecorator();
-            fail();
-        } catch (ResourceInitializeException e) {}
-    }
-
-    @Test
-    public void disposeDecoratorTest() {
-        srt.disposeDecorator();
-        assertEquals(new NullState<String>(), srt.getCheckpointReference());
-        assertEquals(new NullState<String>(), srt.getPreviousCheckpointReference());
-    }
-
     private class StatefulResourceForTesting extends StatefulResource<String> {
 
         public StatefulResourceForTesting(InternalResource<String> resource, LockManager lockManager) {

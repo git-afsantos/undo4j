@@ -1,8 +1,6 @@
 package org.bitbucket.jtransaction.resources;
 
 import org.bitbucket.jtransaction.common.Acquirable;
-import org.bitbucket.jtransaction.common.Disposable;
-import org.bitbucket.jtransaction.common.Initializable;
 import org.bitbucket.jtransaction.common.VersionedObject;
 
 
@@ -14,7 +12,7 @@ import org.bitbucket.jtransaction.common.VersionedObject;
 */
 
 public interface Resource<T> extends Acquirable,
-        VersionedObject<ResourceState<T>>, Initializable, Disposable {
+        VersionedObject<ResourceState<T>> {
     /** Checks whether this resource can be accessed, in its current state.
      */
     boolean isAccessible();
@@ -35,4 +33,8 @@ public interface Resource<T> extends Acquirable,
     /** Sets whether this resource is in a consistent state.
      */
     void setConsistent(boolean isConsistent);
+
+
+    /** Return this resource's unique identifier. */
+    ResourceId getId();
 }

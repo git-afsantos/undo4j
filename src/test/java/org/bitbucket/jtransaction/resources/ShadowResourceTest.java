@@ -11,7 +11,6 @@ import mockit.Injectable;
 
 import org.bitbucket.jtransaction.common.LockManager;
 import org.bitbucket.jtransaction.resources.StatefulResource.Status;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -36,12 +35,6 @@ public class ShadowResourceTest {
     private ResourceState<String> stringResource2;
     @Injectable
     private ResourceState<String> stringResource3;
-
-    @Before
-    public void setUp() {
-        resource = new ShadowResource<String>(internalResource, lockManager);
-        resource.initialize();
-    }
 
     @Test
     public void testGetShadow() throws Exception {
@@ -170,17 +163,6 @@ public class ShadowResourceTest {
         assertTrue(resource.getLocalCommit() instanceof NullState);
         assertEquals(Status.UPDATED, resource.getStatus());
         assertTrue(resource.isConsistent());
-    }
-
-    @Test
-    public void testDisposeDecorator() throws Exception {
-        resource.setCheckpoint(stringResource2);
-        resource.disposeDecorator();
-
-        assertTrue(resource.getCheckpoint() instanceof NullState);
-        assertEquals(resource.getPreviousCheckpoint(), stringResource2);
-        assertEquals(resource.getLocalCommitReference(), stringResource2);
-        assertEquals(resource.getShadowReference(), stringResource2);
     }
 
     @Test

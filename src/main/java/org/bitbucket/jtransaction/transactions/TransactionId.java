@@ -1,43 +1,33 @@
-package org.bitbucket.jtransaction.resources.collections;
+package org.bitbucket.jtransaction.transactions;
 
-import org.bitbucket.jtransaction.common.Validator;
-import org.bitbucket.jtransaction.resources.InternalResource;
-import org.bitbucket.jtransaction.resources.ResourceState;
+import org.bitbucket.jtransaction.common.Copyable;
 
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * InternalCollection
+ * TransactionId
  * 
  * @author afs
  * @version 2013
 */
 
-abstract class InternalCollection<T> implements InternalResource<T> {
+public final class TransactionId implements Copyable<TransactionId> {
+    // Atomic integer containing the next transaction ID to be assigned.
+    private static final AtomicInteger NEXT_ID = new AtomicInteger();
+
     // instance variables
-    private final Validator<ResourceState<T>> validator;
+    private final int id;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Empty constructor of objects of class InternalCollection. */
-    protected InternalCollection() {
-        this.validator = new NullValidator<T>();
-    }
+    /** Parameter constructor of objects of class TransactionId. */
+    private TransactionId(int id) { this.id = id; }
 
 
-    /** Parameter constructor of objects of class InternalCollection. */
-    protected InternalCollection(Validator<ResourceState<T>> val) {
-        checkArgument(val);
-        this.validator = val;
-    }
-
-
-    /** Copy constructor of objects of class InternalCollection. */
-    protected InternalCollection(InternalCollection<T> instance) {
-        this.validator = instance.getValidator();
-    }
+    /** Copy constructor of objects of class TransactionId. */
+    private TransactionId(TransactionId instance) { this(instance.getId()); }
 
 
 
@@ -46,31 +36,18 @@ abstract class InternalCollection<T> implements InternalResource<T> {
     **************************************************************************/
 
     /** */
-    protected final Validator<ResourceState<T>> getValidator() {
-        return this.validator;
-    }
+    private int getId() { return id; }
 
 
 
     /**************************************************************************
-     * Predicates
+     * Public Methods
     **************************************************************************/
 
-    /** */
-    @Override
-    public final boolean isValidState(ResourceState<T> state) {
-        return this.validator.isValid(state);
-    }
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    /** */
-    protected final void checkValidState(ResourceState<T> state) {
-        checkArgument(this.validator.isValid(state));
+    /** Creates and returns a fresh transaction identifier.
+     */
+    static TransactionId newTransactionId() {
+        return new TransactionId(NEXT_ID.incrementAndGet());
     }
 
 
@@ -91,10 +68,11 @@ abstract class InternalCollection<T> implements InternalResource<T> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof InternalCollection)) return false;
-        InternalCollection<?> n = (InternalCollection<?>) o;
-        return this.validator.equals(n.getValidator());
+        if (o == null || this.getClass() != o.getClass()) return false;
+        TransactionId n = (TransactionId) o;
+        return id == n.getId();
     }
+
 
     /** Contract:
         * Consistency: successive calls (with no modification of the equality
@@ -114,36 +92,19 @@ abstract class InternalCollection<T> implements InternalResource<T> {
         hash = prime * hash + codeForField
     */
     @Override
-    public int hashCode() {
-        return 37 + this.validator.hashCode();
-    }
+    public int hashCode() { return id; }
+
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.validator);
+        sb.append(id);
         return sb.toString();
     }
 
+
     /** Creates and returns a (deep) copy of this object. */
     @Override
-    public abstract InternalCollection<T> clone();
-
-
-
-    /**************************************************************************
-     * Nested Classes
-    **************************************************************************/
-
-    /** */
-    static final class NullValidator<T>
-            implements Validator<ResourceState<T>> {
-        /** Constructor */
-        NullValidator() {}
-
-        /** */
-        @Override
-        public boolean isValid(ResourceState<T> state) { return true; }
-    }
+    public TransactionId clone() { return new TransactionId(this); }
 }

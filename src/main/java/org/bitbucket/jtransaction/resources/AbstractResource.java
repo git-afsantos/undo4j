@@ -14,9 +14,11 @@ import org.bitbucket.jtransaction.common.LockManager;
  * @version 2013
 */
 
-public abstract class AbstractResource<T> implements Resource<T>, Copyable<AbstractResource<T>> {
-
-    private final InternalResource<T> resource;
+public abstract class AbstractResource<T>
+        implements Resource<T>, Copyable<AbstractResource<T>> {
+    // instance variables
+	private final ResourceId id = ResourceId.newResourceId();
+	private final InternalResource<T> resource;
     private final LockManager lockManager;
     private volatile boolean accessible, consistent;
 
@@ -31,7 +33,7 @@ public abstract class AbstractResource<T> implements Resource<T>, Copyable<Abstr
         checkArgument("null lock manager", lm);
         this.resource = r;
         this.lockManager = lm;
-        this.accessible = false;
+        this.accessible = true;
         this.consistent = true;
     }
 
@@ -47,12 +49,18 @@ public abstract class AbstractResource<T> implements Resource<T>, Copyable<Abstr
      * Getters
     **************************************************************************/
 
-    /** Returns IsolationLevel.NONE, by default.
-     * Implementations should override this method to define their
-     * isolation level.
+    /**
+     * Returns this resource's unique identifier.
      */
     @Override
-    public IsolationLevel getIsolationLevel() {
+    public ResourceId getId() { return this.id.clone(); }
+
+
+    /**
+     * Returns the isolation level defined upon construction.
+     */
+    @Override
+    public final IsolationLevel getIsolationLevel() {
         return this.lockManager.getIsolationLevel();
     }
 
@@ -118,37 +126,6 @@ public abstract class AbstractResource<T> implements Resource<T>, Copyable<Abstr
     /**************************************************************************
      * Public Methods
     **************************************************************************/
-
-    /** Invokes initialize on the internal resource,
-     * and then sets this resource as accessible.
-     * Throws a ResourceInitializeException wrapping any exception thrown
-     * by the internal resource's initialize.
-     */
-    @Override
-    public final void initialize() {
-        // Initialize internal resource.
-        initializeInternalResource();
-        // Notify subclasses.
-        initializeDecorator();
-        // Set the resource as accessible.
-        this.accessible = true;
-    }
-
-    /** Invokes dispose on the internal resource,
-     * and then sets the resource as inaccessible.
-     * Throws a ResourceDisposeException wrapping any exception thrown
-     * by the internal resource's dispose.
-     */
-    @Override
-    public final void dispose() {
-        // Set the resource as inaccessible.
-        this.accessible = false;
-        // Dispose internal resource.
-        disposeInternalResource();
-        // Notify subclasses.
-        disposeDecorator();
-    }
-
     /**
      * Acquire the resource, based on the internal locking scheme.
      */
@@ -163,42 +140,6 @@ public abstract class AbstractResource<T> implements Resource<T>, Copyable<Abstr
     @Override
     public final void release() {
         this.lockManager.release();
-    }
-
-    /** Called in initialize.
-     * Does nothing, by default.
-     * Override for custom behaviour.
-     */
-    protected void initializeDecorator() {}
-
-    /** Called in dispose.
-     * Does nothing, by default.
-     * Override for custom behaviour.
-     */
-    protected void disposeDecorator() {}
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    /** */
-    private void initializeInternalResource() {
-        try {
-            // Perform any necessary initialization.
-            this.resource.initialize();
-        } catch (Exception e) {
-            throw new ResourceInitializeException(e.getMessage(), e);
-        }
-    }
-
-    /** */
-    private void disposeInternalResource() {
-        try {
-            // Perform any necessary cleanup.
-            this.resource.dispose();
-        } catch (Exception e) {
-            throw new ResourceDisposeException(e.getMessage(), e);
-        }
     }
 
     /**************************************************************************

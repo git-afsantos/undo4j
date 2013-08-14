@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import mockit.Expectations;
 import mockit.Injectable;
 
 import org.bitbucket.jtransaction.common.LockManager;
@@ -53,34 +52,6 @@ public class AbstractResourceTest {
         absResource.setConsistent(false);
 
         assertFalse(absResource.isConsistent());
-    }
-
-    @Test
-    public void testInitialize() throws Exception {
-        new Expectations() {
-            {
-                internalResource.initialize();
-
-                absResource.initializeDecorator();
-            }
-        };
-        absResource.initialize();
-
-        assertTrue(absResource.isAccessible());
-    }
-
-    @Test
-    public void testDispose() throws Exception {
-        new Expectations() {
-            {
-                internalResource.dispose();
-
-                absResource.disposeDecorator();
-            }
-        };
-        absResource.dispose();
-
-        assertFalse(absResource.isAccessible());
     }
 
     private class AsbtractResourceForTesting extends AbstractResource<String> {

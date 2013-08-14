@@ -1,7 +1,6 @@
 package org.bitbucket.jtransaction.resources;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import mockit.Deencapsulation;
 import mockit.Expectations;
@@ -70,12 +69,6 @@ public class SingleWriterStatefulResourceTest {
         swsr.setLocalCommit(mock);
         swsr.update();
         assertEquals(Status.UPDATED, swsr.getStatus());
-    }
-
-    @Test
-    public void disposeDecoratorTest() throws Exception {
-        swsr.disposeDecorator();
-        assertFalse(swsr.hasLocalCommit());
     }
 
     private class SingleWriterStatefulResourceForTesting extends SingleWriterStatefulResource<String> {

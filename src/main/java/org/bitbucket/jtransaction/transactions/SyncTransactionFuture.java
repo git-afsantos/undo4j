@@ -1,42 +1,30 @@
-package org.bitbucket.jtransaction.resources.collections;
 
-import org.bitbucket.jtransaction.common.Validator;
-import org.bitbucket.jtransaction.resources.InternalResource;
-import org.bitbucket.jtransaction.resources.ResourceState;
+package org.bitbucket.jtransaction.transactions;
 
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
- * InternalCollection
+ * SyncTransactionFuture
  * 
  * @author afs
  * @version 2013
 */
 
-abstract class InternalCollection<T> implements InternalResource<T> {
+final class SyncTransactionFuture<T> implements Future<T> {
     // instance variables
-    private final Validator<ResourceState<T>> validator;
+    private final T result;
+    private final Throwable exception;
 
     /**************************************************************************
      * Constructors
     **************************************************************************/
 
-    /** Empty constructor of objects of class InternalCollection. */
-    protected InternalCollection() {
-        this.validator = new NullValidator<T>();
-    }
-
-
-    /** Parameter constructor of objects of class InternalCollection. */
-    protected InternalCollection(Validator<ResourceState<T>> val) {
-        checkArgument(val);
-        this.validator = val;
-    }
-
-
-    /** Copy constructor of objects of class InternalCollection. */
-    protected InternalCollection(InternalCollection<T> instance) {
-        this.validator = instance.getValidator();
+    /** Parameter constructor of objects of class SyncTransactionFuture. */
+    SyncTransactionFuture(T res, Throwable ex) {
+        result = res;
+        exception = ex;
     }
 
 
@@ -46,31 +34,41 @@ abstract class InternalCollection<T> implements InternalResource<T> {
     **************************************************************************/
 
     /** */
-    protected final Validator<ResourceState<T>> getValidator() {
-        return this.validator;
-    }
+    T getResult() { return result; }
+
+    /** */
+    Throwable getThrowable() { return exception; }
 
 
 
     /**************************************************************************
-     * Predicates
+     * Public Methods
     **************************************************************************/
 
     /** */
     @Override
-    public final boolean isValidState(ResourceState<T> state) {
-        return this.validator.isValid(state);
-    }
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
+    public boolean cancel(boolean mayInterrupt) { return false; }
 
     /** */
-    protected final void checkValidState(ResourceState<T> state) {
-        checkArgument(this.validator.isValid(state));
+    @Override
+    public boolean isCancelled() { return false; }
+
+    /** */
+    @Override
+    public boolean isDone() { return true; }
+
+    /** */
+    @Override
+    public T get() throws ExecutionException {
+        if (exception == null) { return result; }
+        throw new ExecutionException(exception);
+    }
+
+    /** */
+    @Override
+    public T get(long time, TimeUnit unit) throws ExecutionException {
+        if (exception == null) { return result; }
+        throw new ExecutionException(exception);
     }
 
 
@@ -91,9 +89,9 @@ abstract class InternalCollection<T> implements InternalResource<T> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof InternalCollection)) return false;
-        InternalCollection<?> n = (InternalCollection<?>) o;
-        return this.validator.equals(n.getValidator());
+        if (o == null || this.getClass() != o.getClass()) return false;
+        SyncTransactionFuture<?> n = (SyncTransactionFuture<?>) o;
+        return result.equals(n.getResult());
     }
 
     /** Contract:
@@ -115,35 +113,14 @@ abstract class InternalCollection<T> implements InternalResource<T> {
     */
     @Override
     public int hashCode() {
-        return 37 + this.validator.hashCode();
+        return 37 + (result == null ? 0 : result.hashCode());
     }
 
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.validator);
+        sb.append(result);
         return sb.toString();
-    }
-
-    /** Creates and returns a (deep) copy of this object. */
-    @Override
-    public abstract InternalCollection<T> clone();
-
-
-
-    /**************************************************************************
-     * Nested Classes
-    **************************************************************************/
-
-    /** */
-    static final class NullValidator<T>
-            implements Validator<ResourceState<T>> {
-        /** Constructor */
-        NullValidator() {}
-
-        /** */
-        @Override
-        public boolean isValid(ResourceState<T> state) { return true; }
     }
 }

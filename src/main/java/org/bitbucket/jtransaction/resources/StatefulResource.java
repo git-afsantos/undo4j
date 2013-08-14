@@ -49,7 +49,7 @@ public abstract class StatefulResource<T> extends AbstractResource<T> {
     ) {
         super(resource, lockManager);
         this.buildEach = buildEachUpdate;
-        this.checkpoint = identity(null);
+        this.initializeCheckpoint();
         this.previous = this.checkpoint;
     }
 
@@ -208,21 +208,11 @@ public abstract class StatefulResource<T> extends AbstractResource<T> {
 
     /** Creates the initial checkpoint.
      */
-    @Override
-    protected void initializeDecorator() {
+    protected final void initializeCheckpoint() {
         try { buildCheckpoint(); }
         catch (Exception e) {
             throw new ResourceInitializeException(e.getMessage(), e);
         }
-    }
-
-
-    /** Disposes of any stored states.
-     */
-    @Override
-    protected void disposeDecorator() {
-        this.checkpoint = identity(null);
-        this.previous = this.checkpoint;
     }
 
 

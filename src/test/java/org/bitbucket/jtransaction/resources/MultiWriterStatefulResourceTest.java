@@ -164,27 +164,6 @@ public class MultiWriterStatefulResourceTest {
     }
 
     @Test
-    public void tetsInitializeDecorator() throws Exception {
-        new Expectations() {
-            {
-                multiWriterStatefulResource.buildCheckpoint();
-                minTimes = 1;
-            }
-        };
-        multiWriterStatefulResource.initializeDecorator();
-    }
-
-    @Test
-    public void testDisposeDecorator() throws Exception {
-        multiWriterStatefulResource.disposeDecorator();
-        ResourceState<String> checkpoint = Deencapsulation.getField(multiWriterStatefulResource, "checkpoint");
-        ResourceState<String> previous = Deencapsulation.getField(multiWriterStatefulResource, "previous");
-
-        assertTrue(checkpoint.isNull());
-        assertTrue(previous.isNull());
-    }
-
-    @Test
     public void testRollBackToCheckpoint(@NonStrict
     final ResourceState<String> rs) throws Exception {
         Deencapsulation.setField(multiWriterStatefulResource, "checkpoint", rs);

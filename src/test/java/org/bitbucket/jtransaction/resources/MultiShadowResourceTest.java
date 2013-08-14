@@ -90,10 +90,4 @@ public class MultiShadowResourceTest {
         assertFalse(msr.hasLocalCommit());
         assertTrue(msr.isConsistent());
     }
-
-    @Test
-    public void disposeDecoratorTest() {
-        msr.disposeDecorator();
-        assertFalse(msr.hasShadow());
-    }
 }
