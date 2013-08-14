@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import mockit.Deencapsulation;
+import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mock;
 import mockit.MockUp;
@@ -51,6 +52,13 @@ public class SingleWriterStatefulResourceTest {
 				return true;
 			}
 		}.getMockInstance();
+
+		new Expectations() {
+			{
+				swsr.updatePreviousCheckpoint();
+				swsr.setCheckpoint(mock);
+			}
+		};
 		Deencapsulation.setField(swsr, "resource", ir2);
 		swsr.write(mock);
 		swsr.commit();
