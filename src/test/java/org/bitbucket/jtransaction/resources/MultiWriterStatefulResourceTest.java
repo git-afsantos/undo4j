@@ -272,30 +272,19 @@ public class MultiWriterStatefulResourceTest {
 
         public MultiWriterStatefulResourceForTesting(InternalResource<String> resource, LockManager lockManager) {
             super(resource, lockManager);
-            // TODO Auto-generated constructor stub
         }
 
         @Override
-        public void write(ResourceState<String> state) {
-            // TODO Auto-generated method stub
-
-        }
+        public void write(ResourceState<String> state) {}
 
         @Override
-        public void commit() {
-            // TODO Auto-generated method stub
-
-        }
+        public void commit() {}
 
         @Override
-        public void rollback() {
-            // TODO Auto-generated method stub
-
-        }
+        public void rollback() {}
 
         @Override
         public MultiWriterStatefulResource<String> clone() {
-            // TODO Auto-generated method stub
             return null;
         }
 
