@@ -145,15 +145,6 @@ public final class MultiShadowResource<T>
     }
 
 
-    /** Disposes of any stored states.
-     */
-    @Override
-    protected void disposeDecorator() {
-        super.disposeDecorator();
-        this.shadow.remove();
-    }
-
-
 
     /**************************************************************************
      * Private Methods

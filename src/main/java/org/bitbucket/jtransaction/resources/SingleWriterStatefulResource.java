@@ -143,15 +143,6 @@ public abstract class SingleWriterStatefulResource<T>
     }
 
 
-    /** Disposes of any stored states.
-     */
-    @Override
-    protected void disposeDecorator() {
-        super.disposeDecorator();
-        this.localCommit = getCheckpointReference();
-    }
-
-
 
     /**************************************************************************
      * Equals, HashCode, ToString & Clone

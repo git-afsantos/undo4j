@@ -141,15 +141,6 @@ public final class ShadowResource<T> extends SingleWriterStatefulResource<T> {
     }
 
 
-    /** Disposes of any stored states.
-     */
-    @Override
-    protected void disposeDecorator() {
-        super.disposeDecorator();
-        this.shadow = getCheckpointReference();
-    }
-
-
 
     /**************************************************************************
      * Private Methods

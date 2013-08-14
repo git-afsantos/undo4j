@@ -81,9 +81,7 @@ abstract class InternalConcurrentQueue<T> extends InternalCollection<T> {
      * Public Methods
     **************************************************************************/
 
-    /** */
-    @Override
-    public void dispose() { queue.clear(); }
+    // ...
 
 
 
