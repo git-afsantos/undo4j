@@ -85,7 +85,9 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
     @Override
     public T call() throws Exception {
     	Iterable<ManagedResource<?>> resources = client.getManagedResources();
-        // Transaction setup --------------------------------------------------
+    	// Transaction setup --------------------------------------------------
+    	// If no resource is declared, the transaction is empty.
+    	if (resources == null) { throw new TransactionEmptyException(EMPTY); }
         getListener().bind(this);
         createControllers(resources);
         // Transaction body ---------------------------------------------------
