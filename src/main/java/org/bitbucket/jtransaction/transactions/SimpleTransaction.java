@@ -1,12 +1,11 @@
 package org.bitbucket.jtransaction.transactions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bitbucket.jtransaction.common.AccessMode;
 import org.bitbucket.jtransaction.common.IsolationLevel;
-
-import org.bitbucket.jtransaction.resources.ResourceCommitException;
-import org.bitbucket.jtransaction.resources.ResourceUpdateException;
-
-import java.util.concurrent.Callable;
+import org.bitbucket.jtransaction.resources.ResourceId;
 
 /**
  * SimpleTransaction
@@ -19,7 +18,9 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
     private static final String EMPTY = "empty transaction";
 
     // instance variables
-    private final Callable<T> client;
+    private final TransactionalCallable<T> client;
+    private final Map<ResourceId, ResourceController> controllers =
+    		new HashMap<>();
 
     /**************************************************************************
      * Constructors
@@ -30,7 +31,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
             AccessMode mode,
             IsolationLevel isolation,
             TransactionListener listener,
-            Callable<T> body
+            TransactionalCallable<T> body
     ) {
         super(mode, isolation, listener);
         client = body;
@@ -50,7 +51,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
     **************************************************************************/
 
     /** */
-    private Callable<T> getClientCallable() { return client; }
+    private TransactionalCallable<T> getClientCallable() { return client; }
 
 
 
@@ -66,7 +67,13 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
      * Predicates
     **************************************************************************/
 
-    // ...
+    /** */
+    private boolean isEmpty() {
+    	for (ResourceController rc: controllers.values()) {
+    		if (rc.isAccessed()) { return false; }
+    	}
+    	return true;
+    }
 
 
 
@@ -76,16 +83,17 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 
     /** */
     @Override
-    public TransactionResult<T> call() throws Exception {
+    public T call() throws Exception {
+    	Iterable<ManagedResource<?>> resources = client.getManagedResources();
         // Transaction setup --------------------------------------------------
         getListener().bind(this);
+        createControllers(resources);
         // Transaction body ---------------------------------------------------
-        TransactionResult<T> result = computeResult();
+        T result = computeResult(resources);
         // Transaction cleanup ------------------------------------------------
-        // Cleanup - Assure transaction is not empty.
-        checkNotEmpty();
-        // Cleanup - Try to commit.
-        trySafeCommit();
+        boolean empty = isEmpty();
+        trySafeCommit(resources);
+        if (empty) { throw new TransactionEmptyException(EMPTY); }
         // Return computed result.
         return result;
     }
@@ -97,13 +105,14 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
     **************************************************************************/
 
     /** */
-    private TransactionResult<T> computeResult() throws Exception {
+    private T computeResult(Iterable<ManagedResource<?>> resources)
+    		throws Exception {
         try {
             // Client code ----------------------------------------------------
-            return new TransactionResult<T>(client.call(), getStatistics());
+            return client.call();
         } catch (Exception ex) {
             // Cleanup - Try to roll back.
-            rollbackAndRelease();
+            rollbackAndRelease(resources);
             // Rethrow exception.
             throw ex;
         }
@@ -111,11 +120,64 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 
 
     /** */
-    private void trySafeCommit() {
-        try { commit(); }
-        catch (Exception ex) { rollback(); }
-        finally { releaseHandles(); }
+    private void commit(Iterable<ManagedResource<?>> resources) {
+        // Attempt commit on each resource.
+        // Execution should abort as soon as an error is encountered.
+        // Try ------------------------------------------------------
+        for (ManagedResource<?> r : resources) { r.commit(); }
+        // If all commits executed successfully, update.
+        for (ManagedResource<?> r : resources) { r.update(); }
+        // End Try --------------------------------------------------
+        // Notify listener.
+        getListener().terminate();
     }
+
+    /** */
+    private void rollback(Iterable<ManagedResource<?>> resources) {
+        // Attempt to roll back on each resource.
+        // Execution is aborted as soon as an error is encountered.
+        // Try ------------------------------------------------------
+        for (ManagedResource<?> r : resources) { r.rollback(); }
+        // End Try --------------------------------------------------
+        // Notify listener.
+        getListener().terminate();
+    }
+
+    /** Releases all controllers kept. */
+    private void releaseControllers(Iterable<ManagedResource<?>> resources) {
+        for (ManagedResource<?> r : resources) {
+        	r.release();
+        	r.removeController();
+        }
+        this.controllers.clear();
+    }
+
+
+    /** */
+    private void rollbackAndRelease(Iterable<ManagedResource<?>> resources) {
+        try { rollback(resources); }
+        finally { releaseControllers(resources); }
+    }
+
+
+    /** */
+    private void trySafeCommit(Iterable<ManagedResource<?>> resources) {
+        try { commit(resources); }
+        catch (Exception ex) { rollback(resources); }
+        finally { releaseControllers(resources); }
+    }
+
+
+    /** */
+    private void createControllers(Iterable<ManagedResource<?>> resources) {
+    	ResourceController rc;
+    	for (ManagedResource<?> r: resources) {
+    		rc = newController();
+    		controllers.put(r.getId(), rc);
+    		r.putController(rc);
+    	}
+    }
+    
 
 
 

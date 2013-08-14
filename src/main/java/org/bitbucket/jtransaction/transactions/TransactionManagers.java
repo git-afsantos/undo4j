@@ -27,31 +27,20 @@ public final class TransactionManagers {
     **************************************************************************/
 
     /** */
-    public static TransactionManager newSingleThreadSyncManager() {
-        return new SynchronousTransactionManager(new ResourceManager());
-    }
-
-    /** */
-    public static TransactionManager newConcurrentSyncManager() {
-        return new SynchronousTransactionManager(
-            new ConcurrentResourceManager()
-        );
+    public static TransactionManager newSynchronousManager() {
+        return new SynchronousTransactionManager();
     }
 
     /** */
     public static TransactionManager newFixedThreadPool(int maxThreads) {
         ExecutorService exec = Executors.newFixedThreadPool(maxThreads);
-        return new AsynchronousTransactionManager(
-            new ConcurrentResourceManager(), exec
-        );
+        return new AsynchronousTransactionManager(exec);
     }
 
     /** */
     public static TransactionManager newSingleThreadAsyncManager() {
         ExecutorService exec = Executors.newSingleThreadExecutor();
-        return new AsynchronousTransactionManager(
-            new ConcurrentResourceManager(), exec
-        );
+        return new AsynchronousTransactionManager(exec);
     }
 
 

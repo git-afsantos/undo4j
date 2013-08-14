@@ -5,12 +5,10 @@ import org.bitbucket.jtransaction.common.IsolationLevel;
 
 import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * AbstractTransaction
+ * README: There are some commented lines.
+ * I don't have yet a way to keep the statistics updated.
  * 
  * @author afs
  * @version 2013
@@ -23,9 +21,7 @@ abstract class AbstractTransaction<T> implements Transaction<T> {
     private final AccessMode mode;
     private final IsolationLevel isolation;
     private final TransactionListener listener;
-    private final TransactionStatistics stats = new TransactionStatistics();
-    private final Map<String, ResourceController> controllers =
-            new HashMap<>();
+    // private final TransactionStatistics stats = new TransactionStatistics();
 
     /**************************************************************************
      * Constructors
@@ -73,19 +69,14 @@ abstract class AbstractTransaction<T> implements Transaction<T> {
     @Override
     public final IsolationLevel getIsolationLevel() { return this.isolation; }
 
-    /** */
+    /*
     protected final TransactionStatistics getStatistics() {
         return this.stats.clone();
-    }
+    }*/
 
     /** */
     protected final TransactionListener getListener() {
         return this.listener;
-    }
-
-    /** */
-    protected final Map<String, ResourceController> getControllers() {
-        return this.controllers;
     }
 
 
@@ -102,11 +93,6 @@ abstract class AbstractTransaction<T> implements Transaction<T> {
     /**************************************************************************
      * Predicates
     **************************************************************************/
-
-    /** */
-    protected final boolean isEmpty() {
-        return !this.stats.hasUsedResources();
-    }
 
     /** */
     @Override
@@ -126,27 +112,18 @@ abstract class AbstractTransaction<T> implements Transaction<T> {
      * Public Methods
     **************************************************************************/
 
-    /** */
+    /*
     @Override
-    public final void readPerformed(String resource) {
-        this.stats.putIfAbsent(resource);
+    public final <T> void readPerformed(Resource<T> resource) {
         this.stats.incrementReadCount(resource);
-    }
+    }*/
 
-    /** */
+    /*
     @Override
     public final void writePerformed(String resource) {
         this.stats.putIfAbsent(resource);
         this.stats.incrementWriteCount(resource);
-    }
-
-
-    /** */
-    @Override
-    public final void putController(String res, ResourceController ctrl) {
-        this.controllers.put(res, ctrl);
-        this.stats.incrementRequestedCount();
-    }
+    }*/
 
 
     /** */
@@ -155,51 +132,8 @@ abstract class AbstractTransaction<T> implements Transaction<T> {
 
 
     /** */
-    protected final void commit() {
-        // Attempt commit on each resource.
-        // Execution should abort as soon as an error is encountered.
-        Collection<ResourceController> ctrls = this.controllers.values();
-        // Try ------------------------------------------------------
-        for (ResourceController c : ctrls) { c.commit(); }
-        // If all commits executed successfully, update.
-        for (ResourceController c : ctrls) { c.update(); }
-        // End Try --------------------------------------------------
-        // Notify listener.
-        this.listener.terminate();
-    }
-
-    /** */
-    protected final void rollback() {
-        // Attempt to rollback on each resource.
-        // Execution is aborted as soon as an error is encountered.
-        Collection<ResourceController> ctrls = this.controllers.values();
-        // Try ------------------------------------------------------
-        for (ResourceController c : ctrls) { c.rollback(); }
-        // End Try --------------------------------------------------
-        // Notify listener.
-        this.listener.terminate();
-    }
-
-    /** Releases all handles kept. */
-    protected final void releaseHandles() {
-        Collection<ResourceController> ctrls = this.controllers.values();
-        for (ResourceController c : ctrls) { c.release(); }
-        this.controllers.clear();
-    }
-
-
-    /** */
-    protected final void rollbackAndRelease() {
-        try { rollback(); }
-        finally { releaseHandles(); }
-    }
-
-
-    /** */
-    protected final void checkNotEmpty() {
-        if (isEmpty()) {
-            throw new TransactionEmptyException("empty transaction");
-        }
+    protected final ResourceController newController() {
+        return ResourceControllers.newController(this.mode);
     }
 
 

@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
  * @version 2013
 */
 
-final class SyncTransactionFuture<T> implements Future<TransactionResult<T>> {
+final class SyncTransactionFuture<T> implements Future<T> {
     // instance variables
-    private final TransactionResult<T> result;
+    private final T result;
     private final Throwable exception;
 
     /**************************************************************************
@@ -21,7 +21,7 @@ final class SyncTransactionFuture<T> implements Future<TransactionResult<T>> {
     **************************************************************************/
 
     /** Parameter constructor of objects of class SyncTransactionFuture. */
-    SyncTransactionFuture(TransactionResult<T> res, Throwable ex) {
+    SyncTransactionFuture(T res, Throwable ex) {
         result = res;
         exception = ex;
     }
@@ -33,7 +33,7 @@ final class SyncTransactionFuture<T> implements Future<TransactionResult<T>> {
     **************************************************************************/
 
     /** */
-    TransactionResult<T> getResult() { return result; }
+    T getResult() { return result; }
 
     /** */
     Throwable getThrowable() { return exception; }
@@ -58,15 +58,14 @@ final class SyncTransactionFuture<T> implements Future<TransactionResult<T>> {
 
     /** */
     @Override
-    public TransactionResult<T> get() throws ExecutionException {
+    public T get() throws ExecutionException {
         if (exception == null) { return result; }
         throw new ExecutionException(exception);
     }
 
     /** */
     @Override
-    public TransactionResult<T> get(long time, TimeUnit unit)
-            throws ExecutionException {
+    public T get(long time, TimeUnit unit) throws ExecutionException {
         if (exception == null) { return result; }
         throw new ExecutionException(exception);
     }

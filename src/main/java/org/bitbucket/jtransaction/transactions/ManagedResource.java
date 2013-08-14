@@ -2,6 +2,7 @@ package org.bitbucket.jtransaction.transactions;
 
 import org.bitbucket.jtransaction.common.Copyable;
 import org.bitbucket.jtransaction.resources.Resource;
+import org.bitbucket.jtransaction.resources.ResourceId;
 import org.bitbucket.jtransaction.resources.ResourceState;
 
 /**
@@ -11,22 +12,11 @@ import org.bitbucket.jtransaction.resources.ResourceState;
  * @version 2013
 */
 
-/**
- * 
- * TODO:
- * produced by factory
- * wraps a resource
- * offers read and write, just like the handles
- * commit etc are package-private
- * adding listeners, or producing handles is also package private
- *
- */
-
 
 public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	// instance variables
 	private final Resource<T> resource;
-	private final ThreadLocal<ResourceListener> listeners;
+	private final ThreadLocal<ResourceController> controllers;
 
 
 	/**************************************************************************
@@ -36,14 +26,14 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	/** Parameter constructor */
 	ManagedResource(Resource<T> r) {
 		resource = r;
-		listeners = new ThreadLocal<ResourceListener>();
+		controllers = new ThreadLocal<ResourceController>();
 	}
 
 
 	/** Copy constructor */
 	private ManagedResource(ManagedResource<T> instance) {
 		resource = instance.getResource();
-		listeners = new ThreadLocal<ResourceListener>();
+		controllers = new ThreadLocal<ResourceController>();
 	}
 
 
@@ -53,6 +43,10 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 
 	/** Returns a copy, if possible. */
 	Resource<T> getResource() { return resource; }
+
+
+	/** */
+	public ResourceId getId() { return resource.getId(); }
 
 
 	/**************************************************************************
@@ -66,22 +60,15 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 
 	/** */
 	public ResourceState<T> read() {
-		checkHasListener();
-		ResourceListener rl = listeners.get();
-		rl.readCalled(resource);
-		ResourceState<T> state = resource.read();
-		rl.readPerformed(resource);
-		return state;
+		checkHasController();
+		return controllers.get().read(resource);
 	}
 
 
 	/** */
 	public void write(ResourceState<T> state) {
-		checkHasListener();
-		ResourceListener rl = listeners.get();
-		rl.writeCalled(resource);
-		resource.write(state);
-		rl.writePerformed(resource);
+		checkHasController();
+		controllers.get().write(resource, state);;
 	}
 
 
@@ -98,31 +85,37 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 
 	/** */
 	void commit() {
-		checkHasListener();
-		ResourceListener rl = listeners.get();
-		rl.commitCalled(resource);
-		resource.commit();
-		rl.commitPerformed(resource);
+		controllers.get().commit(resource);
 	}
 
 
 	/** */
 	void rollback() {
-		checkHasListener();
-		ResourceListener rl = listeners.get();
-		rl.rollbackCalled(resource);
-		resource.rollback();
-		rl.rollbackPerformed(resource);
+		controllers.get().rollback(resource);
 	}
 
 
 	/** */
 	void update() {
-		checkHasListener();
-		ResourceListener rl = listeners.get();
-		rl.updateCalled(resource);
-		resource.update();
-		rl.updatePerformed(resource);
+		controllers.get().update(resource);
+	}
+
+
+	/** */
+	void release() {
+		controllers.get().release(resource);
+	}
+
+
+	/** */
+	void putController(ResourceController rc) {
+		controllers.set(rc);
+	}
+
+
+	/** */
+	void removeController() {
+		controllers.remove();
 	}
 
 
@@ -131,8 +124,8 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
     **************************************************************************/
 
 	/** */
-	private void checkHasListener() {
-		if (listeners.get() == null) {
+	private void checkHasController() {
+		if (controllers.get() == null) {
 			throw new IllegalResourceStateException();
 		}
 	}

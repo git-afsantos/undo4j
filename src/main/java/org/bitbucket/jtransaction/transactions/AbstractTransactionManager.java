@@ -3,11 +3,6 @@ package org.bitbucket.jtransaction.transactions;
 import org.bitbucket.jtransaction.common.AccessMode;
 import org.bitbucket.jtransaction.common.IsolationLevel;
 
-import org.bitbucket.jtransaction.resources.Resource;
-
-import static org.bitbucket.jtransaction.common.Check.checkArgument;
-
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
@@ -20,7 +15,6 @@ import java.util.concurrent.Future;
 abstract class AbstractTransactionManager
         implements TransactionManager, TransactionListener {
     // instance variables
-    private final ResourceManager resourceManager;
     private final ThreadLocal<Transaction<?>> transactions =
             new ThreadLocal<Transaction<?>>();
 
@@ -30,48 +24,13 @@ abstract class AbstractTransactionManager
 
     /** Parameter constructor of objects of class AbstractTransactionManager.
      */
-    protected AbstractTransactionManager(ResourceManager rm) {
-        checkArgument("null resource manager", rm);
-        this.resourceManager = rm;
-    }
+    protected AbstractTransactionManager() {}
 
 
 
     /**************************************************************************
      * Getters
     **************************************************************************/
-
-    /** */
-    @Override
-    public final ResourceHandle getHandleFor(String resource) {
-        // Only transactions may use this method.
-        checkTransaction();
-        // Retrieve resource.
-        Resource r = getResource(resource);
-        // Retrieve the current transaction.
-        Transaction<?> t = getTransaction();
-        // Create new controller for resource.
-        ResourceController ctrl;
-        if (t.getAccessMode() == AccessMode.READ) {
-            ctrl = new ReadOnlyController(r, resource, t);
-        } else {
-            ctrl = new ResourceController(r, resource, t);
-        }
-        // Register new controller.
-        t.putController(resource, ctrl);
-        return ctrl;
-    }
-
-
-    /** */
-    protected final ResourceManager getResourceManager() {
-        return this.resourceManager;
-    }
-
-    /** Override for concurrent access. */
-    protected Resource getResource(String id) {
-        return this.resourceManager.getResource(id);
-    }
 
     /** */
     protected final Transaction<?> getTransaction() {
@@ -107,31 +66,12 @@ abstract class AbstractTransactionManager
      * Public Methods
     **************************************************************************/
 
-    /** Only non-transactional threads may call this method. */
-    @Override
-    public void putResource(String id, Resource resource) {
-        // Throw exception if a transaction tries to add a resource.
-        checkNotTransaction();
-        // Delegate to resource manager.
-        this.resourceManager.putResource(id, resource);
-    }
-
-    /** Only non-transactional threads may call this method. */
-    @Override
-    public void removeResource(String id) {
-        // Throw exception if a transaction tries to remove a resource.
-        checkNotTransaction();
-        // Delegate to resource manager.
-        this.resourceManager.removeResource(id);
-    }
-
-
     /** Submits the transaction of execution.
      * Assumes default access mode: write.
      * Assumes default isolation level: none.
      */
     @Override
-    public <T> Future<TransactionResult<T>> submit(Callable<T> task) {
+    public <T> Future<T> submit(TransactionalCallable<T> task) {
         return submit(task, AccessMode.WRITE, IsolationLevel.NONE);
     }
 
@@ -139,8 +79,8 @@ abstract class AbstractTransactionManager
      * Assumes default isolation level: none.
      */
     @Override
-    public <T> Future<TransactionResult<T>> submit(
-        Callable<T> task, AccessMode mode
+    public <T> Future<T> submit(
+        TransactionalCallable<T> task, AccessMode mode
     ) {
         return submit(task, mode, IsolationLevel.NONE);
     }
@@ -188,8 +128,6 @@ abstract class AbstractTransactionManager
     /** Returns a string representation of the object. */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.resourceManager);
-        return sb.toString();
+        return this.transactions.toString();
     }
 }

@@ -8,7 +8,7 @@ package org.bitbucket.jtransaction.transactions;
  * @version 2013
 */
 
-public final class ReadOnlyHandleException
+public final class ReadOnlyControllerException
         extends UnsupportedOperationException {
     private static final long serialVersionUID = 1L;
 
@@ -17,9 +17,9 @@ public final class ReadOnlyHandleException
     **************************************************************************/
 
     /** Empty constructor of objects of class ReadOnlyHandleException. */
-    ReadOnlyHandleException() { super(); }
+    ReadOnlyControllerException() { super(); }
 
 
     /** Parameter constructor of objects of class ReadOnlyHandleException. */
-    ReadOnlyHandleException(String msg) { super(msg); }
+    ReadOnlyControllerException(String msg) { super(msg); }
 }

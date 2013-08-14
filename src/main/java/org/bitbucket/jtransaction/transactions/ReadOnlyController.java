@@ -39,8 +39,8 @@ final class ReadOnlyController extends ResourceController {
      */
     @Override
     protected <T> void write(Resource<T> r, ResourceState<T> s)
-    		throws ReadOnlyHandleException {
-        throw new ReadOnlyHandleException(READ_ONLY);
+    		throws ReadOnlyControllerException {
+        throw new ReadOnlyControllerException(READ_ONLY);
     }
 
 

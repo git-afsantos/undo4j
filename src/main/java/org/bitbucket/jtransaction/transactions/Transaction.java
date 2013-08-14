@@ -9,11 +9,7 @@ import java.util.concurrent.Callable;
  * @version 2013
 */
 
-interface Transaction<T> extends TransactionHeader,
-        Callable<TransactionResult<T>>, ReadWriteListener {
-    /** */
-    void putController(String id, ResourceController controller);
-
+interface Transaction<T> extends TransactionHeader, Callable<T> {
     /** */
     void interrupt();
 }

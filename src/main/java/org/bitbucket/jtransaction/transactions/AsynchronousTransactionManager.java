@@ -5,7 +5,6 @@ import org.bitbucket.jtransaction.common.IsolationLevel;
 
 import static org.bitbucket.jtransaction.common.Check.checkArgument;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -27,10 +26,7 @@ final class AsynchronousTransactionManager extends AbstractTransactionManager {
 
     /** Parameter constructor of class AsynchronousTransactionManager.
      */
-    protected AsynchronousTransactionManager(
-        ResourceManager rm, ExecutorService exec
-    ) {
-        super(rm);
+    protected AsynchronousTransactionManager(ExecutorService exec) {
         executor = exec;
     }
 
@@ -45,8 +41,10 @@ final class AsynchronousTransactionManager extends AbstractTransactionManager {
      * access mode and isolation level.
      */
     @Override
-    public <T> Future<TransactionResult<T>> submit(
-        Callable<T> task, AccessMode mode, IsolationLevel isolation
+    public <T> Future<T> submit(
+        TransactionalCallable<T> task,
+        AccessMode mode,
+        IsolationLevel isolation
     ) {
         checkArgument(task);
         checkArgument(mode);
