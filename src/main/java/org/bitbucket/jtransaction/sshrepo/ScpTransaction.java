@@ -48,7 +48,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	private void renameRemoteDirectory(String name) {
 		String cmd = new StringBuilder("mv ").
 				append(trimRemoteDirectory(targetDir)).append(' ').
-				append(name).toString();
+				append(trimRemoteDirectory(name)).toString();
 		resource.write(stringToState(cmd));
 	}
 	
@@ -64,7 +64,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	private ResourceState<String> rollbackOnCopying(String altered) {
 		String cmd = new StringBuilder("rm -rf ").
 				append(trimRemoteDirectory(targetDir)).append("; mv ").
-				append(altered).append(' ').
+				append(trimRemoteDirectory(altered)).append(' ').
 				append(trimRemoteDirectory(targetDir)).toString();
 		return stringToState(cmd);
 	}
@@ -83,8 +83,8 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	
 	private String trimRemoteDirectory(String s) {
 		int i = s.indexOf(':');
-		if (i >= 0) {
-			return s.substring(i);
+		if (i >= 0 && s.length() > i + 1) {
+			return s.substring(i + 1);
 		}
 		return s;
 	}
