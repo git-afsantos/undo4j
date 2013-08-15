@@ -1,28 +1,31 @@
 package org.bitbucket.jtransaction.resources.implementations;
 
-import org.bitbucket.jtransaction.resources.ImmutableState;
+import org.bitbucket.jtransaction.common.LockManager;
 import org.bitbucket.jtransaction.resources.InternalResource;
 import org.bitbucket.jtransaction.resources.ResourceState;
+import org.bitbucket.jtransaction.resources.StatelessResource;
+import org.jtransaction.mongodb.MongoCollection;
 
-import com.github.jmkgreen.morphia.dao.BasicDAO;
+public class MongoResource<T, D extends MongoDAO<T>> extends
+		StatelessResource<MongoCollection<T, D>> {
 
-public class MongoResource<T, K> implements InternalResource<T> {
-	private BasicDAO<T, K> dao;
-	private T dataObject;
-
-	@Override
-	public boolean isValidState(ResourceState<T> state) {
-		return !state.isNull();
+	public MongoResource(InternalResource<MongoCollection<T, D>> resource,
+			LockManager lockManager) {
+		super(resource, lockManager);
 	}
 
 	@Override
-	public ResourceState<T> buildState() throws Exception {
-		return new ImmutableState<T>(dataObject);
+	public void rollback() {
+		super.rollback();
+		InternalResource<MongoCollection<T, D>> internalResource = getInternalResource();
+		try {
+			ResourceState<MongoCollection<T, D>> resourceState = internalResource
+					.buildState();
+			MongoCollection<T, D> dataObject = resourceState.get();
+			dataObject.rollback();
+		} catch (Exception e) {
+			throw new RuntimeException("rollback failed", e);
+		}
+
 	}
-
-	@Override
-	public void applyState(ResourceState<T> state) throws Exception {
-
-	}
-
 }
