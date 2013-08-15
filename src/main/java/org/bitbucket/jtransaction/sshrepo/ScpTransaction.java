@@ -72,7 +72,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	
 	private ResourceState<String> deleteAfterCommit(String altered) {
 		String cmd = new StringBuilder("rm -rf ").
-				append(altered).toString();
+				append(trimRemoteDirectory(altered)).toString();
 		return stringToState(cmd);
 	}
 
