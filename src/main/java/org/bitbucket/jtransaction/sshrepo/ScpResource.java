@@ -48,7 +48,7 @@ public final class ScpResource extends StatelessResource<String> {
 	@Override
 	public void rollback() {
 		try {
-			this.getInternalResource().applyState(commitCmd);
+			this.getInternalResource().applyState(rollbackCmd);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ResourceRollbackException(e.getMessage(), e);
