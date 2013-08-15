@@ -29,6 +29,8 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 		
 		renameRemoteDirectory(stampedName);
 		
+		scpResource.setRollbackCmd(rollbackOnCopying(stampedName));
+		
 		copyDirectory();
 
 		return null;
@@ -58,7 +60,13 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	}
 	
 	
-	
+	private ResourceState<String> rollbackOnCopying(String altered) {
+		String cmd = new StringBuilder("rm -rf ").
+				append(targetDir).append("; mv ").
+				append(altered).append(' ').
+				append(targetDir).toString();
+		return stringToState(cmd);
+	}
 
 	
 	private ResourceState<String> stringToState(String s) {

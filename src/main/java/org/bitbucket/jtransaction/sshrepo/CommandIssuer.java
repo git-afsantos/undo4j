@@ -34,8 +34,7 @@ public final class CommandIssuer implements InternalResource<String> {
 		this.channel = (ChannelExec) active.openChannel("exec");
 	}
 
-	public CommandIssuer(ChannelExec ch) throws CommandIssuerException,
-			JSchException {
+	public CommandIssuer(ChannelExec ch) {
 		this.channel = ch;
 	}
 
@@ -50,7 +49,7 @@ public final class CommandIssuer implements InternalResource<String> {
 		return null;
 	}
 
-	@Override
+	/*@Override
 	public void applyState(ResourceState<String> state) throws Exception {
 		if (state.isNull()) { return; }
 		
@@ -74,5 +73,15 @@ public final class CommandIssuer implements InternalResource<String> {
 			}
 		}
 		channel.disconnect();
+	}*/
+	
+	@Override
+	public void applyState(ResourceState<String> state) {
+		if (state.isNull()) {
+			System.out.println("Issuer> null");
+		}
+		else {
+			System.out.println("Issuer> " + state.get());
+		}
 	}
 }
