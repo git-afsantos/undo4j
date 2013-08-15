@@ -1,13 +1,9 @@
 package org.bitbucket.jtransaction.sshrepo;
 
-import java.io.InputStream;
+import java.io.PrintStream;
 
 import org.bitbucket.jtransaction.resources.InternalResource;
 import org.bitbucket.jtransaction.resources.ResourceState;
-
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 
 public final class CommandIssuer implements InternalResource<String> {
 	public static class CommandIssuerException extends Exception {
@@ -21,21 +17,10 @@ public final class CommandIssuer implements InternalResource<String> {
 		}
 	}
 
-	private ChannelExec channel;
+	private PrintStream out;
 
-	/*
-	 * Receives an active (connected) session to create an ChannelExec.
-	 */
-	public CommandIssuer(Session active) throws CommandIssuerException,
-			JSchException {
-		if (!active.isConnected())
-			throw new CommandIssuerException("Must receive an active session");
-
-		this.channel = (ChannelExec) active.openChannel("exec");
-	}
-
-	public CommandIssuer(ChannelExec ch) {
-		this.channel = ch;
+	public CommandIssuer(PrintStream ch) {
+		this.out = ch;
 	}
 
 	@Override
@@ -54,27 +39,6 @@ public final class CommandIssuer implements InternalResource<String> {
 		if (state.isNull()) {
 			return;
 		}
-
-		InputStream in;
-		byte[] tmp = new byte[1024];
-
-		channel.setCommand(state.get());
-		in = channel.getInputStream();
-		channel.connect();
-
-		while (true) {
-			while (in.available() > 0) {
-				int i = in.read(tmp, 0, 1024);
-				if (i < 0)
-					break;
-				System.out.print(new String(tmp, 0, i));
-			}
-			if (channel.isClosed()) {
-				System.out.println("exit-status: " + channel.getExitStatus());
-				break;
-			}
-		}
-		channel.disconnect();
+		out.println(state.get());
 	}
-
 }

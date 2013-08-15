@@ -1,17 +1,23 @@
 package org.bitbucket.jtransaction.sshrepo;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.bitbucket.jtransaction.sshrepo.ScpFrom.MyUserInfo;
 import org.bitbucket.jtransaction.transactions.TransactionManager;
 import org.bitbucket.jtransaction.transactions.TransactionManagers;
 
-import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 
 public final class ScpMain {
-	public static void main(String[] args) throws JSchException {
+	public static void main(String[] args) throws JSchException, IOException,
+			InterruptedException, ExecutionException {
 		if (args.length != 2) {
 			System.out.println("usage: java jcp src user@host:dest");
 			System.exit(-1);
@@ -31,12 +37,23 @@ public final class ScpMain {
 		session.setUserInfo(ui);
 		session.connect();
 
-		CommandIssuer cmd = new CommandIssuer(
-				(ChannelExec) session.openChannel("exec"));
+		ChannelShell channel = (ChannelShell) session.openChannel("shell");
+
+		PrintStream out = new PrintStream(channel.getOutputStream(), true);
+		channel.connect();
+
+		CommandIssuer cmd = new CommandIssuer(out);
+
 		ScpResource res = new ScpResource(cmd);
 		ScpTransaction tr = new ScpTransaction(res, args[0], args[1]);
 		TransactionManager man = TransactionManagers.newSynchronousManager();
-		man.submit(tr);
+		Future<Object> f = man.submit(tr);
+
+		f.get();
+
 		man.shutdown();
+
+		channel.disconnect();
+		session.disconnect();
 	}
 }
