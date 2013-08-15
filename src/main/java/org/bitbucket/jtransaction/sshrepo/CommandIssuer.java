@@ -34,6 +34,11 @@ public final class CommandIssuer implements InternalResource<String> {
 		this.channel = (ChannelExec) active.openChannel("exec");
 	}
 
+	public CommandIssuer(ChannelExec ch) throws CommandIssuerException,
+			JSchException {
+		this.channel = ch;
+	}
+
 	@Override
 	public boolean isValidState(ResourceState<String> state) {
 		// Validate a command, maybe?

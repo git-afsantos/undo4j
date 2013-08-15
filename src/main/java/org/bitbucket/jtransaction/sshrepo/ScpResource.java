@@ -1,29 +1,21 @@
 package org.bitbucket.jtransaction.sshrepo;
 
 import org.bitbucket.jtransaction.common.LockManagers;
+import org.bitbucket.jtransaction.resources.ResourceCommitException;
+import org.bitbucket.jtransaction.resources.ResourceRollbackException;
+import org.bitbucket.jtransaction.resources.ResourceState;
 import org.bitbucket.jtransaction.resources.StatelessResource;
 
 public final class ScpResource extends StatelessResource<String> {
 	// private flags...
-	// SSH Session
+	private ResourceState<String> commitCmd;
+	private ResourceState<String> rollbackCmd;
 
-	public ScpResource() {
-		super(new CommandIssuer(), LockManagers.newNullLockManager());
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
-	 * 
-	 */
-	public void initialize() {
-		// Connect etc.
-	}
-
-	/**
-	 * 
-	 */
-	public void dispose() {
-		// Close connection etc.
+	public ScpResource(CommandIssuer cmd, ResourceState<String> commitCmd,
+			ResourceState<String> rollbackCmd) {
+		super(cmd, LockManagers.newNullLockManager());
+		this.commitCmd = commitCmd;
+		this.rollbackCmd = rollbackCmd;
 	}
 
 	/**
@@ -31,7 +23,12 @@ public final class ScpResource extends StatelessResource<String> {
 	 */
 	@Override
 	public void commit() {
-
+		try {
+			this.getInternalResource().applyState(commitCmd);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ResourceCommitException(e.getMessage(), e);
+		}
 	}
 
 	/**
@@ -50,6 +47,11 @@ public final class ScpResource extends StatelessResource<String> {
 	 */
 	@Override
 	public void rollback() {
-
+		try {
+			this.getInternalResource().applyState(commitCmd);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ResourceRollbackException(e.getMessage(), e);
+		}
 	}
 }
