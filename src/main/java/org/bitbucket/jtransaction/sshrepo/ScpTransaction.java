@@ -54,7 +54,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	
 	
 	private void copyDirectory() {
-		String cmd = new StringBuilder("scp -r ").
+		String cmd = new StringBuilder("scp -rp ").
 				append(sourceDir).append(' ').
 				append(targetDir).toString();
 		resource.write(stringToState(cmd));
