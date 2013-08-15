@@ -11,6 +11,11 @@ import com.jcraft.jsch.Session;
 
 public final class CommandIssuer implements InternalResource<String> {
 	public static class CommandIssuerException extends Exception {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public CommandIssuerException(String msg) {
 			super(msg);
 		}
