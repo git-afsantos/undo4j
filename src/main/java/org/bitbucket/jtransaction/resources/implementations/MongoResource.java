@@ -1,6 +1,7 @@
 package org.bitbucket.jtransaction.resources.implementations;
 
 import org.bitbucket.jtransaction.common.LockManager;
+import org.bitbucket.jtransaction.common.LockManagers;
 import org.bitbucket.jtransaction.resources.InternalResource;
 import org.bitbucket.jtransaction.resources.ResourceState;
 import org.bitbucket.jtransaction.resources.StatelessResource;
@@ -12,6 +13,10 @@ public class MongoResource<T, D extends MongoDAO<T>> extends
 	public MongoResource(InternalResource<MongoCollection<T, D>> resource,
 			LockManager lockManager) {
 		super(resource, lockManager);
+	}
+
+	public MongoResource(InternalResource<MongoCollection<T, D>> resource) {
+		super(resource, LockManagers.newNullLockManager());
 	}
 
 	@Override
