@@ -10,9 +10,11 @@ import org.bitbucket.jtransaction.transactions.TransactionalCallable;
 
 public class ScpTransaction implements TransactionalCallable<Object> {
 	private ManagedResource<String> resource;
+	private ScpResource scpResource;
 	private String sourceDir, targetDir;
 	
 	public ScpTransaction(ScpResource r, String s, String t) {
+		scpResource = r;
 		resource = ManagedResource.from(r);
 		sourceDir = s;
 		targetDir = t;
@@ -54,6 +56,9 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 				append(targetDir).toString();
 		resource.write(stringToState(cmd));
 	}
+	
+	
+	
 
 	
 	private ResourceState<String> stringToState(String s) {

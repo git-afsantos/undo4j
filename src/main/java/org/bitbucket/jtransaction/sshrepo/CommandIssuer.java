@@ -52,6 +52,8 @@ public final class CommandIssuer implements InternalResource<String> {
 
 	@Override
 	public void applyState(ResourceState<String> state) throws Exception {
+		if (state.isNull()) { return; }
+		
 		InputStream in;
 		byte[] tmp = new byte[1024];
 

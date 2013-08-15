@@ -1,6 +1,7 @@
 package org.bitbucket.jtransaction.sshrepo;
 
 import org.bitbucket.jtransaction.common.LockManagers;
+import org.bitbucket.jtransaction.resources.NullState;
 import org.bitbucket.jtransaction.resources.ResourceCommitException;
 import org.bitbucket.jtransaction.resources.ResourceRollbackException;
 import org.bitbucket.jtransaction.resources.ResourceState;
@@ -11,6 +12,13 @@ public final class ScpResource extends StatelessResource<String> {
 	private ResourceState<String> commitCmd;
 	private ResourceState<String> rollbackCmd;
 
+	
+	public ScpResource(CommandIssuer cmd) {
+		super(cmd, LockManagers.newNullLockManager());
+		this.commitCmd = new NullState<String>();
+		this.rollbackCmd = this.commitCmd;
+	}
+	
 	public ScpResource(CommandIssuer cmd, ResourceState<String> commitCmd,
 			ResourceState<String> rollbackCmd) {
 		super(cmd, LockManagers.newNullLockManager());
@@ -55,6 +63,12 @@ public final class ScpResource extends StatelessResource<String> {
 		}
 	}
 
+	
+	public void setCommitCmd(ResourceState<String> newCmd) {
+		this.commitCmd = newCmd;
+	}
+	
+	
 	public void setRollbackCmd(ResourceState<String> newCmd) {
 		this.rollbackCmd = newCmd;
 	}
