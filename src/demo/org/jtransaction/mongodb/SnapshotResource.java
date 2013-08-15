@@ -8,13 +8,6 @@ import org.jtransaction.mongodb.datamodel.SnapshotObject;
 public class SnapshotResource extends
 		MongoInternalResource<SnapshotObject, SnapshotDAO> {
 
-	private final SnapshotDAO dao;
-
-	public SnapshotResource(SnapshotDAO dao) {
-		super();
-		this.dao = dao;
-	}
-
 	@Override
 	public ResourceState<MongoCollection<SnapshotObject, SnapshotDAO>> buildState()
 			throws Exception {

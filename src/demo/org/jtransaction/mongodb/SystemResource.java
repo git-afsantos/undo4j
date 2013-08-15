@@ -8,13 +8,6 @@ import org.jtransaction.mongodb.datamodel.SystemObject;
 public class SystemResource extends
 		MongoInternalResource<SystemObject, SystemDAO> {
 
-	private final SystemDAO dao;
-
-	public SystemResource(SystemDAO dao) {
-		super();
-		this.dao = dao;
-	}
-
 	@Override
 	public ResourceState<MongoCollection<SystemObject, SystemDAO>> buildState()
 			throws Exception {
@@ -28,5 +21,4 @@ public class SystemResource extends
 		super.applyState(state);
 		dataObject.run();
 	}
-
 }

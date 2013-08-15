@@ -51,7 +51,7 @@ public class MongoTransaction {
 		system.add(new SystemObject(systemID));
 
 		SystemDAO systemDAO = new SystemDAO(datastore);
-		SystemResource systemResource = new SystemResource(systemDAO);
+		SystemResource systemResource = new SystemResource();
 
 		MongoCollection<SystemObject, SystemDAO> systemCollection = new MongoCollection<SystemObject, SystemDAO>(
 				systemDAO, system, Action.READ);
@@ -77,8 +77,8 @@ public class MongoTransaction {
 		MongoCollection<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollection<>(
 				snapshotDAO, snapshots, Action.WRITE);
 
-		SystemResource systemResource = new SystemResource(systemDAO);
-		SnapshotResource snapshotResource = new SnapshotResource(snapshotDAO);
+		SystemResource systemResource = new SystemResource();
+		SnapshotResource snapshotResource = new SnapshotResource();
 
 		ManagedResource<MongoCollection<SystemObject, SystemDAO>> systemManagedResource = ManagedResource
 				.from(new MongoResource<SystemObject, SystemDAO>(
