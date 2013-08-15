@@ -1,5 +1,6 @@
 package org.bitbucket.jtransaction.sshrepo;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -58,10 +59,16 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 		resource.write(stringToState(cmd));
 	}
 
-	private void copyDirectory() {
-		String cmd = new StringBuilder("scp -rpv ").append(sourceDir)
+	private void copyDirectory() throws InterruptedException, IOException {
+		String cmd = new StringBuilder("scp -rp ").append(sourceDir)
 				.append(' ').append(targetDir).toString();
-		resource.write(stringToState(cmd));
+
+		ProcessBuilder builder = new ProcessBuilder("scp", "-r", "-p",
+				sourceDir, targetDir);
+		Process process = builder.start();
+		process.waitFor();
+
+		// resource.write(stringToState(cmd));
 	}
 
 	private ResourceState<String> rollbackOnCopying(String altered) {

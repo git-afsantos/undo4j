@@ -44,10 +44,11 @@ public final class ScpMain {
 		TransactionManager man = TransactionManagers.newSynchronousManager();
 		Future<Object> f = man.submit(tr);
 
-		f.get();
-
-		man.shutdown();
-
-		session.disconnect();
+		try {
+			f.get();
+		} finally {
+			man.shutdown();
+			session.disconnect();
+		}
 	}
 }
