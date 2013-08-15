@@ -49,10 +49,12 @@ public final class CommandIssuer implements InternalResource<String> {
 		return null;
 	}
 
-	/*@Override
+	@Override
 	public void applyState(ResourceState<String> state) throws Exception {
-		if (state.isNull()) { return; }
-		
+		if (state.isNull()) {
+			return;
+		}
+
 		InputStream in;
 		byte[] tmp = new byte[1024];
 
@@ -73,15 +75,6 @@ public final class CommandIssuer implements InternalResource<String> {
 			}
 		}
 		channel.disconnect();
-	}*/
-	
-	@Override
-	public void applyState(ResourceState<String> state) {
-		if (state.isNull()) {
-			System.out.println("Issuer> null");
-		}
-		else {
-			System.out.println("Issuer> " + state.get());
-		}
 	}
+
 }
