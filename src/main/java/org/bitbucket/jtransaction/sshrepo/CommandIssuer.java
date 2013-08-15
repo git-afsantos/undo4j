@@ -1,5 +1,7 @@
 package org.bitbucket.jtransaction.sshrepo;
 
+import java.io.InputStream;
+
 import org.bitbucket.jtransaction.resources.InternalResource;
 import org.bitbucket.jtransaction.resources.ResourceState;
 
@@ -40,6 +42,25 @@ public final class CommandIssuer implements InternalResource<String> {
 
 	@Override
 	public void applyState(ResourceState<String> state) throws Exception {
+		InputStream in;
+		byte[] tmp = new byte[1024];
+
 		channel.setCommand(state.get());
+		in = channel.getInputStream();
+		channel.connect();
+
+		while (true) {
+			while (in.available() > 0) {
+				int i = in.read(tmp, 0, 1024);
+				if (i < 0)
+					break;
+				System.out.print(new String(tmp, 0, i));
+			}
+			if (channel.isClosed()) {
+				System.out.println("exit-status: " + channel.getExitStatus());
+				break;
+			}
+		}
+		channel.disconnect();
 	}
 }
