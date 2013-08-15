@@ -12,8 +12,10 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	private ManagedResource<String> resource;
 	private String sourceDir, targetDir;
 	
-	public ScpTransaction(ScpResource r) {
+	public ScpTransaction(ScpResource r, String s, String t) {
 		resource = ManagedResource.from(r);
+		sourceDir = s;
+		targetDir = t;
 	}
 	
 
