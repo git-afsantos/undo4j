@@ -1,25 +1,71 @@
 package org.jtransaction.mongodb.dataaccess;
 
-import org.jtransaction.mongodb.datamodel.System;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.bitbucket.jtransaction.resources.implementations.MongoDAO;
+import org.jtransaction.mongodb.datamodel.SystemObject;
 
 import com.github.jmkgreen.morphia.Datastore;
 import com.github.jmkgreen.morphia.dao.BasicDAO;
 import com.github.jmkgreen.morphia.query.Query;
 
-public class SystemDAO extends BasicDAO<System, String> {
+public class SystemDAO extends BasicDAO<SystemObject, String> implements
+		MongoDAO<SystemObject> {
 
 	public SystemDAO(Datastore datastore) {
 		super(datastore);
 	}
 
-	public System read(String systemID) {
-		Query<System> query = createQuery();
-		query.field(System.SYSTEM_ID).equals(systemID);
+	@Override
+	public SystemObject readObject(SystemObject system) {
+		Query<SystemObject> query = buildFetchSystemQuery(system.getSystemID());
 
 		return findOne(query);
 	}
 
-	public void write(System system) {
-		this.save(system);
+	@Override
+	public List<SystemObject> readObjects(List<SystemObject> systems) {
+		List<SystemObject> readSystems = new LinkedList<SystemObject>();
+		for (SystemObject system : systems) {
+			readSystems.add(readObject(system));
+		}
+		return systems;
+	}
+
+	@Override
+	public void writeObject(SystemObject system) {
+		if (!exists(system.getSystemID())) {
+			this.save(system);
+		}
+	}
+
+	@Override
+	public void writeObjects(List<SystemObject> systems) {
+		for (SystemObject system : systems) {
+			writeObject(system);
+		}
+	}
+
+	@Override
+	public void deleteObject(SystemObject system) {
+		delete(system);
+	}
+
+	@Override
+	public void deleteObjects(List<SystemObject> systems) {
+		for (SystemObject system : systems) {
+			deleteObject(system);
+		}
+	}
+
+	public boolean exists(String systemID) {
+		return exists(buildFetchSystemQuery(systemID));
+	}
+
+	private Query<SystemObject> buildFetchSystemQuery(String systemID) {
+		Query<SystemObject> query = createQuery();
+		query.field(SystemObject.SYSTEM_ID).equal(systemID);
+		return query;
 	}
 }
