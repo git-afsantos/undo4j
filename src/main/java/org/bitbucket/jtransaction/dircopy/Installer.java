@@ -1,5 +1,13 @@
 package org.bitbucket.jtransaction.dircopy;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bitbucket.jtransaction.resources.NormalState;
+import org.bitbucket.jtransaction.resources.ResourceState;
+import org.bitbucket.jtransaction.transactions.ManagedResource;
+import org.bitbucket.jtransaction.transactions.TransactionalCallable;
+
 /**
  * Installer
  * 
@@ -7,14 +15,14 @@ package org.bitbucket.jtransaction.dircopy;
  * @version 2013
 */
 
-public final class Installer implements Callable<String> {
+public final class Installer implements TransactionalCallable<String> {
     private static final String TEXT = "Hello World!";
 
     // instance variables
     private final boolean canFail;
     private final String[] files;
     private final UpdateListener listener;
-    private final ResourceHandleProvider provider;
+    private final List<ManagedResource<String>> resources;
 
     /**************************************************************************
      * Constructors
@@ -24,12 +32,12 @@ public final class Installer implements Callable<String> {
     public Installer(
         boolean fails,
         String[] files, UpdateListener listener,
-        ResourceHandleProvider provider
+        List<ManagedResource<String>> resources
     ) {
         this.canFail = fails;
         this.files = files;
         this.listener = listener;
-        this.provider = provider;
+        this.resources = resources;
     }
 
 
@@ -51,11 +59,11 @@ public final class Installer implements Callable<String> {
      */
     @Override
     public String call() throws InterruptedException {
-        StringState text = new StringState(TEXT);
-        ResourceHandle file;
+        ResourceState<String> text = new NormalState<String>(TEXT);
+        ManagedResource<String> file;
         for (int i = 0; i < files.length; ++i) {
             // Retrieve file from manager.
-            file = provider.getHandleFor(files[i]);
+            file = resources.get(i);
             Thread.sleep(2000L);
             if (canFail && i == files.length - 1) { fail(files[i]); }
             
@@ -69,6 +77,17 @@ public final class Installer implements Callable<String> {
         }
         return "Installation complete!";
     }
+    
+    
+    /** */
+    @Override
+	public Iterable<ManagedResource<?>> getManagedResources() {
+		List<ManagedResource<?>> list = new ArrayList<>(resources.size());
+		for (ManagedResource<?> r: resources) {
+			list.add(r);
+		}
+    	return list;
+	}
 
 
 

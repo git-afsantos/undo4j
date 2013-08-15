@@ -3,11 +3,13 @@ package org.bitbucket.jtransaction.dircopy;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.bitbucket.jtransaction.common.Copyable;
 import org.bitbucket.jtransaction.resources.InternalResource;
+import org.bitbucket.jtransaction.resources.NormalState;
 import org.bitbucket.jtransaction.resources.ResourceState;
 
 /**
@@ -88,7 +90,7 @@ public final class InternalFile
     public ResourceState<String> buildState() throws IOException {
         openInput();
         String line = in.readLine();
-        return line != null ? new StringState(line) : null;
+        return line != null ? new NormalState<String>(line) : null;
     }
 
     /** */
@@ -96,7 +98,7 @@ public final class InternalFile
     public void applyState(ResourceState<String> state) throws FileNotFoundException {
         if (isValidState(state)) {
             openOutput();
-            out.println(((StringState) state).getValue());
+            out.println(state.get());
         }
     }
 

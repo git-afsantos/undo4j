@@ -1,5 +1,14 @@
 package org.bitbucket.jtransaction.dircopy;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import org.bitbucket.jtransaction.transactions.ManagedResource;
+import org.bitbucket.jtransaction.transactions.TransactionManager;
+import org.bitbucket.jtransaction.transactions.TransactionManagers;
+
 /**
  * InstallerDemo
  * 
@@ -32,15 +41,16 @@ public final class InstallerDemo {
             makeDirectory(root);
             
             TransactionManager manager;
-            manager = TransactionManagers.newSingleThreadSyncManager();
+            manager = TransactionManagers.newSynchronousManager();
+            List<ManagedResource<String>> rs = new ArrayList<>(files.length);
             for (String f : files) {
-                manager.putResource(f, new FileResource(f, false));
+            	rs.add(ManagedResource.from(new FileResource(f, false)));
             }
             
             try {
                 String result = manager.submit(
-                    new Installer(fails, files, gui, manager)
-                ).get().getResult();
+                    new Installer(fails, files, gui, rs)
+                ).get();
                 gui.update(1, result);
             } catch (ExecutionException ex) {
                 gui.update(0, ex.getCause().getMessage());
@@ -49,9 +59,14 @@ public final class InstallerDemo {
                 System.err.println(ex.getMessage());
             }
             
-            for (String f: files) { manager.removeResource(f); }
             manager.shutdown();
         }
+    }
+    
+    
+    public static void main(String[] args) {
+    	boolean fails = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;
+    	run(fails);
     }
 
 
