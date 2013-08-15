@@ -1,9 +1,10 @@
 package org.bitbucket.jtransaction.sshrepo;
 
-import java.io.PrintStream;
-
 import org.bitbucket.jtransaction.resources.InternalResource;
 import org.bitbucket.jtransaction.resources.ResourceState;
+
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 
 public final class CommandIssuer implements InternalResource<String> {
 	public static class CommandIssuerException extends Exception {
@@ -17,10 +18,10 @@ public final class CommandIssuer implements InternalResource<String> {
 		}
 	}
 
-	private PrintStream out;
+	private Session session;
 
-	public CommandIssuer(PrintStream ch) {
-		this.out = ch;
+	public CommandIssuer(Session s) {
+		this.session = s;
 	}
 
 	@Override
@@ -39,6 +40,37 @@ public final class CommandIssuer implements InternalResource<String> {
 		if (state.isNull()) {
 			return;
 		}
-		out.println(state.get());
+		ChannelExec channel = (ChannelExec) session.openChannel("exec");
+		channel.setCommand(state.get());
+
+		System.out.println("Running> " + state.get());
+
+		((ChannelExec) channel).setErrStream(System.err);
+		((ChannelExec) channel).setOutputStream(System.out);
+		java.io.InputStream in = channel.getInputStream();
+		channel.connect();
+
+		byte[] tmp = new byte[1024];
+		while (true) {
+			while (in.available() > 0) {
+				int i = in.read(tmp, 0, 1024);
+				if (i < 0)
+					break;
+				System.out.print(new String(tmp, 0, i));
+			}
+			if (channel.isClosed()) {
+				if (channel.getExitStatus() > 0) {
+					channel.disconnect();
+					throw new Exception("Must rollback!");
+				} else
+					break;
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (Exception ee) {
+			}
+		}
+
+		channel.disconnect();
 	}
 }

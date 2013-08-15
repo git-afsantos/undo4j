@@ -26,6 +26,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 		String stampedName = new StringBuilder().append(targetDir)
 				.append(System.currentTimeMillis()).toString();
 
+		makeRemoteDirectory();
 		renameRemoteDirectory(stampedName);
 
 		scpResource.setCommitCmd(deleteAfterCommit(stampedName));
@@ -51,8 +52,14 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 		resource.write(stringToState(cmd));
 	}
 
+	private void makeRemoteDirectory() {
+		String cmd = new StringBuilder("mkdir -p ").append(
+				trimRemoteDirectory(targetDir)).toString();
+		resource.write(stringToState(cmd));
+	}
+
 	private void copyDirectory() {
-		String cmd = new StringBuilder("scp -rp ").append(sourceDir)
+		String cmd = new StringBuilder("scp -rpv ").append(sourceDir)
 				.append(' ').append(targetDir).toString();
 		resource.write(stringToState(cmd));
 	}
