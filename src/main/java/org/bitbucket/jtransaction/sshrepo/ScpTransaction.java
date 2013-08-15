@@ -29,6 +29,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 		
 		renameRemoteDirectory(stampedName);
 		
+		scpResource.setCommitCmd(deleteAfterCommit(stampedName));
 		scpResource.setRollbackCmd(rollbackOnCopying(stampedName));
 		
 		copyDirectory();
@@ -65,6 +66,13 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 				append(targetDir).append("; mv ").
 				append(altered).append(' ').
 				append(targetDir).toString();
+		return stringToState(cmd);
+	}
+	
+	
+	private ResourceState<String> deleteAfterCommit(String altered) {
+		String cmd = new StringBuilder("rm -rf ").
+				append(altered).toString();
 		return stringToState(cmd);
 	}
 
