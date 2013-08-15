@@ -25,7 +25,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 				append(targetDir).
 				append(System.currentTimeMillis()).toString();
 		
-		renameOldDirectory(stampedName);
+		renameRemoteDirectory(stampedName);
 		
 		copyDirectory();
 
@@ -40,7 +40,7 @@ public class ScpTransaction implements TransactionalCallable<Object> {
 	}
 	
 	
-	private void renameOldDirectory(String name) {
+	private void renameRemoteDirectory(String name) {
 		String cmd = new StringBuilder("mv ").
 				append(targetDir).append(' ').
 				append(name).toString();

@@ -54,4 +54,8 @@ public final class ScpResource extends StatelessResource<String> {
 			throw new ResourceRollbackException(e.getMessage(), e);
 		}
 	}
+
+	public void setRollbackCmd(ResourceState<String> newCmd) {
+		this.rollbackCmd = newCmd;
+	}
 }
