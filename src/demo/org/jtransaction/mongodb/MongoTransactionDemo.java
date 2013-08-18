@@ -42,10 +42,12 @@ public class MongoTransactionDemo {
 				systemDAO, system, Action.READ);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		ReadSystemTransaction transaction = new ReadSystemTransaction(systemCollection,
+		ReadSystemTransaction transaction = new ReadSystemTransaction(
+				systemCollection,
 				ManagedResource
 						.from(new MongoResource<SystemObject, SystemDAO>(
-								systemResource, LockManagers.newNullLockManager())));
+								systemResource, LockManagers
+										.newNullLockManager())));
 		tm.submit(transaction);
 		return systemResource.buildState().get().getObjects().get(0);
 	}
