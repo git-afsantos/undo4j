@@ -5,28 +5,27 @@ import org.bitbucket.jtransaction.common.LockManagers;
 import org.bitbucket.jtransaction.resources.InternalResource;
 import org.bitbucket.jtransaction.resources.ResourceState;
 import org.bitbucket.jtransaction.resources.StatelessResource;
-import org.jtransaction.mongodb.MongoCollection;
 
 public class MongoResource<T, D extends MongoDAO<T>> extends
-		StatelessResource<MongoCollection<T, D>> {
+		StatelessResource<MongoCollectionInterface<T, D>> {
 
-	public MongoResource(InternalResource<MongoCollection<T, D>> resource,
+	public MongoResource(InternalResource<MongoCollectionInterface<T, D>> resource,
 			LockManager lockManager) {
 		super(resource, lockManager);
 	}
 
-	public MongoResource(InternalResource<MongoCollection<T, D>> resource) {
+	public MongoResource(InternalResource<MongoCollectionInterface<T, D>> resource) {
 		super(resource, LockManagers.newNullLockManager());
 	}
 
 	@Override
 	public void rollback() {
 		super.rollback();
-		InternalResource<MongoCollection<T, D>> internalResource = getInternalResource();
+		InternalResource<MongoCollectionInterface<T, D>> internalResource = getInternalResource();
 		try {
-			ResourceState<MongoCollection<T, D>> resourceState = internalResource
+			ResourceState<MongoCollectionInterface<T, D>> resourceState = internalResource
 					.buildState();
-			MongoCollection<T, D> dataObject = resourceState.get();
+			MongoCollectionInterface<T, D> dataObject = resourceState.get();
 			dataObject.rollback();
 		} catch (Exception e) {
 			throw new RuntimeException("rollback failed", e);

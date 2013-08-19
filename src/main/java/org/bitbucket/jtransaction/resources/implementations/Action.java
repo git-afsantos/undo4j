@@ -1,4 +1,4 @@
-package org.jtransaction.mongodb;
+package org.bitbucket.jtransaction.resources.implementations;
 
 public enum Action {
 

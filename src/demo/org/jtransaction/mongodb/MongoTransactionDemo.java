@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.bitbucket.jtransaction.common.LockManagers;
+import org.bitbucket.jtransaction.resources.implementations.Action;
+import org.bitbucket.jtransaction.resources.implementations.MongoCollectionInterface;
 import org.bitbucket.jtransaction.resources.implementations.MongoResource;
 import org.bitbucket.jtransaction.transactions.ManagedResource;
 import org.bitbucket.jtransaction.transactions.TransactionManager;
@@ -57,9 +59,9 @@ public class MongoTransactionDemo {
 	public void addSnapshots(List<SystemObject> systems,
 			List<SnapshotObject> snapshots) throws InterruptedException,
 			ExecutionException, UnknownHostException {
-		MongoCollection<SystemObject, SystemDAO> systemCollection = new MongoCollection<>(
+		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(
 				systemDAO, systems, Action.WRITE);
-		MongoCollection<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollection<>(
+		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
 				snapshotDAO, snapshots, Action.WRITE);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
@@ -80,9 +82,9 @@ public class MongoTransactionDemo {
 	public void deleteObjects(List<SystemObject> systems,
 			List<SnapshotObject> snapshots) throws InterruptedException,
 			ExecutionException {
-		MongoCollection<SystemObject, SystemDAO> systemCollection = new MongoCollection<>(
+		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(
 				systemDAO, systems, Action.DELETE);
-		MongoCollection<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollection<>(
+		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
 				snapshotDAO, snapshots, Action.DELETE);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
@@ -106,7 +108,7 @@ public class MongoTransactionDemo {
 
 		SystemResource systemResource = new SystemResource();
 
-		MongoCollection<SystemObject, SystemDAO> systemCollection = new MongoCollection<SystemObject, SystemDAO>(
+		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<SystemObject, SystemDAO>(
 				systemDAO, system, Action.READ);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();

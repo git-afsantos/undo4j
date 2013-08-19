@@ -1,18 +1,16 @@
-package org.jtransaction.mongodb;
+package org.bitbucket.jtransaction.resources.implementations;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bitbucket.jtransaction.resources.implementations.MongoDAO;
-
-public class MongoCollection<T, D extends MongoDAO<T>> {
+public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
 
 	private D dao;
 	private List<T> objects;
 	private Action action;
 	private List<T> objectsChanged;
 
-	public MongoCollection(D dao, List<T> objects, Action action) {
+	public MongoCollectionInterface(D dao, List<T> objects, Action action) {
 		this.dao = dao;
 		this.objects = objects;
 		this.action = action;

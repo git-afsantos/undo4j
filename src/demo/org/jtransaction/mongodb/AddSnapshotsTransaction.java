@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bitbucket.jtransaction.resources.ImmutableState;
+import org.bitbucket.jtransaction.resources.implementations.MongoCollectionInterface;
 import org.bitbucket.jtransaction.transactions.ManagedResource;
 import org.bitbucket.jtransaction.transactions.TransactionalCallable;
 import org.jtransaction.mongodb.dataaccess.SnapshotDAO;
@@ -15,16 +16,16 @@ class AddSnapshotsTransaction implements TransactionalCallable<Boolean> {
 	/**
 	 * 
 	 */
-	private ManagedResource<MongoCollection<SystemObject, SystemDAO>> systemResource;
-	private ManagedResource<MongoCollection<SnapshotObject, SnapshotDAO>> snapshotResource;
-	private MongoCollection<SystemObject, SystemDAO> systems;
-	private MongoCollection<SnapshotObject, SnapshotDAO> snapshots;
+	private ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource;
+	private ManagedResource<MongoCollectionInterface<SnapshotObject, SnapshotDAO>> snapshotResource;
+	private MongoCollectionInterface<SystemObject, SystemDAO> systems;
+	private MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots;
 
 	public AddSnapshotsTransaction(
-			MongoCollection<SystemObject, SystemDAO> systems,
-			MongoCollection<SnapshotObject, SnapshotDAO> snapshots,
-			ManagedResource<MongoCollection<SystemObject, SystemDAO>> systemResource,
-			ManagedResource<MongoCollection<SnapshotObject, SnapshotDAO>> snapshotResource) {
+			MongoCollectionInterface<SystemObject, SystemDAO> systems,
+			MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots,
+			ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource,
+			ManagedResource<MongoCollectionInterface<SnapshotObject, SnapshotDAO>> snapshotResource) {
 		this.systemResource = systemResource;
 		this.snapshotResource = snapshotResource;
 		this.systems = systems;
@@ -34,10 +35,10 @@ class AddSnapshotsTransaction implements TransactionalCallable<Boolean> {
 	@Override
 	public Boolean call() throws Exception {
 		systemResource
-				.write(new ImmutableState<MongoCollection<SystemObject, SystemDAO>>(
+				.write(new ImmutableState<MongoCollectionInterface<SystemObject, SystemDAO>>(
 						systems));
 		snapshotResource
-				.write(new ImmutableState<MongoCollection<SnapshotObject, SnapshotDAO>>(
+				.write(new ImmutableState<MongoCollectionInterface<SnapshotObject, SnapshotDAO>>(
 						snapshots));
 		return new Boolean(true);
 	}
