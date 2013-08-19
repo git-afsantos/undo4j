@@ -1,6 +1,7 @@
 package com.github.undo4j.resources.implementations;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
@@ -30,6 +31,7 @@ public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
 			break;
 		}
 		run();
+		this.objectsChanged = new LinkedList<T>();
 	}
 
 	public void run() {
