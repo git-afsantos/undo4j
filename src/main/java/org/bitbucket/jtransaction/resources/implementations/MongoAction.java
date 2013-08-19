@@ -1,10 +1,10 @@
 package org.bitbucket.jtransaction.resources.implementations;
 
-public enum Action {
+public enum MongoAction {
 
 	WRITE, READ, DELETE;
 
-	public static Action getDefaultAction() {
+	public static MongoAction getDefaultAction() {
 		return WRITE;
 	}
 }

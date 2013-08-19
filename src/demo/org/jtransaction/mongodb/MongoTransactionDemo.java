@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.bitbucket.jtransaction.common.LockManagers;
-import org.bitbucket.jtransaction.resources.implementations.Action;
+import org.bitbucket.jtransaction.resources.implementations.MongoAction;
 import org.bitbucket.jtransaction.resources.implementations.MongoCollectionInterface;
 import org.bitbucket.jtransaction.resources.implementations.MongoResource;
 import org.bitbucket.jtransaction.transactions.ManagedResource;
@@ -60,9 +60,9 @@ public class MongoTransactionDemo {
 			List<SnapshotObject> snapshots) throws InterruptedException,
 			ExecutionException, UnknownHostException {
 		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(
-				systemDAO, systems, Action.WRITE);
+				systemDAO, systems, MongoAction.WRITE);
 		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
-				snapshotDAO, snapshots, Action.WRITE);
+				snapshotDAO, snapshots, MongoAction.WRITE);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 
@@ -83,9 +83,9 @@ public class MongoTransactionDemo {
 			List<SnapshotObject> snapshots) throws InterruptedException,
 			ExecutionException {
 		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(
-				systemDAO, systems, Action.DELETE);
+				systemDAO, systems, MongoAction.DELETE);
 		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
-				snapshotDAO, snapshots, Action.DELETE);
+				snapshotDAO, snapshots, MongoAction.DELETE);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 
@@ -109,7 +109,7 @@ public class MongoTransactionDemo {
 		SystemResource systemResource = new SystemResource();
 
 		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<SystemObject, SystemDAO>(
-				systemDAO, system, Action.READ);
+				systemDAO, system, MongoAction.READ);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 		ReadSystemTransaction transaction = new ReadSystemTransaction(

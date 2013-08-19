@@ -7,10 +7,10 @@ public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
 
 	private D dao;
 	private List<T> objects;
-	private Action action;
+	private MongoAction action;
 	private List<T> objectsChanged;
 
-	public MongoCollectionInterface(D dao, List<T> objects, Action action) {
+	public MongoCollectionInterface(D dao, List<T> objects, MongoAction action) {
 		this.dao = dao;
 		this.objects = objects;
 		this.action = action;
@@ -22,10 +22,10 @@ public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
 		case READ:
 			break;
 		case WRITE:
-			action = Action.DELETE;
+			action = MongoAction.DELETE;
 			break;
 		case DELETE:
-			action = Action.WRITE;
+			action = MongoAction.WRITE;
 			objects = objectsChanged;
 			break;
 		}
