@@ -29,6 +29,12 @@ public class SnapshotObject {
 		this.snapshotID = snapshotID;
 	}
 
+	private SnapshotObject(SnapshotObject snapshotObject) {
+		this.id = snapshotObject.id;
+		this.systemID = snapshotObject.systemID;
+		this.snapshotID = snapshotObject.snapshotID;
+	}
+
 	public String getSystemID() {
 		return systemID;
 	}
@@ -57,6 +63,11 @@ public class SnapshotObject {
 	public String toString() {
 		return "Snapshot [id=" + id + ", systemID=" + systemID
 				+ ", snapshotID=" + snapshotID + "]";
+	}
+
+	@Override
+	public SnapshotObject clone() {
+		return new SnapshotObject(this);
 	}
 
 }

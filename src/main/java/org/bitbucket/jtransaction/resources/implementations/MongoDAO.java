@@ -15,4 +15,5 @@ public interface MongoDAO<T> {
 	public void deleteObject(T object);
 
 	public void deleteObjects(List<T> objects);
+
 }

@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bitbucket.jtransaction.resources.implementations.MongoDAO;
+import org.jtransaction.mongodb.datamodel.SnapshotObject;
 import org.jtransaction.mongodb.datamodel.SystemObject;
 
 import com.github.jmkgreen.morphia.Datastore;
@@ -49,7 +50,15 @@ public class SystemDAO extends BasicDAO<SystemObject, String> implements
 
 	@Override
 	public void deleteObject(SystemObject system) {
-		delete(system);
+		SnapshotDAO snapshotDAO = new SnapshotDAO(this.getDatastore());
+		String systemID = system.getSystemID();
+		if (!snapshotDAO.exists(new SnapshotObject(systemID, null))) {
+			delete(readObject(system));
+		} else {
+			throw new RuntimeException("Cannot delete system " + systemID
+					+ " because it has snapshots.");
+		}
+
 	}
 
 	@Override
@@ -68,4 +77,5 @@ public class SystemDAO extends BasicDAO<SystemObject, String> implements
 		query.field(SystemObject.SYSTEM_ID).equal(systemID);
 		return query;
 	}
+
 }

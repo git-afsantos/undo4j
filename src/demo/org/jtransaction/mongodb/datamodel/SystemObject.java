@@ -25,6 +25,11 @@ public class SystemObject {
 		this.systemID = systemID;
 	}
 
+	private SystemObject(SystemObject systemObject) {
+		this.id = systemObject.id;
+		this.systemID = systemObject.systemID;
+	}
+
 	public String getSystemID() {
 		return systemID;
 	}
@@ -44,6 +49,11 @@ public class SystemObject {
 	@Override
 	public String toString() {
 		return "System [id=" + id + ", systemID=" + systemID + "]";
+	}
+
+	@Override
+	public SystemObject clone() {
+		return new SystemObject(this);
 	}
 
 }

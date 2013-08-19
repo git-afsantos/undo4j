@@ -23,13 +23,81 @@ import com.mongodb.MongoClient;
 public class MongoTransactionDemo {
 
 	private Datastore datastore;
+
 	private SystemDAO systemDAO;
 	private SnapshotDAO snapshotDAO;
+
+	private static String system1 = "system1";
+	private static String system2 = "system2";
+	private static String snapshot1 = "snapshot1";
+	private static String snapshot2 = "snapshot2";
+
+	private static List<SystemObject> systems = new ArrayList<SystemObject>();
+	private static List<SnapshotObject> snapshots = new ArrayList<SnapshotObject>();
 
 	public MongoTransactionDemo() throws UnknownHostException {
 		datastore = initMongo();
 		systemDAO = new SystemDAO(datastore);
 		snapshotDAO = new SnapshotDAO(datastore);
+	}
+
+	public static void main(String[] args) throws Exception {
+		MongoTransactionDemo mongoTransaction = new MongoTransactionDemo();
+
+		buildDataObjectsForAdding(false);
+		// buildDataObjectsForAdding(true);
+
+		mongoTransaction.addSnapshots(systems, snapshots);
+
+		// buildDataObjectsForDelete(false);
+		// // buildDataObjectsForDelete(true);
+		// mongoTransaction.deleteObjects(systems, snapshots);
+	}
+
+	public void addSnapshots(List<SystemObject> systems,
+			List<SnapshotObject> snapshots) throws InterruptedException,
+			ExecutionException, UnknownHostException {
+		MongoCollection<SystemObject, SystemDAO> systemCollection = new MongoCollection<>(
+				systemDAO, systems, Action.WRITE);
+		MongoCollection<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollection<>(
+				snapshotDAO, snapshots, Action.WRITE);
+
+		TransactionManager tm = TransactionManagers.newSynchronousManager();
+
+		AddSnapshotsTransaction transaction = new AddSnapshotsTransaction(
+				systemCollection, snapshotCollection,
+				ManagedResource
+						.from(new MongoResource<SystemObject, SystemDAO>(
+								new SystemResource())),
+				ManagedResource
+						.from(new MongoResource<SnapshotObject, SnapshotDAO>(
+								new SnapshotResource())));
+		Future<Boolean> f = tm.submit(transaction);
+
+		java.lang.System.out.println(f.get().booleanValue());
+	}
+
+	public void deleteObjects(List<SystemObject> systems,
+			List<SnapshotObject> snapshots) throws InterruptedException,
+			ExecutionException {
+		MongoCollection<SystemObject, SystemDAO> systemCollection = new MongoCollection<>(
+				systemDAO, systems, Action.DELETE);
+		MongoCollection<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollection<>(
+				snapshotDAO, snapshots, Action.DELETE);
+
+		TransactionManager tm = TransactionManagers.newSynchronousManager();
+
+		DeletObjectsTransaction transaction = new DeletObjectsTransaction(
+				systemCollection, snapshotCollection,
+				ManagedResource
+						.from(new MongoResource<SystemObject, SystemDAO>(
+								new SystemResource())),
+				ManagedResource
+						.from(new MongoResource<SnapshotObject, SnapshotDAO>(
+								new SnapshotResource())));
+		Future<Boolean> f = tm.submit(transaction);
+
+		java.lang.System.out.println(f.get().booleanValue());
 	}
 
 	public SystemObject readSystem(String systemID) throws Exception {
@@ -52,50 +120,36 @@ public class MongoTransactionDemo {
 		return systemResource.buildState().get().getObjects().get(0);
 	}
 
-	public void addSnapshots(List<SystemObject> systems,
-			List<SnapshotObject> snapshots) throws InterruptedException,
-			ExecutionException, UnknownHostException {
+	private static void buildDataObjectsForAdding(boolean error) {
+		clearLists();
 
-		MongoCollection<SystemObject, SystemDAO> systemCollection = new MongoCollection<>(
-				systemDAO, systems, Action.WRITE);
-		MongoCollection<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollection<>(
-				snapshotDAO, snapshots, Action.WRITE);
-
-		TransactionManager tm = TransactionManagers.newSynchronousManager();
-
-		AddSnapshotsTransaction transaction = new AddSnapshotsTransaction(
-				systemCollection, snapshotCollection,
-				ManagedResource
-						.from(new MongoResource<SystemObject, SystemDAO>(
-								new SystemResource())),
-				ManagedResource
-						.from(new MongoResource<SnapshotObject, SnapshotDAO>(
-								new SnapshotResource())));
-		Future<Boolean> f = tm.submit(transaction);
-
-		java.lang.System.out.println(f.get().booleanValue());
-	}
-
-	public static void main(String[] args) throws Exception {
-		MongoTransactionDemo mongoTransaction = new MongoTransactionDemo();
-
-		String system1 = "system1";
-		String system2 = "system2";
-
-		String snapshot1 = "snapshot1";
-		String snapshot2 = "snapshot2";
-
-		List<SystemObject> systems = new ArrayList<SystemObject>();
 		systems.add(new SystemObject(system1));
 		systems.add(new SystemObject(system2));
 
-		List<SnapshotObject> snapshots = new ArrayList<SnapshotObject>();
 		snapshots.add(new SnapshotObject(system1, snapshot1));
 		snapshots.add(new SnapshotObject(system1, snapshot2));
 		snapshots.add(new SnapshotObject(system2, snapshot1));
-		snapshots.add(new SnapshotObject("system3", snapshot1));
+		if (error) {
+			snapshots.add(new SnapshotObject("system3", snapshot1));
+		}
+	}
 
-		mongoTransaction.addSnapshots(systems, snapshots);
+	private static void buildDataObjectsForDelete(boolean error) {
+		clearLists();
+
+		systems.add(new SystemObject(system1));
+		if (error) {
+			systems.add(new SystemObject(system2));
+		}
+
+		snapshots.add(new SnapshotObject(system1, snapshot1));
+		snapshots.add(new SnapshotObject(system1, snapshot2));
+
+	}
+
+	private static void clearLists() {
+		systems.clear();
+		snapshots.clear();
 	}
 
 	private Datastore initMongo() throws UnknownHostException {

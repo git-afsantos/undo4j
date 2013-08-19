@@ -20,9 +20,7 @@ public class SnapshotDAO extends BasicDAO<SnapshotObject, String> implements
 
 	@Override
 	public SnapshotObject readObject(SnapshotObject snapshot) {
-		Query<SnapshotObject> query = createQuery();
-		query.field(SystemObject.SYSTEM_ID).equal(snapshot.getSystemID());
-		query.field(SnapshotObject.SNAPSHOT_ID).equal(snapshot.getSnapshotID());
+		Query<SnapshotObject> query = buildFetchSystemQuery(snapshot);
 		return findOne(query);
 	}
 
@@ -64,7 +62,24 @@ public class SnapshotDAO extends BasicDAO<SnapshotObject, String> implements
 
 	@Override
 	public void deleteObject(SnapshotObject snapshot) {
-		delete(snapshot);
+		SnapshotObject object = readObject(snapshot);
+		delete(object);
+	}
 
+	private Query<SnapshotObject> buildFetchSystemQuery(SnapshotObject snapshot) {
+		Query<SnapshotObject> query = createQuery();
+		String systemID = snapshot.getSystemID();
+		String snapshotID = snapshot.getSnapshotID();
+		if (systemID != null) {
+			query.field(SystemObject.SYSTEM_ID).equal(systemID);
+		}
+		if (snapshotID != null) {
+			query.field(SnapshotObject.SNAPSHOT_ID).equal(snapshotID);
+		}
+		return query;
+	}
+
+	public boolean exists(SnapshotObject snapshot) {
+		return exists(buildFetchSystemQuery(snapshot));
 	}
 }
