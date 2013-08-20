@@ -1,8 +1,8 @@
-package org.bitbucket.jtransaction.dircopy;
+package com.github.undo4j.dircopy;
 
-import org.bitbucket.jtransaction.common.LockManagers;
-import org.bitbucket.jtransaction.resources.InternalResource;
-import org.bitbucket.jtransaction.resources.StatelessResource;
+import com.github.undo4j.common.LockManagers;
+import com.github.undo4j.resources.InternalResource;
+import com.github.undo4j.resources.StatelessResource;
 
 /**
  * FileResource

@@ -1,12 +1,12 @@
-package org.bitbucket.jtransaction.dircopy;
+package com.github.undo4j.dircopy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bitbucket.jtransaction.resources.NormalState;
-import org.bitbucket.jtransaction.resources.ResourceState;
-import org.bitbucket.jtransaction.transactions.ManagedResource;
-import org.bitbucket.jtransaction.transactions.TransactionalCallable;
+import com.github.undo4j.resources.NormalState;
+import com.github.undo4j.resources.ResourceState;
+import com.github.undo4j.transactions.ManagedResource;
+import com.github.undo4j.transactions.TransactionalCallable;
 
 /**
  * Installer

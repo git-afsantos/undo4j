@@ -1,4 +1,4 @@
-package org.bitbucket.jtransaction.dircopy;
+package com.github.undo4j.dircopy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,10 +7,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.bitbucket.jtransaction.common.Copyable;
-import org.bitbucket.jtransaction.resources.InternalResource;
-import org.bitbucket.jtransaction.resources.NormalState;
-import org.bitbucket.jtransaction.resources.ResourceState;
+import com.github.undo4j.common.Copyable;
+import com.github.undo4j.resources.InternalResource;
+import com.github.undo4j.resources.NormalState;
+import com.github.undo4j.resources.ResourceState;
 
 /**
  * InternalFile

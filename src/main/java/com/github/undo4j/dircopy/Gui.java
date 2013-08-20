@@ -1,4 +1,4 @@
-package org.bitbucket.jtransaction.dircopy;
+package com.github.undo4j.dircopy;
 
 import java.awt.Component;
 import java.awt.Dimension;

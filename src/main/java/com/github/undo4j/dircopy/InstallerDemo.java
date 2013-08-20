@@ -1,13 +1,13 @@
-package org.bitbucket.jtransaction.dircopy;
+package com.github.undo4j.dircopy;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.bitbucket.jtransaction.transactions.ManagedResource;
-import org.bitbucket.jtransaction.transactions.TransactionManager;
-import org.bitbucket.jtransaction.transactions.TransactionManagers;
+import com.github.undo4j.transactions.ManagedResource;
+import com.github.undo4j.transactions.TransactionManager;
+import com.github.undo4j.transactions.TransactionManagers;
 
 /**
  * InstallerDemo
