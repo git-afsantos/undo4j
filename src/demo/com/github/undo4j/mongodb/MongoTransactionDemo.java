@@ -43,12 +43,12 @@ public class MongoTransactionDemo {
 	}
 
 	public static void main(String[] args) throws Exception {
-		MongoTransactionDemo mongoTransaction = new MongoTransactionDemo();
+		MongoTransactionDemo demo = new MongoTransactionDemo();
 
 		buildDataObjectsForAdding(false);
 		// buildDataObjectsForAdding(true);
 
-		mongoTransaction.addSnapshots(systems, snapshots);
+		demo.addSnapshots(systems, snapshots);
 
 		// buildDataObjectsForDelete(false);
 		// // buildDataObjectsForDelete(true);
@@ -63,8 +63,6 @@ public class MongoTransactionDemo {
 		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
 				snapshotDAO, snapshots, MongoAction.WRITE);
 
-		TransactionManager tm = TransactionManagers.newSynchronousManager();
-
 		AddSnapshotsTransaction transaction = new AddSnapshotsTransaction(
 				systemCollection, snapshotCollection,
 				ManagedResource
@@ -73,6 +71,8 @@ public class MongoTransactionDemo {
 				ManagedResource
 						.from(new MongoResource<SnapshotObject, SnapshotDAO>(
 								new SnapshotResource())));
+
+		TransactionManager tm = TransactionManagers.newSynchronousManager();
 		Future<Boolean> f = tm.submit(transaction);
 
 		java.lang.System.out.println(f.get().booleanValue());
@@ -135,6 +135,7 @@ public class MongoTransactionDemo {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static void buildDataObjectsForDelete(boolean error) {
 		clearLists();
 

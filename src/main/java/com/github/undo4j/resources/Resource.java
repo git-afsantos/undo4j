@@ -25,7 +25,7 @@ public interface Resource<T> extends Acquirable,
 
     /** Checks whether this resource is in a consistent state.
      * The level of consistency guaranteed is, at least, that commit or rollback
-     * operations completed successfully.
+     * executedOperations completed successfully.
      */
     boolean isConsistent();
 

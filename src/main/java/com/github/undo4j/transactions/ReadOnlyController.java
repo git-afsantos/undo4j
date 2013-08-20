@@ -35,7 +35,7 @@ final class ReadOnlyController extends ResourceController {
     **************************************************************************/
 
     /** Throws a ReadOnlyHandleException.
-     * This handle does not support write operations.
+     * This handle does not support write executedOperations.
      */
     @Override
     protected <T> void write(Resource<T> r, ResourceState<T> s)
