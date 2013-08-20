@@ -25,7 +25,7 @@ public class FilesystemInternalResource implements
 	public void applyState(ResourceState<FilesystemInterface> state)
 			throws Exception {
 		dataObject = state.get();
-
+		dataObject.run();
 	}
 
 }
