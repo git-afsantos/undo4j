@@ -23,12 +23,7 @@ public class FileOperation {
 		this.operation = operation;
 		this.src = src;
 		this.dst = dst;
-		this.tmpDir = File.createTempFile("fileOperation",
-				Long.toString(System.nanoTime()));
-		if (!tmpDir.mkdir()) {
-			throw new IOException("ould not create temporary directory "
-					+ tmpDir.getAbsolutePath());
-		}
+		this.tmpDir = createTempDirectory("fileOperation");
 	}
 
 	public static FileOperation copyFile(File src, File dst) throws IOException {
@@ -52,7 +47,7 @@ public class FileOperation {
 			moveFile();
 			break;
 		case REMOVE:
-			removeFile();
+			removeSrcFile();
 			break;
 		}
 	}
@@ -72,7 +67,7 @@ public class FileOperation {
 		}
 	}
 
-	protected void removeFile() throws IOException {
+	protected void removeSrcFile() throws IOException {
 		checkFileExists(src);
 		saveCopyOfSource();
 		src.delete();
@@ -80,20 +75,25 @@ public class FileOperation {
 
 	protected void moveFile() throws IOException {
 		copyFile();
-		removeFile();
+		removeSrcFile();
+
+		throw new IOException("simulated error!");
 	}
 
 	protected void copyFile() throws IOException {
 		checkFileExists(src);
 		saveCopyOfDestinationIfNecessary();
+		deleteFileOrDirectory(dst);
 		copyFileOrDirectory(src, dst);
 	}
 
 	protected void restoreSource() throws IOException {
+		deleteFileOrDirectory(src);
 		copyFileOrDirectory(tmpSrc, src);
 	}
 
 	protected void restoreDestination() throws IOException {
+		deleteFileOrDirectory(dst);
 		copyFileOrDirectory(tmpDst, dst);
 	}
 
@@ -118,11 +118,36 @@ public class FileOperation {
 		}
 	}
 
+	protected void deleteFileOrDirectory(File file) throws IOException {
+		if (file.isDirectory()) {
+			FileUtils.deleteDirectory(file);
+		} else if (file.isFile()) {
+			file.delete();
+		}
+
+	}
+
 	protected static void checkFileExists(File file) throws IOException {
 		if (!file.exists()) {
 			throw new IOException("File " + file.getAbsolutePath()
 					+ " does not exist.");
 		}
+	}
+
+	public static File createTempDirectory(String prefix) throws IOException {
+		return createTempDirectory(prefix, null);
+	}
+
+	public static File createTempDirectory(String prefix, File directory)
+			throws IOException {
+		File tmpDir = File.createTempFile(prefix,
+				Long.toString(System.nanoTime()), directory);
+		tmpDir.delete();
+		if (!tmpDir.mkdir()) {
+			throw new IOException("could not create temporary directory "
+					+ tmpDir.getAbsolutePath());
+		}
+		return tmpDir;
 	}
 
 }
