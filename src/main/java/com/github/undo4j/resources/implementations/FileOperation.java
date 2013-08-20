@@ -11,12 +11,12 @@ public class FileOperation {
 		COPY, MOVE, REMOVE;
 	}
 
-	private Operation operation;
-	private File src;
-	private File dst;
-	private File tmpDir;
-	private File tmpSrc;
-	private File tmpDst;
+	protected Operation operation;
+	protected File src;
+	protected File dst;
+	protected File tmpDir;
+	protected File tmpSrc;
+	protected File tmpDst;
 
 	protected FileOperation(Operation operation, File src, File dst)
 			throws IOException {
@@ -72,44 +72,44 @@ public class FileOperation {
 		}
 	}
 
-	private void removeFile() throws IOException {
+	protected void removeFile() throws IOException {
 		checkFileExists(src);
 		saveCopyOfSource();
 		src.delete();
 	}
 
-	private void moveFile() throws IOException {
+	protected void moveFile() throws IOException {
 		copyFile();
 		removeFile();
 	}
 
-	private void copyFile() throws IOException {
+	protected void copyFile() throws IOException {
 		checkFileExists(src);
 		saveCopyOfDestinationIfNecessary();
 		copyFileOrDirectory(src, dst);
 	}
 
-	private void restoreSource() throws IOException {
+	protected void restoreSource() throws IOException {
 		copyFileOrDirectory(tmpSrc, src);
 	}
 
-	private void restoreDestination() throws IOException {
+	protected void restoreDestination() throws IOException {
 		copyFileOrDirectory(tmpDst, dst);
 	}
 
-	private void saveCopyOfSource() throws IOException {
+	protected void saveCopyOfSource() throws IOException {
 		tmpSrc = new File(tmpDir, src.getName());
 		copyFileOrDirectory(src, tmpSrc);
 	}
 
-	private void saveCopyOfDestinationIfNecessary() throws IOException {
+	protected void saveCopyOfDestinationIfNecessary() throws IOException {
 		if (dst.exists()) {
 			tmpDst = new File(tmpDir, dst.getName());
 			copyFileOrDirectory(dst, tmpDst);
 		}
 	}
 
-	private static void copyFileOrDirectory(File src, File dst)
+	protected static void copyFileOrDirectory(File src, File dst)
 			throws IOException {
 		if (src.isDirectory()) {
 			FileUtils.copyDirectory(src, dst);
@@ -118,7 +118,7 @@ public class FileOperation {
 		}
 	}
 
-	private static void checkFileExists(File file) throws IOException {
+	protected static void checkFileExists(File file) throws IOException {
 		if (!file.exists()) {
 			throw new IOException("File " + file.getAbsolutePath()
 					+ " does not exist.");

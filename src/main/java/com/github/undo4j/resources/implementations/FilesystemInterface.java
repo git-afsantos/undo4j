@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class FilesystemInterface {
-	private List<FileOperation> operations = new LinkedList<>();
+	protected List<FileOperation> operations = new LinkedList<>();
 
 	public void rollback() throws IOException {
 		for (int i = operations.size() - 1; i >= 0; i--) {
@@ -30,7 +30,7 @@ public class FilesystemInterface {
 		go(operation);
 	}
 
-	private void go(FileOperation operation) throws IOException {
+	protected void go(FileOperation operation) throws IOException {
 		operation.run();
 		operations.add(operation);
 	};
