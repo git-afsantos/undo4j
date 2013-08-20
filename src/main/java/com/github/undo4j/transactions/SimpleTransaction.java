@@ -106,8 +106,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 			return client.call();
 		} catch (Exception ex) {
 			// Cleanup - Try to roll back.
-			rollbackAndRelease(resources);
-			// Rethrow exception.
+			rollbackAndRelease(resources, ex);
 			throw ex;
 		}
 	}
@@ -130,7 +129,8 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 	}
 
 	/** */
-	private void rollback(Iterable<ManagedResource<?>> resources) {
+	private void rollback(Iterable<ManagedResource<?>> resources,
+			Exception cause) throws Exception {
 		// Attempt to roll back on each resource.
 		// Execution is aborted as soon as an error is encountered.
 		// Try ------------------------------------------------------
@@ -140,6 +140,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 		// End Try --------------------------------------------------
 		// Notify listener.
 		getListener().terminate();
+		throw cause;
 	}
 
 	/** Releases all controllers kept. */
@@ -152,20 +153,22 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 	}
 
 	/** */
-	private void rollbackAndRelease(Iterable<ManagedResource<?>> resources) {
+	private void rollbackAndRelease(Iterable<ManagedResource<?>> resources,
+			Exception cause) throws Exception {
 		try {
-			rollback(resources);
+			rollback(resources, cause);
 		} finally {
 			releaseControllers(resources);
 		}
 	}
 
 	/** */
-	private void trySafeCommit(Iterable<ManagedResource<?>> resources) {
+	private void trySafeCommit(Iterable<ManagedResource<?>> resources)
+			throws Exception {
 		try {
 			commit(resources);
 		} catch (Exception ex) {
-			rollback(resources);
+			rollback(resources, ex);
 		} finally {
 			releaseControllers(resources);
 		}
