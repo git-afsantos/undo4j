@@ -6,8 +6,13 @@ import com.github.undo4j.resources.ImmutableState;
 import com.github.undo4j.resources.InternalResource;
 import com.github.undo4j.resources.ResourceState;
 
-public class StudentsInternalResource implements InternalResource<List<Student>> {
+public class StudentsInternalResource implements
+		InternalResource<List<Student>> {
 	private List<Student> dataObject;
+
+	protected StudentsInternalResource(List<Student> students) {
+		this.dataObject = students;
+	}
 
 	@Override
 	public boolean isValidState(ResourceState<List<Student>> state) {

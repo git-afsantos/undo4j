@@ -24,8 +24,10 @@ public class StudentsTransactionDemo {
 	public List<Student> processStudents(List<Student> students)
 			throws Exception {
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		StudentsInternalResource resource = new StudentsInternalResource();
-		tm.submit(new ProcessStudents(students, ManagedResource
+		StudentsInternalResource resource = new StudentsInternalResource(
+				students);
+
+		tm.submit(new ProcessStudents(students, resource, ManagedResource
 				.from(new ShadowResource<>(resource))));
 
 		return resource.buildState().get();

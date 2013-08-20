@@ -247,16 +247,18 @@ class ResourceController implements Copyable<ResourceController> {
 	}
 
 	/**
-	 * Acquires the underlying resource for both read and write executedOperations.
-	 * Throws ResourceAcquireException, if the resource can't be acquired.
+	 * Acquires the underlying resource for both read and write
+	 * executedOperations. Throws ResourceAcquireException, if the resource
+	 * can't be acquired.
 	 */
 	protected <T> void acquireResource(Resource<T> resource) {
 		acquireResource(resource, AccessMode.WRITE);
 	}
 
 	/**
-	 * Acquires the underlying resource for both read and write executedOperations.
-	 * Throws ResourceAcquireException, if the resource can't be acquired.
+	 * Acquires the underlying resource for both read and write
+	 * executedOperations. Throws ResourceAcquireException, if the resource
+	 * can't be acquired.
 	 */
 	protected final <T> void acquireResource(Resource<T> r, AccessMode am) {
 		try {
