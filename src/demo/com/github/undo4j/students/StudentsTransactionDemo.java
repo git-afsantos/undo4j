@@ -36,7 +36,7 @@ public class StudentsTransactionDemo {
 		List<ManagedResource<Student>> managedStudents = manageStudents(students);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		Future<String> f = tm.submit(new ProcessStudents(managedStudents,
+		Future<String> f = tm.submit(new ProcessStudentsTransaction(managedStudents,
 				operations));
 
 		System.out.println(f.get() + "\n");

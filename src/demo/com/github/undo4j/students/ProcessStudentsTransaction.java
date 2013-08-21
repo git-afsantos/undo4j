@@ -6,12 +6,12 @@ import java.util.List;
 import com.github.undo4j.transactions.ManagedResource;
 import com.github.undo4j.transactions.TransactionalCallable;
 
-public class ProcessStudents implements TransactionalCallable<String> {
+public class ProcessStudentsTransaction implements TransactionalCallable<String> {
 
 	private List<ManagedResource<Student>> students;
 	private List<StudentOperation> operations;
 
-	public ProcessStudents(List<ManagedResource<Student>> students,
+	public ProcessStudentsTransaction(List<ManagedResource<Student>> students,
 			List<StudentOperation> operations) {
 		this.students = students;
 		this.operations = operations;
