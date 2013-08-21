@@ -12,14 +12,14 @@ import com.github.undo4j.resources.implementations.MongoCollectionInterface;
 import com.github.undo4j.transactions.ManagedResource;
 import com.github.undo4j.transactions.TransactionalCallable;
 
-public class DeletObjectsTransaction implements TransactionalCallable<Boolean> {
+public class DeleteObjectsTransaction implements TransactionalCallable<Boolean> {
 
 	private ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource;
 	private ManagedResource<MongoCollectionInterface<SnapshotObject, SnapshotDAO>> snapshotResource;
 	private MongoCollectionInterface<SystemObject, SystemDAO> systems;
 	private MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots;
 
-	public DeletObjectsTransaction(
+	public DeleteObjectsTransaction(
 			MongoCollectionInterface<SystemObject, SystemDAO> systems,
 			MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots,
 			ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource,

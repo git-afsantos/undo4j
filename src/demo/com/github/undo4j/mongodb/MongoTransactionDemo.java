@@ -88,7 +88,7 @@ public class MongoTransactionDemo {
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 
-		DeletObjectsTransaction transaction = new DeletObjectsTransaction(
+		DeleteObjectsTransaction transaction = new DeleteObjectsTransaction(
 				systemCollection, snapshotCollection,
 				ManagedResource
 						.from(new MongoResource<SystemObject, SystemDAO>(
