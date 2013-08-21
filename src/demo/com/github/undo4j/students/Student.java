@@ -1,52 +1,55 @@
 package com.github.undo4j.students;
 
-public class Student {
+import com.github.undo4j.resources.InternalResource;
+import com.github.undo4j.resources.NormalState;
+import com.github.undo4j.resources.ResourceState;
 
-	private String name;
-	private double grade;
+public class Student implements InternalResource<StudentState> {
+
+	private StudentState state;
 
 	protected Student(String name, double grade) {
-		this.name = name;
-		this.grade = grade;
+		this.state = new StudentState(name, grade);
 	}
 
-	protected Student(Student student) {
-		this.name = student.name;
-		this.grade = student.grade;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public double getGrade() {
-		return grade;
-	}
-
-	public void setGrade(double grade) {
-		this.grade = grade;
-	}
-
-	public void raiseGrade(double percent) {
-		grade += grade * percent;
-		if (grade > 10) {
-			throw new RuntimeException(name + "'s grade is greater than 10!");
-		}
-
+	public StudentState getState() {
+		return state;
 	}
 
 	@Override
 	public String toString() {
-		return "Student [name=" + name + ", grade=" + grade + "]";
+		return state.toString();
 	}
 
 	@Override
-	protected Student clone() {
-		return new Student(this);
+	public boolean isValidState(ResourceState<StudentState> state) {
+		/*
+		 * This is another place to do validation Instead of the boilerplate
+		 * code we can have custom code here, but then there is some more
+		 * plumbing to do in the applyState method
+		 */
+		// if (state.isNull()) {
+		// return false;
+		// }
+		// double value = state.get().getGrade();
+		// return value >= 0 && value <= 10;
+		return !state.isNull();
 	}
 
+	@Override
+	public ResourceState<StudentState> buildState() throws Exception {
+		return new NormalState<StudentState>(state);
+	}
+
+	@Override
+	public void applyState(ResourceState<StudentState> state) throws Exception {
+		// checkValidState(state);
+		this.state = state.get();
+	}
+
+	private void checkValidState(ResourceState<StudentState> state) {
+		if (!this.isValidState(state)) {
+			throw new RuntimeException(this.state.getName() + "'s grade is greater than 10!");
+		}
+	}
 }

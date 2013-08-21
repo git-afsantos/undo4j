@@ -12,10 +12,10 @@ public class RaiseGrade implements StudentOperation {
 	}
 
 	@Override
-	public void updateStudent(ManagedResource<Student> student) throws Exception {
-		Student s = student.read().get();
-		s.raiseGrade(raisePercent);
-		student.write(new NormalState<Student>(s));
+	public void updateStudent(ManagedResource<StudentState> student) throws Exception {
+		StudentState studentState = student.read().get();
+		StudentState newStudentState = studentState.raiseGrade(raisePercent);
+		student.write(new NormalState<StudentState>(newStudentState));
 	}
 
 }

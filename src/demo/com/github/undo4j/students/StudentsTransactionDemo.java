@@ -17,16 +17,16 @@ public class StudentsTransactionDemo {
 
 		List<Student> students = new ArrayList<>(10);
 
-		students.add(new Student("Bart", 3));
-		students.add(new Student("AJ", 5));
+		// students.add(new Student("Bart", 3));
+		// students.add(new Student("AJ", 5));
 		students.add(new Student("Georgios", 8.5));
-		students.add(new Student("Alberto", 7.5));
-		students.add(new Student("Anwar", 7));
-		students.add(new Student("Rute", 7));
-		students.add(new Student("Christiaan", 8));
-		students.add(new Student("Theo", 7));
-		students.add(new Student("Dimithrios", 8));
-		students.add(new Student("Dennis", 9));
+		// students.add(new Student("Alberto", 7.5));
+		// students.add(new Student("Anwar", 7));
+		// students.add(new Student("Rute", 7));
+		// students.add(new Student("Christiaan", 8));
+		// students.add(new Student("Theo", 7));
+		// students.add(new Student("Dimithrios", 8));
+		// students.add(new Student("Dennis", 9));
 
 		runTransaction(demo, students);
 	}
@@ -34,7 +34,7 @@ public class StudentsTransactionDemo {
 	private static void runTransaction(StudentsTransactionDemo demo, List<Student> students) throws IOException,
 			Exception {
 		List<StudentOperation> operations = new ArrayList<>();
-		operations.add(new RaiseGrade(0.1));
+		// operations.add(new RaiseGrade(0.1));
 		operations.add(new RaiseGrade(0.5));
 
 		printStudents(students);
@@ -48,7 +48,7 @@ public class StudentsTransactionDemo {
 	}
 
 	public void processStudents(List<Student> students, List<StudentOperation> operations) throws Exception {
-		List<ManagedResource<Student>> managedStudents = manageStudents(students);
+		List<ManagedResource<StudentState>> managedStudents = manageStudents(students);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 		try {
@@ -60,19 +60,10 @@ public class StudentsTransactionDemo {
 		}
 	}
 
-	// private List<Student> unmanageStudents(List<ManagedResource<Student>>
-	// managedStudents) {
-	// List<Student> students = new ArrayList<>(managedStudents.size());
-	// for (ManagedResource<Student> managedStudent : managedStudents) {
-	// students.add(managedStudent.read().get());
-	// }
-	// return students;
-	// }
-
-	private List<ManagedResource<Student>> manageStudents(List<Student> students) {
-		List<ManagedResource<Student>> managedStudents = new ArrayList<>(students.size());
+	private List<ManagedResource<StudentState>> manageStudents(List<Student> students) {
+		List<ManagedResource<StudentState>> managedStudents = new ArrayList<>(students.size());
 		for (Student student : students) {
-			managedStudents.add(ManagedResource.from(new ShadowResource<>(new StudentResource(student))));
+			managedStudents.add(ManagedResource.from(new ShadowResource<>(student)));
 		}
 		return managedStudents;
 	}

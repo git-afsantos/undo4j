@@ -8,17 +8,17 @@ import com.github.undo4j.transactions.TransactionalCallable;
 
 public class ProcessStudentsTransaction implements TransactionalCallable<String> {
 
-	private List<ManagedResource<Student>> students;
+	private List<ManagedResource<StudentState>> students;
 	private List<StudentOperation> operations;
 
-	public ProcessStudentsTransaction(List<ManagedResource<Student>> students, List<StudentOperation> operations) {
+	public ProcessStudentsTransaction(List<ManagedResource<StudentState>> students, List<StudentOperation> operations) {
 		this.students = students;
 		this.operations = operations;
 	}
 
 	@Override
 	public String call() throws Exception {
-		for (ManagedResource<Student> student : students) {
+		for (ManagedResource<StudentState> student : students) {
 			for (StudentOperation operation : operations) {
 				operation.updateStudent(student);
 			}
