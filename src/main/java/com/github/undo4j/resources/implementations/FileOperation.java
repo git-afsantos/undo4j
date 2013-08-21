@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 
 public class FileOperation {
 
-	public enum Operation {
+	private enum Operation {
 		COPY, MOVE, REMOVE;
 	}
 
