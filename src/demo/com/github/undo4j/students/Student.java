@@ -3,9 +3,9 @@ package com.github.undo4j.students;
 public class Student {
 
 	private String name;
-	private float grade;
+	private double grade;
 
-	protected Student(String name, float grade) {
+	protected Student(String name, double grade) {
 		this.name = name;
 		this.grade = grade;
 	}
@@ -18,16 +18,20 @@ public class Student {
 		this.name = name;
 	}
 
-	public float getGrade() {
+	public double getGrade() {
 		return grade;
 	}
 
-	public void setGrade(float grade) {
+	public void setGrade(double grade) {
 		this.grade = grade;
 	}
 
-	public void raiseGrade(float percent) {
+	public void raiseGrade(double percent) {
 		grade += grade * percent;
+
+	}
+
+	public void checIsValid() {
 		if (grade > 10) {
 			throw new RuntimeException(name + "'s grade is greater than 10!");
 		}

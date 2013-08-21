@@ -6,37 +6,32 @@ import java.util.List;
 import com.github.undo4j.transactions.ManagedResource;
 import com.github.undo4j.transactions.TransactionalCallable;
 
-public class ProcessStudents implements TransactionalCallable<Boolean> {
+public class ProcessStudents implements TransactionalCallable<String> {
 
-	private ManagedResource<List<Student>> managedResource;
-	private List<Student> students;
-	private StudentsInternalResource internalResource;
+	private List<ManagedResource<Student>> students;
+	private List<StudentOperation> operations;
 
-	protected ProcessStudents(List<Student> students,
-			StudentsInternalResource internalResource,
-			ManagedResource<List<Student>> managedResource) {
+	public ProcessStudents(List<ManagedResource<Student>> students,
+			List<StudentOperation> operations) {
 		this.students = students;
-		this.managedResource = managedResource;
-		this.internalResource = internalResource;
+		this.operations = operations;
 	}
 
 	@Override
-	public Boolean call() throws Exception {
-		List<Student> students = internalResource.buildState().get();
-
-		for (Student student : students) {
-			student.raiseGrade(0.1f);
+	public String call() throws Exception {
+		for (ManagedResource<Student> student : students) {
+			for (StudentOperation operation : operations) {
+				operation.updateStudent(student);
+			}
 		}
 
-		// managedResource.write(new ImmutableState<List<Student>>(students));
-
-		return null;
+		return "Operations completed, transaction will now commit.";
 	}
 
 	@Override
 	public Iterable<ManagedResource<?>> getManagedResources() {
-		List<ManagedResource<?>> list = new ArrayList<>(1);
-		list.add(managedResource);
+		List<ManagedResource<?>> list = new ArrayList<>(students.size());
+		list.addAll(students);
 		return list;
 	}
 }
