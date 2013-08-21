@@ -1,4 +1,3 @@
-
 package com.github.undo4j.transactions;
 
 import com.github.undo4j.common.AccessMode;
@@ -11,124 +10,110 @@ import java.util.concurrent.Future;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
-abstract class AbstractTransactionManager
-        implements TransactionManager, TransactionListener {
-    // instance variables
-    private final ThreadLocal<Transaction<?>> transactions =
-            new ThreadLocal<Transaction<?>>();
+abstract class AbstractTransactionManager implements TransactionManager, TransactionListener {
+	// instance variables
+	private final ThreadLocal<Transaction<?>> transactions = new ThreadLocal<Transaction<?>>();
 
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Parameter constructor of objects of class AbstractTransactionManager.
-     */
-    protected AbstractTransactionManager() {}
+	/**
+	 * Parameter constructor of objects of class AbstractTransactionManager.
+	 */
+	protected AbstractTransactionManager() {
+	}
 
+	/**************************************************************************
+	 * Getters
+	 **************************************************************************/
 
+	/** */
+	protected final Transaction<?> getTransaction() {
+		return this.transactions.get();
+	}
 
-    /**************************************************************************
-     * Getters
-    **************************************************************************/
+	/**************************************************************************
+	 * Setters
+	 **************************************************************************/
 
-    /** */
-    protected final Transaction<?> getTransaction() {
-        return this.transactions.get();
-    }
+	/** Sets the current thread as the given transaction. */
+	protected final <T> void setTransaction(Transaction<T> t) {
+		this.transactions.set(t);
+	}
 
+	/**************************************************************************
+	 * Predicates
+	 **************************************************************************/
 
+	/**
+	 * Checks whether the current thread is a transaction.
+	 */
+	protected final boolean isTransaction() {
+		return this.transactions.get() != null;
+	}
 
-    /**************************************************************************
-     * Setters
-    **************************************************************************/
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
-    /** Sets the current thread as the given transaction. */
-    protected final <T> void setTransaction(Transaction<T> t) {
-        this.transactions.set(t);
-    }
+	/**
+	 * Submits the transaction of execution. Assumes default access mode: write.
+	 * Assumes default isolation level: none.
+	 */
+	@Override
+	public <T> Future<T> submit(TransactionalCallable<T> task) {
+		return submit(task, AccessMode.WRITE, IsolationLevel.NONE);
+	}
 
+	/**
+	 * Submits the transaction for execution. Assumes default isolation level:
+	 * none.
+	 */
+	@Override
+	public <T> Future<T> submit(TransactionalCallable<T> task, AccessMode mode) {
+		return submit(task, mode, IsolationLevel.NONE);
+	}
 
+	/** Registers the current thread as a transaction. */
+	@Override
+	public <T> void bind(Transaction<T> t) {
+		this.transactions.set(t);
+	}
 
-    /**************************************************************************
-     * Predicates
-    **************************************************************************/
+	/** Unregisters the current thread as a transaction. */
+	@Override
+	public void terminate() {
+		this.transactions.remove();
+	}
 
-    /** Checks whether the current thread is a transaction.
-     */
-    protected final boolean isTransaction() {
-        return this.transactions.get() != null;
-    }
+	/**************************************************************************
+	 * Private Methods
+	 **************************************************************************/
 
+	/** */
+	protected final void checkTransaction() {
+		if (!isTransaction()) {
+			throw new TransactionContextException("not a transaction");
+		}
+	}
 
+	/** */
+	protected final void checkNotTransaction() {
+		if (isTransaction()) {
+			throw new TransactionContextException("thread is a transaction");
+		}
+	}
 
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
+	/**************************************************************************
+	 * Equals, HashCode, ToString & Clone
+	 **************************************************************************/
 
-    /** Submits the transaction of execution.
-     * Assumes default access mode: write.
-     * Assumes default isolation level: none.
-     */
-    @Override
-    public <T> Future<T> submit(TransactionalCallable<T> task) {
-        return submit(task, AccessMode.WRITE, IsolationLevel.NONE);
-    }
-
-    /** Submits the transaction for execution.
-     * Assumes default isolation level: none.
-     */
-    @Override
-    public <T> Future<T> submit(
-        TransactionalCallable<T> task, AccessMode mode
-    ) {
-        return submit(task, mode, IsolationLevel.NONE);
-    }
-
-
-    /** Registers the current thread as a transaction. */
-    @Override
-    public <T> void bind(Transaction<T> t) {
-        this.transactions.set(t);
-    }
-
-    /** Unregisters the current thread as a transaction. */
-    @Override
-    public void terminate() {
-        this.transactions.remove();
-    }
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    /** */
-    protected final void checkTransaction() {
-        if (!isTransaction()) {
-            throw new TransactionContextException("not a transaction");
-        }
-    }
-
-
-    /** */
-    protected final void checkNotTransaction() {
-        if (isTransaction()) {
-            throw new TransactionContextException("thread is a transaction");
-        }
-    }
-
-
-
-    /**************************************************************************
-     * Equals, HashCode, ToString & Clone
-    **************************************************************************/
-
-    /** Returns a string representation of the object. */
-    @Override
-    public String toString() {
-        return this.transactions.toString();
-    }
+	/** Returns a string representation of the object. */
+	@Override
+	public String toString() {
+		return this.transactions.toString();
+	}
 }

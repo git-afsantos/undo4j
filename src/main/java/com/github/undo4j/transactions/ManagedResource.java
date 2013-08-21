@@ -12,8 +12,7 @@ import com.github.undo4j.resources.ResourceState;
  * 
  * @author afs
  * @version 2013
-*/
-
+ */
 
 public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	// instance variables
@@ -21,10 +20,9 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 	private final ThreadLocal<ResourceController> controllers;
 	private final ResourceListener listener;
 
-
 	/**************************************************************************
-     * Constructors
-    **************************************************************************/
+	 * Constructors
+	 **************************************************************************/
 
 	/** Parameter constructor */
 	ManagedResource(Resource<T> r, ResourceListener rl) {
@@ -33,7 +31,6 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		listener = rl;
 	}
 
-
 	/** Copy constructor */
 	private ManagedResource(ManagedResource<T> instance) {
 		resource = instance.getResource();
@@ -41,31 +38,32 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		listener = instance.getListener();
 	}
 
-
 	/**************************************************************************
-     * Getters
-    **************************************************************************/
+	 * Getters
+	 **************************************************************************/
 
 	/** Returns a copy, if possible. */
-	Resource<T> getResource() { return resource; }
-
-
-	/** */
-	public ResourceId getId() { return resource.getId(); }
-
+	Resource<T> getResource() {
+		return resource;
+	}
 
 	/** */
-	public ResourceListener getListener() { return listener; }
+	public ResourceId getId() {
+		return resource.getId();
+	}
 
+	/** */
+	public ResourceListener getListener() {
+		return listener;
+	}
 
 	/**************************************************************************
-     * Predicates
-    **************************************************************************/
-
+	 * Predicates
+	 **************************************************************************/
 
 	/**************************************************************************
-     * Public Methods
-    **************************************************************************/
+	 * Public Methods
+	 **************************************************************************/
 
 	/** */
 	public ResourceState<T> read() {
@@ -76,7 +74,6 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		return s;
 	}
 
-
 	/** */
 	public void write(ResourceState<T> state) {
 		checkHasController();
@@ -85,27 +82,21 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		listener.writePerformed(resource);
 	}
 
-
-
 	/** */
 	public static <T> ManagedResource<T> from(Resource<T> resource) {
 		return ManagedResource.from(resource, new NullResourceListener());
 	}
 
-
 	/** */
-	public static <T> ManagedResource<T> from(
-			Resource<T> resource, ResourceListener listener
-	) {
+	public static <T> ManagedResource<T> from(Resource<T> resource, ResourceListener listener) {
 		checkArgument(resource);
 		checkArgument(listener);
 		return new ManagedResource<T>(resource, listener);
 	}
 
-
 	/**************************************************************************
-     * Package Private Methods
-    **************************************************************************/
+	 * Package Private Methods
+	 **************************************************************************/
 
 	/** */
 	void commit() {
@@ -114,14 +105,12 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		listener.commitPerformed(resource);
 	}
 
-
 	/** */
 	void rollback() {
 		listener.rollbackCalled(resource);
 		controllers.get().rollback(resource);
 		listener.rollbackPerformed(resource);
 	}
-
 
 	/** */
 	void update() {
@@ -130,28 +119,24 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		listener.updatePerformed(resource);
 	}
 
-
 	/** */
 	void release() {
 		controllers.get().release(resource);
 	}
-
 
 	/** */
 	void putController(ResourceController rc) {
 		controllers.set(rc);
 	}
 
-
 	/** */
 	void removeController() {
 		controllers.remove();
 	}
 
-
 	/**************************************************************************
-     * Private Methods
-    **************************************************************************/
+	 * Private Methods
+	 **************************************************************************/
 
 	/** */
 	private void checkHasController() {
@@ -160,20 +145,22 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		}
 	}
 
-
 	/**************************************************************************
-     * Equals, HashCode, ToString, Clone
-    **************************************************************************/
+	 * Equals, HashCode, ToString, Clone
+	 **************************************************************************/
 
 	/** */
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) { return true; }
-		if (!(o instanceof ManagedResource)) { return false; }
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof ManagedResource)) {
+			return false;
+		}
 		ManagedResource<?> n = (ManagedResource<?>) o;
 		return resource.equals(n.getResource());
 	}
-
 
 	/** */
 	@Override
@@ -181,13 +168,11 @@ public final class ManagedResource<T> implements Copyable<ManagedResource<T>> {
 		return resource.hashCode();
 	}
 
-
 	/** */
 	@Override
 	public String toString() {
 		return resource.toString();
 	}
-
 
 	/** */
 	@Override

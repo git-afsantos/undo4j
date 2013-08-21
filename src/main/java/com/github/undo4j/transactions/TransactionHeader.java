@@ -9,21 +9,21 @@ import com.github.undo4j.common.IsolationLevel;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 public interface TransactionHeader extends Copyable<TransactionHeader> {
-    /** */
-    TransactionId getId();
+	/** */
+	TransactionId getId();
 
-    /** */
-    AccessMode getAccessMode();
+	/** */
+	AccessMode getAccessMode();
 
-    /** */
-    IsolationLevel getIsolationLevel();
+	/** */
+	IsolationLevel getIsolationLevel();
 
-    /** */
-    boolean isReader();
+	/** */
+	boolean isReader();
 
-    /** */
-    boolean isWriter();
+	/** */
+	boolean isWriter();
 }

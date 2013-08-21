@@ -21,8 +21,7 @@ class AddSnapshotsTransaction implements TransactionalCallable<Boolean> {
 	private MongoCollectionInterface<SystemObject, SystemDAO> systems;
 	private MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots;
 
-	public AddSnapshotsTransaction(
-			MongoCollectionInterface<SystemObject, SystemDAO> systems,
+	public AddSnapshotsTransaction(MongoCollectionInterface<SystemObject, SystemDAO> systems,
 			MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots,
 			ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource,
 			ManagedResource<MongoCollectionInterface<SnapshotObject, SnapshotDAO>> snapshotResource) {
@@ -34,12 +33,8 @@ class AddSnapshotsTransaction implements TransactionalCallable<Boolean> {
 
 	@Override
 	public Boolean call() throws Exception {
-		systemResource
-				.write(new ImmutableState<MongoCollectionInterface<SystemObject, SystemDAO>>(
-						systems));
-		snapshotResource
-				.write(new ImmutableState<MongoCollectionInterface<SnapshotObject, SnapshotDAO>>(
-						snapshots));
+		systemResource.write(new ImmutableState<MongoCollectionInterface<SystemObject, SystemDAO>>(systems));
+		snapshotResource.write(new ImmutableState<MongoCollectionInterface<SnapshotObject, SnapshotDAO>>(snapshots));
 		return new Boolean(true);
 	}
 

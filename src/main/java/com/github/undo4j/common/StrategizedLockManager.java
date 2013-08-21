@@ -5,24 +5,21 @@ package com.github.undo4j.common;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 abstract class StrategizedLockManager extends LockManager {
 	// instance variables
 	private final LockStrategy strategy;
 
 	/**************************************************************************
-     * Constructors
-    **************************************************************************/
+	 * Constructors
+	 **************************************************************************/
 
-    /** Parameter constructor of objects of class ReadWriteLockManager. */
-	protected StrategizedLockManager(
-		IsolationLevel isolationLevel, LockStrategy lockStrategy
-	) {
+	/** Parameter constructor of objects of class ReadWriteLockManager. */
+	protected StrategizedLockManager(IsolationLevel isolationLevel, LockStrategy lockStrategy) {
 		super(isolationLevel);
 		this.strategy = lockStrategy;
 	}
-
 
 	/** Copy constructor of objects of class ReadWriteLockManager. */
 	protected StrategizedLockManager(StrategizedLockManager instance) {
@@ -30,11 +27,9 @@ abstract class StrategizedLockManager extends LockManager {
 		this.strategy = instance.getLockStrategy();
 	}
 
-
-
 	/**************************************************************************
-     * Getters
-    **************************************************************************/
+	 * Getters
+	 **************************************************************************/
 
 	/** */
 	protected final LockStrategy getLockStrategy() {

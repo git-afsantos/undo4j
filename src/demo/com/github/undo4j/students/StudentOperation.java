@@ -4,7 +4,6 @@ import com.github.undo4j.transactions.ManagedResource;
 
 public interface StudentOperation {
 
-	public void updateStudent(ManagedResource<Student> student)
-			throws Exception;
+	public void updateStudent(ManagedResource<Student> student) throws Exception;
 
 }

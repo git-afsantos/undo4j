@@ -1,4 +1,3 @@
-
 package com.github.undo4j.transactions;
 
 import com.github.undo4j.resources.Resource;
@@ -8,11 +7,14 @@ import com.github.undo4j.resources.Resource;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 interface ReadWriteListener {
 	<T> void readCalled(Resource<T> resource);
+
 	<T> void writeCalled(Resource<T> resource);
-    <T> void readPerformed(Resource<T> resource);
-    <T> void writePerformed(Resource<T> resource);
+
+	<T> void readPerformed(Resource<T> resource);
+
+	<T> void writePerformed(Resource<T> resource);
 }

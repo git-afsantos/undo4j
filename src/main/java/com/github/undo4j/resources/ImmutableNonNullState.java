@@ -7,85 +7,76 @@ import static com.github.undo4j.common.Check.checkArgument;
  * 
  * @author vmiraldo
  * @version 2013
-*/
+ */
 
 public final class ImmutableNonNullState<T> extends AbstractState<T> {
-    // instance variables
-    private final T value;
+	// instance variables
+	private final T value;
 
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Parameter constructor of objects of class ImmutableNonNullState. */
-    public ImmutableNonNullState(T val) {
-        checkArgument(val);
-        value = val;
-    }
+	/** Parameter constructor of objects of class ImmutableNonNullState. */
+	public ImmutableNonNullState(T val) {
+		checkArgument(val);
+		value = val;
+	}
 
+	/** Copy constructor of objects of class ImmutableNonNullState. */
+	private ImmutableNonNullState(ImmutableNonNullState<? extends T> inns) {
+		value = inns.get();
+	}
 
-    /** Copy constructor of objects of class ImmutableNonNullState. */
-    private ImmutableNonNullState(ImmutableNonNullState<? extends T> inns) {
-        value = inns.get();
-    }
+	/**************************************************************************
+	 * Getters
+	 **************************************************************************/
 
+	/** */
+	@Override
+	public T get() {
+		return value;
+	}
 
+	/**************************************************************************
+	 * Setters
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Getters
-    **************************************************************************/
+	/** */
+	@Override
+	public void set(T val) {
+		throw new UnsupportedOperationException("immutable state");
+	}
 
-    /** */
-    @Override
-    public T get() { return value; }
+	/**************************************************************************
+	 * Predicates
+	 **************************************************************************/
 
+	/** */
+	@Override
+	public boolean isNull() {
+		return false;
+	}
 
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Setters
-    **************************************************************************/
+	// ...
 
-    /** */
-    @Override
-    public void set(T val) {
-        throw new UnsupportedOperationException("immutable state");
-    }
+	/**************************************************************************
+	 * Private Methods
+	 **************************************************************************/
 
+	// ...
 
+	/**************************************************************************
+	 * Equals, HashCode, ToString & Clone
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Predicates
-    **************************************************************************/
-
-    /** */
-    @Override
-    public boolean isNull() { return false; }
-
-
-
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
-
-    // ...
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    // ...
-
-
-
-    /**************************************************************************
-     * Equals, HashCode, ToString & Clone
-    **************************************************************************/
-
-    /** Creates and returns a (deep) copy of this object. */
-    @Override
-    public ImmutableNonNullState<T> clone() {
-        return new ImmutableNonNullState<T>(this);
-    }
+	/** Creates and returns a (deep) copy of this object. */
+	@Override
+	public ImmutableNonNullState<T> clone() {
+		return new ImmutableNonNullState<T>(this);
+	}
 }

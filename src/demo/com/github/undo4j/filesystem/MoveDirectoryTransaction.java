@@ -16,8 +16,8 @@ public class MoveDirectoryTransaction implements TransactionalCallable<String> {
 	private FilesystemInterface filesystemInterface;
 
 	public MoveDirectoryTransaction(File srcDirectory, File dstDirectory,
-			ManagedResource<FilesystemInterface> filesystemResource,
-			FilesystemInterface filesystemInterface) throws IOException {
+			ManagedResource<FilesystemInterface> filesystemResource, FilesystemInterface filesystemInterface)
+			throws IOException {
 		this.filesystemResource = filesystemResource;
 		this.filesystemInterface = filesystemInterface;
 		filesystemInterface.mv(srcDirectory, dstDirectory);
@@ -25,8 +25,7 @@ public class MoveDirectoryTransaction implements TransactionalCallable<String> {
 
 	@Override
 	public String call() throws Exception {
-		filesystemResource.write(new ImmutableState<FilesystemInterface>(
-				filesystemInterface));
+		filesystemResource.write(new ImmutableState<FilesystemInterface>(filesystemInterface));
 		return "File system operatiosn complete. Transaction will now commit";
 	}
 

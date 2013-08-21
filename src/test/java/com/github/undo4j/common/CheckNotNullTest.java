@@ -7,22 +7,22 @@ import org.junit.Test;
 
 /**
  * The test class CheckNotNullTest.
- *
- * @author  afs
+ * 
+ * @author afs
  * @version 2013
  */
 public class CheckNotNullTest {
 
-    @Test
-    public void testCheckNotNullWithNotNullObject() throws Exception {
-        Object o = new Object();
-        checkNotNull(o);
+	@Test
+	public void testCheckNotNullWithNotNullObject() throws Exception {
+		Object o = new Object();
+		checkNotNull(o);
 
-        assertNotNull(o);
-    }
+		assertNotNull(o);
+	}
 
-    @Test(expected = NullPointerException.class)
-    public void testCheckNotNullWithNullObject() throws Exception {
-        checkNotNull(null);
-    }
+	@Test(expected = NullPointerException.class)
+	public void testCheckNotNullWithNullObject() throws Exception {
+		checkNotNull(null);
+	}
 }

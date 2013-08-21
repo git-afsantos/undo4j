@@ -21,169 +21,169 @@ import com.github.undo4j.resources.StatefulResource.Status;
 
 /**
  * The test class ShadowResourceTest.
- *
- * @author  (your name)
+ * 
+ * @author (your name)
  * @version (a version number or a date)
  */
 public class ShadowResourceTest {
 
-    private ShadowResource<String> resource;
+	private ShadowResource<String> resource;
 
-    @Injectable
-    private LockManager lockManager;
+	@Injectable
+	private LockManager lockManager;
 
-    @Injectable
-    private InternalResource<String> internalResource;
+	@Injectable
+	private InternalResource<String> internalResource;
 
-    @Injectable
-    private ResourceState<String> stringResource1;
-    @Injectable
-    private ResourceState<String> stringResource2;
-    @Injectable
-    private ResourceState<String> stringResource3;
+	@Injectable
+	private ResourceState<String> stringResource1;
+	@Injectable
+	private ResourceState<String> stringResource2;
+	@Injectable
+	private ResourceState<String> stringResource3;
 
-    @Before
-    public void setup() {
-        resource = new ShadowResource<String>(internalResource, lockManager);
-    }
+	@Before
+	public void setup() {
+		resource = new ShadowResource<String>(internalResource, lockManager);
+	}
 
-    @Test
-    public void testGetShadow() throws Exception {
-        ResourceState<String> shadow = resource.getShadow();
-        assertNotSame(stringResource1, shadow);
-    }
+	@Test
+	public void testGetShadow() throws Exception {
+		ResourceState<String> shadow = resource.getShadow();
+		assertNotSame(stringResource1, shadow);
+	}
 
-    @Test
-    public void testGetShadowReference() throws Exception {
-        ResourceState<String> shadow = resource.getShadow();
-        assertNotSame(stringResource1, shadow);
-    }
+	@Test
+	public void testGetShadowReference() throws Exception {
+		ResourceState<String> shadow = resource.getShadow();
+		assertNotSame(stringResource1, shadow);
+	}
 
-    @Test
-    public void testSetShadowNull() throws Exception {
-        resource.setShadow(null);
-        assertTrue(resource.getShadowReference() instanceof NullState);
-    }
+	@Test
+	public void testSetShadowNull() throws Exception {
+		resource.setShadow(null);
+		assertTrue(resource.getShadowReference() instanceof NullState);
+	}
 
-    @Test
-    public void testHasShadowNull() throws Exception {
-        resource.setShadow(null);
-        assertFalse(resource.hasShadow());
-    }
+	@Test
+	public void testHasShadowNull() throws Exception {
+		resource.setShadow(null);
+		assertFalse(resource.hasShadow());
+	}
 
-    @Test
-    public void testHasShadow() throws Exception {
-        resource.setShadow(stringResource2);
-        assertTrue(resource.hasShadow());
-    }
+	@Test
+	public void testHasShadow() throws Exception {
+		resource.setShadow(stringResource2);
+		assertTrue(resource.hasShadow());
+	}
 
-    @Test
-    public void testWrite() throws Exception {
-        resource.write(stringResource1);
+	@Test
+	public void testWrite() throws Exception {
+		resource.write(stringResource1);
 
-        assertSame(stringResource1, resource.getShadowReference());
-        assertEquals(Status.CHANGED, resource.getStatus());
-    }
+		assertSame(stringResource1, resource.getShadowReference());
+		assertEquals(Status.CHANGED, resource.getStatus());
+	}
 
-    @Test
-    public void testCommitUnChanged() throws Exception {
-        resource.setConsistent(false);
-        resource.setStatus(Status.UPDATED);
-        resource.commit();
+	@Test
+	public void testCommitUnChanged() throws Exception {
+		resource.setConsistent(false);
+		resource.setStatus(Status.UPDATED);
+		resource.commit();
 
-        assertEquals(Status.UPDATED, resource.getStatus());
-        assertFalse(resource.isConsistent());
-    }
+		assertEquals(Status.UPDATED, resource.getStatus());
+		assertFalse(resource.isConsistent());
+	}
 
-    @Test
-    public void testCommitNoShadow() throws Exception {
-        resource.setConsistent(false);
-        resource.setStatus(Status.CHANGED);
-        resource.setShadow(null);
-        resource.commit();
+	@Test
+	public void testCommitNoShadow() throws Exception {
+		resource.setConsistent(false);
+		resource.setStatus(Status.CHANGED);
+		resource.setShadow(null);
+		resource.commit();
 
-        assertEquals(Status.COMMITTED, resource.getStatus());
-        assertTrue(resource.isConsistent());
-    }
+		assertEquals(Status.COMMITTED, resource.getStatus());
+		assertTrue(resource.isConsistent());
+	}
 
-    @Test
-    public void testCommit() throws Exception {
-        ResourceState<?> localCommit = Deencapsulation.getField(resource, "localCommit");
-        resource.setConsistent(false);
-        resource.setStatus(Status.CHANGED);
-        resource.setShadow(stringResource1);
-        resource.commit();
+	@Test
+	public void testCommit() throws Exception {
+		ResourceState<?> localCommit = Deencapsulation.getField(resource, "localCommit");
+		resource.setConsistent(false);
+		resource.setStatus(Status.CHANGED);
+		resource.setShadow(stringResource1);
+		resource.commit();
 
-        assertEquals(Status.COMMITTED, resource.getStatus());
-        assertTrue(resource.isConsistent());
-        assertNotSame(localCommit, stringResource1);
-        assertTrue(resource.getShadow() instanceof NullState);
-    }
+		assertEquals(Status.COMMITTED, resource.getStatus());
+		assertTrue(resource.isConsistent());
+		assertNotSame(localCommit, stringResource1);
+		assertTrue(resource.getShadow() instanceof NullState);
+	}
 
-    @Test
-    public void testRollbackStatusCommitted() throws Exception {
-        resource.setStatus(Status.COMMITTED);
-        resource.setLocalCommit(stringResource1);
-        resource.setCheckpoint(stringResource2);
-        new Expectations() {
-            {
-                resource.rollbackToCheckpoint();
-                minTimes = 1;
-            }
-        };
+	@Test
+	public void testRollbackStatusCommitted() throws Exception {
+		resource.setStatus(Status.COMMITTED);
+		resource.setLocalCommit(stringResource1);
+		resource.setCheckpoint(stringResource2);
+		new Expectations() {
+			{
+				resource.rollbackToCheckpoint();
+				minTimes = 1;
+			}
+		};
 
-        resource.rollback();
+		resource.rollback();
 
-        assertTrue(resource.getShadow() instanceof NullState);
-        assertTrue(resource.getLocalCommit() instanceof NullState);
-        assertEquals(Status.UPDATED, resource.getStatus());
-        assertTrue(resource.isConsistent());
+		assertTrue(resource.getShadow() instanceof NullState);
+		assertTrue(resource.getLocalCommit() instanceof NullState);
+		assertEquals(Status.UPDATED, resource.getStatus());
+		assertTrue(resource.isConsistent());
 
-    }
+	}
 
-    @Test
-    public void testRollbackStatusUpdated() throws Exception {
-        resource.setStatus(Status.COMMITTED);
-        resource.setLocalCommit(stringResource1);
-        resource.setCheckpoint(stringResource2);
-        resource.setPreviousCheckpoint(stringResource3);
-        new Expectations() {
-            {
-                resource.rollbackToPrevious();
-                minTimes = 1;
-            }
-        };
+	@Test
+	public void testRollbackStatusUpdated() throws Exception {
+		resource.setStatus(Status.COMMITTED);
+		resource.setLocalCommit(stringResource1);
+		resource.setCheckpoint(stringResource2);
+		resource.setPreviousCheckpoint(stringResource3);
+		new Expectations() {
+			{
+				resource.rollbackToPrevious();
+				minTimes = 1;
+			}
+		};
 
-        resource.rollback();
+		resource.rollback();
 
-        assertTrue(resource.getShadow() instanceof NullState);
-        assertTrue(resource.getLocalCommit() instanceof NullState);
-        assertEquals(Status.UPDATED, resource.getStatus());
-        assertTrue(resource.isConsistent());
-    }
+		assertTrue(resource.getShadow() instanceof NullState);
+		assertTrue(resource.getLocalCommit() instanceof NullState);
+		assertEquals(Status.UPDATED, resource.getStatus());
+		assertTrue(resource.isConsistent());
+	}
 
-    @Test
-    public void testRollbackStatusChanged() throws Exception {
-        resource.setStatus(Status.CHANGED);
-        resource.setLocalCommit(stringResource1);
-        resource.setCheckpoint(stringResource2);
-        resource.setPreviousCheckpoint(stringResource3);
-        resource.rollback();
+	@Test
+	public void testRollbackStatusChanged() throws Exception {
+		resource.setStatus(Status.CHANGED);
+		resource.setLocalCommit(stringResource1);
+		resource.setCheckpoint(stringResource2);
+		resource.setPreviousCheckpoint(stringResource3);
+		resource.rollback();
 
-        assertTrue(resource.getShadow() instanceof NullState);
-        assertTrue(resource.getLocalCommit() instanceof NullState);
-        assertEquals(Status.UPDATED, resource.getStatus());
-        assertTrue(resource.isConsistent());
-    }
+		assertTrue(resource.getShadow() instanceof NullState);
+		assertTrue(resource.getLocalCommit() instanceof NullState);
+		assertEquals(Status.UPDATED, resource.getStatus());
+		assertTrue(resource.isConsistent());
+	}
 
-    @Test
-    public void testApplyShadow() throws Exception {
-        new Expectations() {
-            {
-                internalResource.applyState(resource.getShadowReference());
-                minTimes = 1;
-            }
-        };
-        Deencapsulation.invoke(resource, "applyShadow");
-    }
+	@Test
+	public void testApplyShadow() throws Exception {
+		new Expectations() {
+			{
+				internalResource.applyState(resource.getShadowReference());
+				minTimes = 1;
+			}
+		};
+		Deencapsulation.invoke(resource, "applyShadow");
+	}
 }

@@ -1,4 +1,3 @@
-
 package com.github.undo4j.transactions;
 
 import java.util.concurrent.Executors;
@@ -9,46 +8,42 @@ import java.util.concurrent.ExecutorService;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 public final class TransactionManagers {
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Empty constructor of objects of class TransactionManagers. */
-    public TransactionManagers() {
-        throw new UnsupportedOperationException();
-    }
+	/** Empty constructor of objects of class TransactionManagers. */
+	public TransactionManagers() {
+		throw new UnsupportedOperationException();
+	}
 
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
+	/** */
+	public static TransactionManager newSynchronousManager() {
+		return new SynchronousTransactionManager();
+	}
 
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
+	/** */
+	public static TransactionManager newFixedThreadPool(int maxThreads) {
+		ExecutorService exec = Executors.newFixedThreadPool(maxThreads);
+		return new AsynchronousTransactionManager(exec);
+	}
 
-    /** */
-    public static TransactionManager newSynchronousManager() {
-        return new SynchronousTransactionManager();
-    }
+	/** */
+	public static TransactionManager newSingleThreadAsyncManager() {
+		ExecutorService exec = Executors.newSingleThreadExecutor();
+		return new AsynchronousTransactionManager(exec);
+	}
 
-    /** */
-    public static TransactionManager newFixedThreadPool(int maxThreads) {
-        ExecutorService exec = Executors.newFixedThreadPool(maxThreads);
-        return new AsynchronousTransactionManager(exec);
-    }
+	/**************************************************************************
+	 * Private Methods
+	 **************************************************************************/
 
-    /** */
-    public static TransactionManager newSingleThreadAsyncManager() {
-        ExecutorService exec = Executors.newSingleThreadExecutor();
-        return new AsynchronousTransactionManager(exec);
-    }
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    /** */
+	/** */
 }

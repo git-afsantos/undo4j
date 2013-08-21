@@ -7,84 +7,77 @@ import static com.github.undo4j.common.Check.checkArgument;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 public final class NonNullState<T> extends AbstractState<T> {
-    // instance variables
-    private T value;
+	// instance variables
+	private T value;
 
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Parameter constructor of objects of class NonNullState. */
-    public NonNullState(T val) {
-        checkArgument(val);
-        value = val;
-    }
+	/** Parameter constructor of objects of class NonNullState. */
+	public NonNullState(T val) {
+		checkArgument(val);
+		value = val;
+	}
 
+	/** Copy constructor of objects of class NonNullState. */
+	private NonNullState(NonNullState<? extends T> instance) {
+		value = instance.get();
+	}
 
-    /** Copy constructor of objects of class NonNullState. */
-    private NonNullState(NonNullState<? extends T> instance) {
-        value = instance.get();
-    }
+	/**************************************************************************
+	 * Getters
+	 **************************************************************************/
 
+	/** */
+	@Override
+	public T get() {
+		return value;
+	}
 
+	/**************************************************************************
+	 * Setters
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Getters
-    **************************************************************************/
+	/** */
+	@Override
+	public void set(T val) {
+		checkArgument(val);
+		value = val;
+	}
 
-    /** */
-    @Override
-    public T get() { return value; }
+	/**************************************************************************
+	 * Predicates
+	 **************************************************************************/
 
+	/** */
+	@Override
+	public boolean isNull() {
+		return false;
+	}
 
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Setters
-    **************************************************************************/
+	// ...
 
-    /** */
-    @Override
-    public void set(T val) {
-        checkArgument(val);
-        value = val;
-    }
+	/**************************************************************************
+	 * Private Methods
+	 **************************************************************************/
 
+	// ...
 
+	/**************************************************************************
+	 * Equals, HashCode, ToString & Clone
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Predicates
-    **************************************************************************/
-
-    /** */
-    @Override
-    public boolean isNull() { return false; }
-
-
-
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
-
-    // ...
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    // ...
-
-
-
-    /**************************************************************************
-     * Equals, HashCode, ToString & Clone
-    **************************************************************************/
-
-    /** Creates and returns a (deep) copy of this object. */
-    @Override
-    public NonNullState<T> clone() { return new NonNullState<T>(this); }
+	/** Creates and returns a (deep) copy of this object. */
+	@Override
+	public NonNullState<T> clone() {
+		return new NonNullState<T>(this);
+	}
 }

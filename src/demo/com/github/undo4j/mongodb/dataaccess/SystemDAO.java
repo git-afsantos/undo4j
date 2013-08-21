@@ -10,8 +10,7 @@ import com.github.undo4j.mongodb.datamodel.SnapshotObject;
 import com.github.undo4j.mongodb.datamodel.SystemObject;
 import com.github.undo4j.resources.implementations.MongoDAO;
 
-public class SystemDAO extends BasicDAO<SystemObject, String> implements
-		MongoDAO<SystemObject> {
+public class SystemDAO extends BasicDAO<SystemObject, String> implements MongoDAO<SystemObject> {
 
 	public SystemDAO(Datastore datastore) {
 		super(datastore);
@@ -54,8 +53,7 @@ public class SystemDAO extends BasicDAO<SystemObject, String> implements
 		if (!snapshotDAO.exists(new SnapshotObject(systemID, null))) {
 			delete(readObject(system));
 		} else {
-			throw new RuntimeException("Cannot delete system " + systemID
-					+ " because it has snapshots.");
+			throw new RuntimeException("Cannot delete system " + systemID + " because it has snapshots.");
 		}
 
 	}

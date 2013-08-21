@@ -10,8 +10,7 @@ import com.github.undo4j.mongodb.datamodel.SnapshotObject;
 import com.github.undo4j.mongodb.datamodel.SystemObject;
 import com.github.undo4j.resources.implementations.MongoDAO;
 
-public class SnapshotDAO extends BasicDAO<SnapshotObject, String> implements
-		MongoDAO<SnapshotObject> {
+public class SnapshotDAO extends BasicDAO<SnapshotObject, String> implements MongoDAO<SnapshotObject> {
 
 	public SnapshotDAO(Datastore datastore) {
 		super(datastore);
@@ -46,9 +45,8 @@ public class SnapshotDAO extends BasicDAO<SnapshotObject, String> implements
 		if (systemDAO.exists(systemID)) {
 			this.save(snapshot);
 		} else {
-			throw new RuntimeException("Cannot write snapshot "
-					+ snapshot.getSnapshotID() + " because system " + systemID
-					+ " does not exist.");
+			throw new RuntimeException("Cannot write snapshot " + snapshot.getSnapshotID() + " because system "
+					+ systemID + " does not exist.");
 		}
 	}
 

@@ -24,157 +24,152 @@ import com.github.undo4j.resources.StatefulResource;
 
 public class StatefulResourceTest {
 
-    private final InternalResource<String> irEx = new MockUp<InternalResource<String>>() {
-        @Mock
-        ResourceState<String> buildState() throws Exception {
-            throw new Exception();
-        }
+	private final InternalResource<String> irEx = new MockUp<InternalResource<String>>() {
+		@Mock
+		ResourceState<String> buildState() throws Exception {
+			throw new Exception();
+		}
 
-        @Mock
-        void applyState(ResourceState<String> state) throws Exception {
-            throw new Exception();
-        }
-    }.getMockInstance();
+		@Mock
+		void applyState(ResourceState<String> state) throws Exception {
+			throw new Exception();
+		}
+	}.getMockInstance();
 
-    @Injectable
-    private InternalResource<String> resource;
+	@Injectable
+	private InternalResource<String> resource;
 
-    @Injectable
-    private LockManager lockManager;
+	@Injectable
+	private LockManager lockManager;
 
-    private StatefulResourceForTesting srt;
+	private StatefulResourceForTesting srt;
 
-    @Before
-    public void setup() {
-        srt = new StatefulResourceForTesting(resource, lockManager);
-    }
+	@Before
+	public void setup() {
+		srt = new StatefulResourceForTesting(resource, lockManager);
+	}
 
-    @Test
-    public void setgetCheckpointTest(@NonStrict
-    final ResourceState<String> mock) throws Exception {
-        srt.setCheckpoint(mock);
-        assertTrue(srt.hasCheckpoint());
-    }
+	@Test
+	public void setgetCheckpointTest(@NonStrict final ResourceState<String> mock) throws Exception {
+		srt.setCheckpoint(mock);
+		assertTrue(srt.hasCheckpoint());
+	}
 
-    @Test
-    public void setgetPreviousCheckpointTest(@NonStrict
-    final ResourceState<String> mock) throws Exception {
-        srt.setPreviousCheckpoint(mock);
-        assertTrue(srt.hasPreviousCheckpoint());
+	@Test
+	public void setgetPreviousCheckpointTest(@NonStrict final ResourceState<String> mock) throws Exception {
+		srt.setPreviousCheckpoint(mock);
+		assertTrue(srt.hasPreviousCheckpoint());
 
-    }
+	}
 
-    @Test
-    public void setgetCheckpointReferenceTestNotNull(@NonStrict
-    final ResourceState<String> mock) {
-        srt.setCheckpoint(mock);
-        assertEquals(mock, srt.getCheckpointReference());
-    }
+	@Test
+	public void setgetCheckpointReferenceTestNotNull(@NonStrict final ResourceState<String> mock) {
+		srt.setCheckpoint(mock);
+		assertEquals(mock, srt.getCheckpointReference());
+	}
 
-    @Test
-    public void setgetCheckpointReferenceTestNull(@NonStrict
-    final ResourceState<String> mock) throws Exception {
-        srt.setCheckpoint(null);
-        assertEquals(new NullState<String>(), srt.getCheckpointReference());
-    }
+	@Test
+	public void setgetCheckpointReferenceTestNull(@NonStrict final ResourceState<String> mock) throws Exception {
+		srt.setCheckpoint(null);
+		assertEquals(new NullState<String>(), srt.getCheckpointReference());
+	}
 
-    @Test
-    public void setgetPrevCheckpointReferenceTestNotNull(@NonStrict
-    final ResourceState<String> mock) {
-        srt.setPreviousCheckpoint(mock);
-        assertEquals(mock, srt.getPreviousCheckpointReference());
-    }
+	@Test
+	public void setgetPrevCheckpointReferenceTestNotNull(@NonStrict final ResourceState<String> mock) {
+		srt.setPreviousCheckpoint(mock);
+		assertEquals(mock, srt.getPreviousCheckpointReference());
+	}
 
-    @Test
-    public void setgetPrevCheckpointReferenceTestNull(@NonStrict
-    final ResourceState<String> mock) throws Exception {
-        srt.setPreviousCheckpoint(null);
-        assertEquals(new NullState<String>(), srt.getPreviousCheckpointReference());
-    }
+	@Test
+	public void setgetPrevCheckpointReferenceTestNull(@NonStrict final ResourceState<String> mock) throws Exception {
+		srt.setPreviousCheckpoint(null);
+		assertEquals(new NullState<String>(), srt.getPreviousCheckpointReference());
+	}
 
-    @Test
-    public void updatePreviousCheckpointTest(@NonStrict
-    final ResourceState<String> mock) throws Exception {
-        srt.setCheckpoint(mock);
-        srt.updatePreviousCheckpoint();
-        assertEquals(mock, srt.getCheckpointReference());
-    }
+	@Test
+	public void updatePreviousCheckpointTest(@NonStrict final ResourceState<String> mock) throws Exception {
+		srt.setCheckpoint(mock);
+		srt.updatePreviousCheckpoint();
+		assertEquals(mock, srt.getCheckpointReference());
+	}
 
-    @Test
-    public void revertCheckpointTest(@NonStrict
-    final ResourceState<String> mock) throws Exception {
-        srt.setPreviousCheckpoint(mock);
-        srt.revertCheckpoint();
-        assertEquals(mock, srt.getPreviousCheckpointReference());
-    }
+	@Test
+	public void revertCheckpointTest(@NonStrict final ResourceState<String> mock) throws Exception {
+		srt.setPreviousCheckpoint(mock);
+		srt.revertCheckpoint();
+		assertEquals(mock, srt.getPreviousCheckpointReference());
+	}
 
-    @Test
-    public void updateCheckpointTestException() throws Exception {
-        Deencapsulation.setField(srt, "resource", irEx);
-        try {
-            srt.updateCheckpoint();
-            fail();
-        } catch (ResourceUpdateException e) {
-            assertFalse(srt.isConsistent());
-        }
+	@Test
+	public void updateCheckpointTestException() throws Exception {
+		Deencapsulation.setField(srt, "resource", irEx);
+		try {
+			srt.updateCheckpoint();
+			fail();
+		} catch (ResourceUpdateException e) {
+			assertFalse(srt.isConsistent());
+		}
 
-    }
+	}
 
-    @Test
-    public void updateCheckpointTest() throws Exception {
-        new Expectations() {
-            {
-                resource.buildState();
-            }
-        };
+	@Test
+	public void updateCheckpointTest() throws Exception {
+		new Expectations() {
+			{
+				resource.buildState();
+			}
+		};
 
-        srt.updateCheckpoint();
-    }
+		srt.updateCheckpoint();
+	}
 
-    @Test
-    public void rollbackToCheckpointTest(@NonStrict
-    final ResourceState<String> mock) throws Exception {
-        new Expectations() {
-            {
-                resource.applyState(mock);
-            }
-        };
+	@Test
+	public void rollbackToCheckpointTest(@NonStrict final ResourceState<String> mock) throws Exception {
+		new Expectations() {
+			{
+				resource.applyState(mock);
+			}
+		};
 
-        srt.rollbackToCheckpoint();
-    }
+		srt.rollbackToCheckpoint();
+	}
 
-    public void rollbackToCheckpointTestException() throws Exception {
-        Deencapsulation.setField(srt, "resource", irEx);
-        try {
-            srt.rollbackToCheckpoint();
-            fail();
-        } catch (ResourceRollbackException e) {
-            assertFalse(srt.isConsistent());
-        }
-    }
+	public void rollbackToCheckpointTestException() throws Exception {
+		Deencapsulation.setField(srt, "resource", irEx);
+		try {
+			srt.rollbackToCheckpoint();
+			fail();
+		} catch (ResourceRollbackException e) {
+			assertFalse(srt.isConsistent());
+		}
+	}
 
-    private class StatefulResourceForTesting extends StatefulResource<String> {
+	private class StatefulResourceForTesting extends StatefulResource<String> {
 
-        public StatefulResourceForTesting(InternalResource<String> resource, LockManager lockManager) {
-            super(resource, lockManager);
-        }
+		public StatefulResourceForTesting(InternalResource<String> resource, LockManager lockManager) {
+			super(resource, lockManager);
+		}
 
-        @Override
-        public void write(ResourceState<String> state) {}
+		@Override
+		public void write(ResourceState<String> state) {
+		}
 
-        @Override
-        public void commit() {}
+		@Override
+		public void commit() {
+		}
 
-        @Override
-        public void rollback() {}
+		@Override
+		public void rollback() {
+		}
 
-        @Override
-        public void update() {}
+		@Override
+		public void update() {
+		}
 
-        @Override
-        public StatefulResource<String> clone() {
-            return null;
-        }
+		@Override
+		public StatefulResource<String> clone() {
+			return null;
+		}
 
-    }
+	}
 }

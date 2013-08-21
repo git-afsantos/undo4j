@@ -1,34 +1,36 @@
 package com.github.undo4j.common;
 
-
 /**
  * NullLockManager
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 final class NullLockManager extends LockManager {
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Empty constructor of objects of class NullLockManager. */
-    NullLockManager() { super(IsolationLevel.NONE); }
+	/** Empty constructor of objects of class NullLockManager. */
+	NullLockManager() {
+		super(IsolationLevel.NONE);
+	}
 
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
+	/** */
+	@Override
+	public boolean acquire(AccessMode mode) {
+		return true;
+	}
 
-    /** */
-    @Override
-    public boolean acquire(AccessMode mode) { return true; }
-
-    /** */
-    @Override
-    public void release() {}
-
+	/** */
+	@Override
+	public void release() {
+	}
 
 	@Override
 	public LockManager clone() {

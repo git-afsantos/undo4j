@@ -19,72 +19,74 @@ import com.github.undo4j.resources.StatelessResource;
 
 public class StatelessResourceTest {
 
-    @Injectable
-    private InternalResource<String> ir;
+	@Injectable
+	private InternalResource<String> ir;
 
-    @Injectable
-    private LockManager lockManager;
+	@Injectable
+	private LockManager lockManager;
 
-    @Injectable
-    private ResourceState<String> stringResource;
+	@Injectable
+	private ResourceState<String> stringResource;
 
-    private StatelessResource<String> srt;
+	private StatelessResource<String> srt;
 
-    @Before
-    public void setup() {
-        srt = new StatelessResource<String>(ir, lockManager);
-    }
+	@Before
+	public void setup() {
+		srt = new StatelessResource<String>(ir, lockManager);
+	}
 
-    private final InternalResource<String> irEx = new MockUp<InternalResource<String>>() {
-        @Mock
-        ResourceState<String> buildState() throws Exception {
-            throw new Exception();
-        }
+	private final InternalResource<String> irEx = new MockUp<InternalResource<String>>() {
+		@Mock
+		ResourceState<String> buildState() throws Exception {
+			throw new Exception();
+		}
 
-        @Mock
-        void applyState(ResourceState<String> state) throws Exception {
-            throw new Exception();
-        }
-    }.getMockInstance();
+		@Mock
+		void applyState(ResourceState<String> state) throws Exception {
+			throw new Exception();
+		}
+	}.getMockInstance();
 
-    @Test
-    public void readTest() throws Exception {
-        new Expectations() {
-            {
-                ir.buildState();
-            }
-        };
+	@Test
+	public void readTest() throws Exception {
+		new Expectations() {
+			{
+				ir.buildState();
+			}
+		};
 
-        srt.read();
-    }
+		srt.read();
+	}
 
-    @Test
-    public void readTestException() {
-        Deencapsulation.setField(srt, "resource", irEx);
-        try {
-            srt.read();
-            fail();
-        } catch (ResourceReadException e) {}
-    }
+	@Test
+	public void readTestException() {
+		Deencapsulation.setField(srt, "resource", irEx);
+		try {
+			srt.read();
+			fail();
+		} catch (ResourceReadException e) {
+		}
+	}
 
-    @Test
-    public void writeTest() throws Exception {
-        new Expectations() {
-            {
-                ir.applyState(stringResource);
-                minTimes = 1;
-            }
-        };
+	@Test
+	public void writeTest() throws Exception {
+		new Expectations() {
+			{
+				ir.applyState(stringResource);
+				minTimes = 1;
+			}
+		};
 
-        srt.write(stringResource);
-    }
+		srt.write(stringResource);
+	}
 
-    @Test
-    public void writeTestException() {
-        Deencapsulation.setField(srt, "resource", irEx);
-        try {
-            srt.write(stringResource);
-            fail();
-        } catch (ResourceWriteException e) {}
-    }
+	@Test
+	public void writeTestException() {
+		Deencapsulation.setField(srt, "resource", irEx);
+		try {
+			srt.write(stringResource);
+			fail();
+		} catch (ResourceWriteException e) {
+		}
+	}
 }

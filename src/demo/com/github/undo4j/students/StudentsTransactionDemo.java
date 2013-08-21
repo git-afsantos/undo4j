@@ -14,13 +14,14 @@ public class StudentsTransactionDemo {
 
 	public static void main(String[] args) throws Exception {
 		StudentsTransactionDemo demo = new StudentsTransactionDemo();
+
 		List<Student> students = buildStudentsList();
 
 		runTransaction(demo, students);
 	}
 
-	private static void runTransaction(StudentsTransactionDemo demo,
-			List<Student> students) throws IOException, Exception {
+	private static void runTransaction(StudentsTransactionDemo demo, List<Student> students) throws IOException,
+			Exception {
 		List<StudentOperation> operations = buildOperationsList();
 
 		printStudents(students);
@@ -31,35 +32,18 @@ public class StudentsTransactionDemo {
 		printStudents(students);
 	}
 
-	public void processStudents(List<Student> students,
-			List<StudentOperation> operations) throws Exception {
+	public void processStudents(List<Student> students, List<StudentOperation> operations) throws Exception {
 		List<ManagedResource<Student>> managedStudents = manageStudents(students);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		Future<String> f = tm.submit(new ProcessStudentsTransaction(managedStudents,
-				operations));
+		Future<String> f = tm.submit(new ProcessStudentsTransaction(managedStudents, operations));
 
 		System.out.println(f.get() + "\n");
 	}
 
-	private List<ManagedResource<Student>> manageStudents(List<Student> students) {
-		List<ManagedResource<Student>> managedStudents = new ArrayList<>(
-				students.size());
-		for (Student student : students) {
-			managedStudents.add(ManagedResource.from(new ShadowResource<>(
-					new StudentResource(student))));
-		}
-		return managedStudents;
-	}
-
-	private static void printStudents(List<Student> students) {
-		for (Student student : students) {
-			System.out.println(student);
-		}
-	}
-
 	private static List<Student> buildStudentsList() {
 		List<Student> students = new ArrayList<>(10);
+
 		students.add(new Student("Georgios", 8.5));
 		students.add(new Student("Alberto", 7.5));
 		students.add(new Student("Anwar", 7));
@@ -76,9 +60,24 @@ public class StudentsTransactionDemo {
 
 	private static List<StudentOperation> buildOperationsList() {
 		List<StudentOperation> operations = new ArrayList<>();
+
 		operations.add(new RaiseGrade(0.1));
-		// uncomment next line to create an error and trigger a rollback
 		// operations.add(new RaiseGrade(0.5));
+
 		return operations;
+	}
+
+	private List<ManagedResource<Student>> manageStudents(List<Student> students) {
+		List<ManagedResource<Student>> managedStudents = new ArrayList<>(students.size());
+		for (Student student : students) {
+			managedStudents.add(ManagedResource.from(new ShadowResource<>(new StudentResource(student))));
+		}
+		return managedStudents;
+	}
+
+	private static void printStudents(List<Student> students) {
+		for (Student student : students) {
+			System.out.println(student);
+		}
 	}
 }

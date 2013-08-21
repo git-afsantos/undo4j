@@ -1,4 +1,3 @@
-
 package com.github.undo4j.transactions;
 
 import java.util.concurrent.Callable;
@@ -8,9 +7,9 @@ import java.util.concurrent.Callable;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 interface Transaction<T> extends TransactionHeader, Callable<T> {
-    /** */
-    void interrupt();
+	/** */
+	void interrupt();
 }

@@ -17,8 +17,7 @@ class ReadSystemTransaction implements TransactionalCallable<Boolean> {
 	private ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource;
 	private MongoCollectionInterface<SystemObject, SystemDAO> system;
 
-	public ReadSystemTransaction(
-			MongoCollectionInterface<SystemObject, SystemDAO> system,
+	public ReadSystemTransaction(MongoCollectionInterface<SystemObject, SystemDAO> system,
 			ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource) {
 		this.systemResource = systemResource;
 		this.system = system;

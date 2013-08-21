@@ -1,4 +1,3 @@
-
 package com.github.undo4j.transactions;
 
 import com.github.undo4j.common.AccessMode;
@@ -15,62 +14,55 @@ import java.util.concurrent.RejectedExecutionException;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 final class AsynchronousTransactionManager extends AbstractTransactionManager {
-    // instance variables
-    private final ExecutorService executor;
+	// instance variables
+	private final ExecutorService executor;
 
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Parameter constructor of class AsynchronousTransactionManager.
-     */
-    protected AsynchronousTransactionManager(ExecutorService exec) {
-        executor = exec;
-    }
+	/**
+	 * Parameter constructor of class AsynchronousTransactionManager.
+	 */
+	protected AsynchronousTransactionManager(ExecutorService exec) {
+		executor = exec;
+	}
 
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
+	/**
+	 * Executes the transaction asynchronously, when possible, with the given
+	 * access mode and isolation level.
+	 */
+	@Override
+	public <T> Future<T> submit(TransactionalCallable<T> task, AccessMode mode, IsolationLevel isolation) {
+		checkArgument(task);
+		checkArgument(mode);
+		checkArgument(isolation);
+		checkNotTransaction();
+		checkNotShutdown();
+		return executor.submit(new SimpleTransaction<T>(mode, isolation, this, task));
+	}
 
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
+	/** */
+	@Override
+	public void shutdown() {
+		executor.shutdown();
+	}
 
-    /**
-     * Executes the transaction asynchronously, when possible, with the given
-     * access mode and isolation level.
-     */
-    @Override
-    public <T> Future<T> submit(
-        TransactionalCallable<T> task,
-        AccessMode mode,
-        IsolationLevel isolation
-    ) {
-        checkArgument(task);
-        checkArgument(mode);
-        checkArgument(isolation);
-        checkNotTransaction();
-        checkNotShutdown();
-        return executor.submit(
-            new SimpleTransaction<T>(mode, isolation, this, task)
-        );
-    }
+	/**************************************************************************
+	 * Private Methods
+	 **************************************************************************/
 
-    /** */
-    @Override
-    public void shutdown() { executor.shutdown(); }
-
-
-
-    /**************************************************************************
-     * Private Methods
-    **************************************************************************/
-
-    /** */
-    private void checkNotShutdown() {
-        if (executor.isShutdown()) {
-            throw new RejectedExecutionException("manager is shut down");
-        }
-    }
+	/** */
+	private void checkNotShutdown() {
+		if (executor.isShutdown()) {
+			throw new RejectedExecutionException("manager is shut down");
+		}
+	}
 }

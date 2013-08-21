@@ -7,22 +7,21 @@ import java.util.concurrent.locks.Lock;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 abstract class LockStrategy {
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Empty constructor of objects of class LockStrategy. */
-    protected LockStrategy() {}
+	/** Empty constructor of objects of class LockStrategy. */
+	protected LockStrategy() {
+	}
 
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
-
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
-
-    /** */
-    protected abstract boolean acquire(Lock lock) throws InterruptedException;
+	/** */
+	protected abstract boolean acquire(Lock lock) throws InterruptedException;
 }

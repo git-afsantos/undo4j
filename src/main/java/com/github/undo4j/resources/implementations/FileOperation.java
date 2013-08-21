@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 
 public class FileOperation {
 
-	private enum Operation {
+	protected enum Operation {
 		COPY, MOVE, REMOVE;
 	}
 
@@ -18,8 +18,7 @@ public class FileOperation {
 	protected File tmpSrc;
 	protected File tmpDst;
 
-	protected FileOperation(Operation operation, File src, File dst)
-			throws IOException {
+	protected FileOperation(Operation operation, File src, File dst) throws IOException {
 		this.operation = operation;
 		this.src = src;
 		this.dst = dst;
@@ -109,8 +108,7 @@ public class FileOperation {
 		}
 	}
 
-	protected static void copyFileOrDirectory(File src, File dst)
-			throws IOException {
+	protected static void copyFileOrDirectory(File src, File dst) throws IOException {
 		if (src.isDirectory()) {
 			FileUtils.copyDirectory(src, dst);
 		} else if (src.isFile()) {
@@ -129,8 +127,7 @@ public class FileOperation {
 
 	protected static void checkFileExists(File file) throws IOException {
 		if (!file.exists()) {
-			throw new IOException("File " + file.getAbsolutePath()
-					+ " does not exist.");
+			throw new IOException("File " + file.getAbsolutePath() + " does not exist.");
 		}
 	}
 
@@ -138,14 +135,11 @@ public class FileOperation {
 		return createTempDirectory(prefix, null);
 	}
 
-	public static File createTempDirectory(String prefix, File directory)
-			throws IOException {
-		File tmpDir = File.createTempFile(prefix,
-				Long.toString(System.nanoTime()), directory);
+	public static File createTempDirectory(String prefix, File directory) throws IOException {
+		File tmpDir = File.createTempFile(prefix, Long.toString(System.nanoTime()), directory);
 		tmpDir.delete();
 		if (!tmpDir.mkdir()) {
-			throw new IOException("could not create temporary directory "
-					+ tmpDir.getAbsolutePath());
+			throw new IOException("could not create temporary directory " + tmpDir.getAbsolutePath());
 		}
 		return tmpDir;
 	}

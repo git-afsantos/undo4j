@@ -55,22 +55,16 @@ public class MongoTransactionDemo {
 		// mongoTransaction.deleteObjects(systems, snapshots);
 	}
 
-	public void addSnapshots(List<SystemObject> systems,
-			List<SnapshotObject> snapshots) throws InterruptedException,
+	public void addSnapshots(List<SystemObject> systems, List<SnapshotObject> snapshots) throws InterruptedException,
 			ExecutionException, UnknownHostException {
-		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(
-				systemDAO, systems, MongoAction.WRITE);
+		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(systemDAO,
+				systems, MongoAction.WRITE);
 		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
 				snapshotDAO, snapshots, MongoAction.WRITE);
 
-		AddSnapshotsTransaction transaction = new AddSnapshotsTransaction(
-				systemCollection, snapshotCollection,
-				ManagedResource
-						.from(new MongoResource<SystemObject, SystemDAO>(
-								new SystemResource())),
-				ManagedResource
-						.from(new MongoResource<SnapshotObject, SnapshotDAO>(
-								new SnapshotResource())));
+		AddSnapshotsTransaction transaction = new AddSnapshotsTransaction(systemCollection, snapshotCollection,
+				ManagedResource.from(new MongoResource<SystemObject, SystemDAO>(new SystemResource())),
+				ManagedResource.from(new MongoResource<SnapshotObject, SnapshotDAO>(new SnapshotResource())));
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 		Future<Boolean> f = tm.submit(transaction);
@@ -78,24 +72,18 @@ public class MongoTransactionDemo {
 		java.lang.System.out.println(f.get().booleanValue());
 	}
 
-	public void deleteObjects(List<SystemObject> systems,
-			List<SnapshotObject> snapshots) throws InterruptedException,
+	public void deleteObjects(List<SystemObject> systems, List<SnapshotObject> snapshots) throws InterruptedException,
 			ExecutionException {
-		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(
-				systemDAO, systems, MongoAction.DELETE);
+		MongoCollectionInterface<SystemObject, SystemDAO> systemCollection = new MongoCollectionInterface<>(systemDAO,
+				systems, MongoAction.DELETE);
 		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
 				snapshotDAO, snapshots, MongoAction.DELETE);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 
-		DeleteObjectsTransaction transaction = new DeleteObjectsTransaction(
-				systemCollection, snapshotCollection,
-				ManagedResource
-						.from(new MongoResource<SystemObject, SystemDAO>(
-								new SystemResource())),
-				ManagedResource
-						.from(new MongoResource<SnapshotObject, SnapshotDAO>(
-								new SnapshotResource())));
+		DeleteObjectsTransaction transaction = new DeleteObjectsTransaction(systemCollection, snapshotCollection,
+				ManagedResource.from(new MongoResource<SystemObject, SystemDAO>(new SystemResource())),
+				ManagedResource.from(new MongoResource<SnapshotObject, SnapshotDAO>(new SnapshotResource())));
 		Future<Boolean> f = tm.submit(transaction);
 
 		java.lang.System.out.println(f.get().booleanValue());
@@ -111,12 +99,9 @@ public class MongoTransactionDemo {
 				systemDAO, system, MongoAction.READ);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		ReadSystemTransaction transaction = new ReadSystemTransaction(
-				systemCollection,
-				ManagedResource
-						.from(new MongoResource<SystemObject, SystemDAO>(
-								systemResource, LockManagers
-										.newNullLockManager())));
+		ReadSystemTransaction transaction = new ReadSystemTransaction(systemCollection,
+				ManagedResource.from(new MongoResource<SystemObject, SystemDAO>(systemResource, LockManagers
+						.newNullLockManager())));
 		tm.submit(transaction);
 		return systemResource.buildState().get().getObjects().get(0);
 	}

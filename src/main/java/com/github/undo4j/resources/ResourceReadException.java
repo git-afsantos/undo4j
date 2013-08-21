@@ -1,30 +1,31 @@
 package com.github.undo4j.resources;
 
-
 /**
  * ResourceReadException
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 public class ResourceReadException extends ResourceException {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Empty constructor of objects of class ResourceReadException. */
-    public ResourceReadException() { super(); }
+	/** Empty constructor of objects of class ResourceReadException. */
+	public ResourceReadException() {
+		super();
+	}
 
+	/** Parameter constructor of objects of class ResourceReadException. */
+	public ResourceReadException(String message) {
+		super(message);
+	}
 
-    /** Parameter constructor of objects of class ResourceReadException. */
-    public ResourceReadException(String message) { super(message); }
-
-
-    /** Parameter constructor of objects of class ResourceReadException. */
-    public ResourceReadException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/** Parameter constructor of objects of class ResourceReadException. */
+	public ResourceReadException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

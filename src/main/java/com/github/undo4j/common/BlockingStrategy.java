@@ -7,30 +7,30 @@ import java.util.concurrent.locks.Lock;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 final class BlockingStrategy extends LockStrategy {
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /**
-     * Empty constructor of objects of class BlockingStrategy.
-     */
-    BlockingStrategy() {}
+	/**
+	 * Empty constructor of objects of class BlockingStrategy.
+	 */
+	BlockingStrategy() {
+	}
 
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
-
-    /**
-     * Acquires the lock, blocking if necessary.
-     * Returns true if the lock has been acquired. Returns false otherwise.
-     */
-    @Override
-    protected boolean acquire(Lock lock) {
-        lock.lock();
-        return true;
-    }
+	/**
+	 * Acquires the lock, blocking if necessary. Returns true if the lock has
+	 * been acquired. Returns false otherwise.
+	 */
+	@Override
+	protected boolean acquire(Lock lock) {
+		lock.lock();
+		return true;
+	}
 }

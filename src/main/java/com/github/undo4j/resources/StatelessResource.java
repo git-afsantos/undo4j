@@ -7,65 +7,61 @@ import com.github.undo4j.common.LockManager;
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
 public class StatelessResource<T> extends AbstractResource<T> {
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Parameter constructor of objects of class StatelessResource. */
-    public StatelessResource(
-		InternalResource<T> resource, LockManager lockManager
-	) {
-        super(resource, lockManager);
-    }
+	/** Parameter constructor of objects of class StatelessResource. */
+	public StatelessResource(InternalResource<T> resource, LockManager lockManager) {
+		super(resource, lockManager);
+	}
 
+	/** Copy constructor of objects of class StatelessResource. */
+	protected StatelessResource(StatelessResource<T> instance) {
+		super(instance);
+	}
 
-    /** Copy constructor of objects of class StatelessResource. */
-    protected StatelessResource(StatelessResource<T> instance) {
-        super(instance);
-    }
+	/**************************************************************************
+	 * Public Methods
+	 **************************************************************************/
 
-
-
-    /**************************************************************************
-     * Public Methods
-    **************************************************************************/
-
-    /** */
-    @Override
-    public final ResourceState<T> read() {
-        try { return getInternalResource().buildState(); }
-        catch (Exception e) {
-            throw new ResourceReadException(e.getMessage(), e);
-        }
-    }
-
-    /** */
-    @Override
-    public final void write(ResourceState<T> state) {
-        try { getInternalResource().applyState(state); }
-        catch (Exception e) {
-            throw new ResourceWriteException(e.getMessage(), e);
-        }
-    }
-
-
-    /** Overridable */
+	/** */
 	@Override
-	public void commit() {}
+	public final ResourceState<T> read() {
+		try {
+			return getInternalResource().buildState();
+		} catch (Exception e) {
+			throw new ResourceReadException(e.getMessage(), e);
+		}
+	}
 
+	/** */
+	@Override
+	public final void write(ResourceState<T> state) {
+		try {
+			getInternalResource().applyState(state);
+		} catch (Exception e) {
+			throw new ResourceWriteException(e.getMessage(), e);
+		}
+	}
 
 	/** Overridable */
 	@Override
-	public void rollback() {}
-
+	public void commit() {
+	}
 
 	/** Overridable */
 	@Override
-	public void update() {}
+	public void rollback() {
+	}
 
+	/** Overridable */
+	@Override
+	public void update() {
+	}
 
 	/** */
 	@Override

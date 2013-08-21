@@ -15,8 +15,7 @@ public class FilesystemResource extends StatelessResource<FilesystemInterface> {
 	public void rollback() {
 		InternalResource<FilesystemInterface> internalResource = getInternalResource();
 		try {
-			ResourceState<FilesystemInterface> resourceState = internalResource
-					.buildState();
+			ResourceState<FilesystemInterface> resourceState = internalResource.buildState();
 			FilesystemInterface dataObject = resourceState.get();
 			dataObject.rollback();
 		} catch (Exception e) {

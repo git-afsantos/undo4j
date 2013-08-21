@@ -1,25 +1,26 @@
 package com.github.undo4j.transactions;
 
-
 /**
  * ReadOnlyHandleException
  * 
  * @author afs
  * @version 2013
-*/
+ */
 
-public final class ReadOnlyControllerException
-        extends UnsupportedOperationException {
-    private static final long serialVersionUID = 1L;
+public final class ReadOnlyControllerException extends UnsupportedOperationException {
+	private static final long serialVersionUID = 1L;
 
-    /**************************************************************************
-     * Constructors
-    **************************************************************************/
+	/**************************************************************************
+	 * Constructors
+	 **************************************************************************/
 
-    /** Empty constructor of objects of class ReadOnlyHandleException. */
-    ReadOnlyControllerException() { super(); }
+	/** Empty constructor of objects of class ReadOnlyHandleException. */
+	ReadOnlyControllerException() {
+		super();
+	}
 
-
-    /** Parameter constructor of objects of class ReadOnlyHandleException. */
-    ReadOnlyControllerException(String msg) { super(msg); }
+	/** Parameter constructor of objects of class ReadOnlyHandleException. */
+	ReadOnlyControllerException(String msg) {
+		super(msg);
+	}
 }

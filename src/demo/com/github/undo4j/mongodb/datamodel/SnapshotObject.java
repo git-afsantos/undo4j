@@ -61,8 +61,7 @@ public class SnapshotObject {
 
 	@Override
 	public String toString() {
-		return "Snapshot [id=" + id + ", systemID=" + systemID
-				+ ", snapshotID=" + snapshotID + "]";
+		return "Snapshot [id=" + id + ", systemID=" + systemID + ", snapshotID=" + snapshotID + "]";
 	}
 
 	@Override

@@ -32,13 +32,11 @@ public class FilesystemTransactionDemo {
 		setupDstDirectory();
 	}
 
-	public void moveSrcToDst() throws IOException, InterruptedException,
-			ExecutionException {
+	public void moveSrcToDst() throws IOException, InterruptedException, ExecutionException {
 		FilesystemInterface filesystemInterface = new FilesystemInterface();
 
-		MoveDirectoryTransaction transaction = new MoveDirectoryTransaction(
-				srcDir, dstDir, ManagedResource.from(new FilesystemResource(
-						new FilesystemInternalResource())), filesystemInterface);
+		MoveDirectoryTransaction transaction = new MoveDirectoryTransaction(srcDir, dstDir,
+				ManagedResource.from(new FilesystemResource(new FilesystemInternalResource())), filesystemInterface);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
 		Future<String> f = tm.submit(transaction);
@@ -51,8 +49,7 @@ public class FilesystemTransactionDemo {
 		srcDir = FileOperation.createTempDirectory("srcDir");
 		srcDir.delete();
 		if (!srcDir.mkdir()) {
-			throw new IOException("could not create temporary src directory "
-					+ srcDir.getAbsolutePath());
+			throw new IOException("could not create temporary src directory " + srcDir.getAbsolutePath());
 		}
 
 		File.createTempFile("aaa", "", srcDir);

@@ -26,8 +26,8 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 	 **************************************************************************/
 
 	/** Parameter constructor of objects of class SimpleTransaction. */
-	SimpleTransaction(AccessMode mode, IsolationLevel isolation,
-			TransactionListener listener, TransactionalCallable<T> body) {
+	SimpleTransaction(AccessMode mode, IsolationLevel isolation, TransactionListener listener,
+			TransactionalCallable<T> body) {
 		super(mode, isolation, listener);
 		client = body;
 	}
@@ -99,8 +99,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 	 **************************************************************************/
 
 	/** */
-	private T computeResult(Iterable<ManagedResource<?>> resources)
-			throws Exception {
+	private T computeResult(Iterable<ManagedResource<?>> resources) throws Exception {
 		try {
 			// Client code ----------------------------------------------------
 			return client.call();
@@ -129,8 +128,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 	}
 
 	/** */
-	private void rollback(Iterable<ManagedResource<?>> resources,
-			Exception cause) throws Exception {
+	private void rollback(Iterable<ManagedResource<?>> resources, Exception cause) throws Exception {
 		// Attempt to roll back on each resource.
 		// Execution is aborted as soon as an error is encountered.
 		// Try ------------------------------------------------------
@@ -153,8 +151,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 	}
 
 	/** */
-	private void rollbackAndRelease(Iterable<ManagedResource<?>> resources,
-			Exception cause) throws Exception {
+	private void rollbackAndRelease(Iterable<ManagedResource<?>> resources, Exception cause) throws Exception {
 		try {
 			rollback(resources, cause);
 		} finally {
@@ -163,8 +160,7 @@ final class SimpleTransaction<T> extends AbstractTransaction<T> {
 	}
 
 	/** */
-	private void trySafeCommit(Iterable<ManagedResource<?>> resources)
-			throws Exception {
+	private void trySafeCommit(Iterable<ManagedResource<?>> resources) throws Exception {
 		try {
 			commit(resources);
 		} catch (Exception ex) {

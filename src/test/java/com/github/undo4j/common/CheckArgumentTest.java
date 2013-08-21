@@ -7,24 +7,24 @@ import org.junit.Test;
 
 /**
  * The test class CheckArgumentTest.
- *
- * @author  afs
+ * 
+ * @author afs
  * @version 2013
  */
 public class CheckArgumentTest {
 
-    /** */
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullArgument() {
-        checkArgument(null);
-    }
+	/** */
+	@Test(expected = IllegalArgumentException.class)
+	public void testNullArgument() {
+		checkArgument(null);
+	}
 
-    /** */
-    @Test
-    public void testArgument() {
-        Object o = new Object();
-        checkArgument(o);
+	/** */
+	@Test
+	public void testArgument() {
+		Object o = new Object();
+		checkArgument(o);
 
-        assertNotNull(o);
-    }
+		assertNotNull(o);
+	}
 }

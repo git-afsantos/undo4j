@@ -11,8 +11,7 @@ public class ProcessStudentsTransaction implements TransactionalCallable<String>
 	private List<ManagedResource<Student>> students;
 	private List<StudentOperation> operations;
 
-	public ProcessStudentsTransaction(List<ManagedResource<Student>> students,
-			List<StudentOperation> operations) {
+	public ProcessStudentsTransaction(List<ManagedResource<Student>> students, List<StudentOperation> operations) {
 		this.students = students;
 		this.operations = operations;
 	}
