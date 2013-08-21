@@ -45,14 +45,12 @@ public class MongoTransactionDemo {
 	public static void main(String[] args) throws Exception {
 		MongoTransactionDemo demo = new MongoTransactionDemo();
 
-		buildDataObjectsForAdding(true);
-		// buildDataObjectsForAdding(true);
+		buildDataObjectsForAdding(false);
 
 		demo.addSnapshots(systems, snapshots);
 
 		// buildDataObjectsForDelete(false);
-		// // buildDataObjectsForDelete(true);
-		// mongoTransaction.deleteObjects(systems, snapshots);
+		// demo.deleteObjects(systems, snapshots);
 	}
 
 	public void addSnapshots(List<SystemObject> systems, List<SnapshotObject> snapshots) throws InterruptedException,
@@ -62,14 +60,14 @@ public class MongoTransactionDemo {
 		MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshotCollection = new MongoCollectionInterface<>(
 				snapshotDAO, snapshots, MongoAction.WRITE);
 
-		AddSnapshotsTransaction transaction = new AddSnapshotsTransaction(systemCollection, snapshotCollection,
+		AddObjectsTransaction transaction = new AddObjectsTransaction(systemCollection, snapshotCollection,
 				ManagedResource.from(new MongoResource<SystemObject, SystemDAO>(new SystemResource())),
 				ManagedResource.from(new MongoResource<SnapshotObject, SnapshotDAO>(new SnapshotResource())));
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		Future<Boolean> f = tm.submit(transaction);
+		Future<String> f = tm.submit(transaction);
 
-		java.lang.System.out.println(f.get().booleanValue());
+		java.lang.System.out.println(f.get());
 	}
 
 	public void deleteObjects(List<SystemObject> systems, List<SnapshotObject> snapshots) throws InterruptedException,
@@ -84,9 +82,9 @@ public class MongoTransactionDemo {
 		DeleteObjectsTransaction transaction = new DeleteObjectsTransaction(systemCollection, snapshotCollection,
 				ManagedResource.from(new MongoResource<SystemObject, SystemDAO>(new SystemResource())),
 				ManagedResource.from(new MongoResource<SnapshotObject, SnapshotDAO>(new SnapshotResource())));
-		Future<Boolean> f = tm.submit(transaction);
+		Future<String> f = tm.submit(transaction);
 
-		java.lang.System.out.println(f.get().booleanValue());
+		java.lang.System.out.println(f.get());
 	}
 
 	public SystemObject readSystem(String systemID) throws Exception {
@@ -120,7 +118,6 @@ public class MongoTransactionDemo {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static void buildDataObjectsForDelete(boolean error) {
 		clearLists();
 

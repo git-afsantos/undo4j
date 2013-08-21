@@ -12,7 +12,7 @@ import com.github.undo4j.resources.implementations.MongoCollectionInterface;
 import com.github.undo4j.transactions.ManagedResource;
 import com.github.undo4j.transactions.TransactionalCallable;
 
-public class DeleteObjectsTransaction implements TransactionalCallable<Boolean> {
+public class DeleteObjectsTransaction implements TransactionalCallable<String> {
 
 	private ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource;
 	private ManagedResource<MongoCollectionInterface<SnapshotObject, SnapshotDAO>> snapshotResource;
@@ -30,10 +30,11 @@ public class DeleteObjectsTransaction implements TransactionalCallable<Boolean> 
 	}
 
 	@Override
-	public Boolean call() throws Exception {
+	public String call() throws Exception {
 		snapshotResource.write(new ImmutableState<MongoCollectionInterface<SnapshotObject, SnapshotDAO>>(snapshots));
 		systemResource.write(new ImmutableState<MongoCollectionInterface<SystemObject, SystemDAO>>(systems));
-		return new Boolean(true);
+
+		return "Objects deleted. Transaction will commit.";
 	}
 
 	@Override

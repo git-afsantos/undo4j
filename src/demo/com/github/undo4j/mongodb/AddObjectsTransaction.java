@@ -12,7 +12,7 @@ import com.github.undo4j.resources.implementations.MongoCollectionInterface;
 import com.github.undo4j.transactions.ManagedResource;
 import com.github.undo4j.transactions.TransactionalCallable;
 
-class AddSnapshotsTransaction implements TransactionalCallable<Boolean> {
+class AddObjectsTransaction implements TransactionalCallable<String> {
 	/**
 	 * 
 	 */
@@ -21,7 +21,7 @@ class AddSnapshotsTransaction implements TransactionalCallable<Boolean> {
 	private MongoCollectionInterface<SystemObject, SystemDAO> systems;
 	private MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots;
 
-	public AddSnapshotsTransaction(MongoCollectionInterface<SystemObject, SystemDAO> systems,
+	public AddObjectsTransaction(MongoCollectionInterface<SystemObject, SystemDAO> systems,
 			MongoCollectionInterface<SnapshotObject, SnapshotDAO> snapshots,
 			ManagedResource<MongoCollectionInterface<SystemObject, SystemDAO>> systemResource,
 			ManagedResource<MongoCollectionInterface<SnapshotObject, SnapshotDAO>> snapshotResource) {
@@ -32,17 +32,18 @@ class AddSnapshotsTransaction implements TransactionalCallable<Boolean> {
 	}
 
 	@Override
-	public Boolean call() throws Exception {
+	public String call() throws Exception {
 		systemResource.write(new ImmutableState<MongoCollectionInterface<SystemObject, SystemDAO>>(systems));
 		snapshotResource.write(new ImmutableState<MongoCollectionInterface<SnapshotObject, SnapshotDAO>>(snapshots));
-		return new Boolean(true);
+
+		return "Objects added. Transaction will commit.";
 	}
 
 	@Override
 	public Iterable<ManagedResource<?>> getManagedResources() {
 		List<ManagedResource<?>> list = new ArrayList<>();
-		list.add(systemResource);
 		list.add(snapshotResource);
+		list.add(systemResource);
 		return list;
 	}
 
