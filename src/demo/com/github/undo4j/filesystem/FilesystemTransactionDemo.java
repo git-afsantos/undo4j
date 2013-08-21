@@ -41,9 +41,9 @@ public class FilesystemTransactionDemo {
 						new FilesystemInternalResource())), filesystemInterface);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		Future<Boolean> f = tm.submit(transaction);
+		Future<String> f = tm.submit(transaction);
 
-		System.out.println(f.get().booleanValue());
+		System.out.println(f.get() + "\n");
 
 	}
 

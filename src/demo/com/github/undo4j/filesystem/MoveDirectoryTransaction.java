@@ -10,7 +10,7 @@ import com.github.undo4j.resources.implementations.FilesystemInterface;
 import com.github.undo4j.transactions.ManagedResource;
 import com.github.undo4j.transactions.TransactionalCallable;
 
-public class MoveDirectoryTransaction implements TransactionalCallable<Boolean> {
+public class MoveDirectoryTransaction implements TransactionalCallable<String> {
 
 	private ManagedResource<FilesystemInterface> filesystemResource;
 	private FilesystemInterface filesystemInterface;
@@ -24,10 +24,10 @@ public class MoveDirectoryTransaction implements TransactionalCallable<Boolean> 
 	}
 
 	@Override
-	public Boolean call() throws Exception {
+	public String call() throws Exception {
 		filesystemResource.write(new ImmutableState<FilesystemInterface>(
 				filesystemInterface));
-		return new Boolean(true);
+		return "File system operatiosn complete. Transaction will now commit";
 	}
 
 	@Override
