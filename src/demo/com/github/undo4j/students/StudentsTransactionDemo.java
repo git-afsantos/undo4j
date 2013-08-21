@@ -17,16 +17,16 @@ public class StudentsTransactionDemo {
 
 		List<Student> students = new ArrayList<>(10);
 
-		// students.add(new Student("Bart", 3));
-		// students.add(new Student("AJ", 5));
+		students.add(new Student("Bart", 3));
+		students.add(new Student("AJ", 5));
 		students.add(new Student("Georgios", 8.5));
-		// students.add(new Student("Alberto", 7.5));
-		// students.add(new Student("Anwar", 7));
-		// students.add(new Student("Rute", 7));
-		// students.add(new Student("Christiaan", 8));
-		// students.add(new Student("Theo", 7));
-		// students.add(new Student("Dimithrios", 8));
-		// students.add(new Student("Dennis", 9));
+		students.add(new Student("Alberto", 7.5));
+		students.add(new Student("Anwar", 7));
+		students.add(new Student("Rute", 7));
+		students.add(new Student("Christiaan", 8));
+		students.add(new Student("Theo", 7));
+		students.add(new Student("Dimithrios", 8));
+		students.add(new Student("Dennis", 9));
 
 		runTransaction(demo, students);
 	}
@@ -34,8 +34,8 @@ public class StudentsTransactionDemo {
 	private static void runTransaction(StudentsTransactionDemo demo, List<Student> students) throws IOException,
 			Exception {
 		List<StudentOperation> operations = new ArrayList<>();
-		// operations.add(new RaiseGrade(0.1));
-		operations.add(new RaiseGrade(0.5));
+		operations.add(new RaiseGrade(0.1));
+		// operations.add(new RaiseGrade(0.5));
 
 		printStudents(students);
 		pause();
@@ -70,7 +70,6 @@ public class StudentsTransactionDemo {
 
 	private static void pause() throws IOException {
 		System.in.read();
-
 	}
 
 	private static void printStudents(List<Student> students) {

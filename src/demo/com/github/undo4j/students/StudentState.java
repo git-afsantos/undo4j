@@ -23,6 +23,11 @@ public class StudentState {
 		return grade;
 	}
 
+	@Override
+	public String toString() {
+		return "StudentState [name=" + name + ", grade=" + grade + "]";
+	}
+
 	public StudentState raiseGrade(double percent) {
 		double newGrade = grade + grade * percent;
 		/*
@@ -33,16 +38,6 @@ public class StudentState {
 		// throw new RuntimeException(name + "'s grade is greater than 10!");
 		// }
 		return new StudentState(name, newGrade);
-	}
-
-	@Override
-	public String toString() {
-		return "StudentState [name=" + name + ", grade=" + grade + "]";
-	}
-
-	@Override
-	protected StudentState clone() {
-		return new StudentState(this);
 	}
 
 }
