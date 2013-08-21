@@ -15,19 +15,34 @@ public class StudentsTransactionDemo {
 	public static void main(String[] args) throws Exception {
 		StudentsTransactionDemo demo = new StudentsTransactionDemo();
 
-		List<Student> students = buildStudentsList();
+		List<Student> students = new ArrayList<>(10);
+
+		students.add(new Student("Bart", 3));
+		students.add(new Student("AJ", 5));
+		students.add(new Student("Georgios", 8.5));
+		students.add(new Student("Alberto", 7.5));
+		students.add(new Student("Anwar", 7));
+		students.add(new Student("Rute", 7));
+		students.add(new Student("Christiaan", 8));
+		students.add(new Student("Theo", 7));
+		students.add(new Student("Dimithrios", 8));
+		students.add(new Student("Dennis", 9));
 
 		runTransaction(demo, students);
 	}
 
 	private static void runTransaction(StudentsTransactionDemo demo, List<Student> students) throws IOException,
 			Exception {
-		List<StudentOperation> operations = buildOperationsList();
+		List<StudentOperation> operations = new ArrayList<>();
+		operations.add(new RaiseGrade(0.1));
+		operations.add(new RaiseGrade(0.5));
 
 		printStudents(students);
-		System.in.read();
+		pause();
 
 		demo.processStudents(students, operations);
+
+		pause();
 
 		printStudents(students);
 	}
@@ -36,36 +51,23 @@ public class StudentsTransactionDemo {
 		List<ManagedResource<Student>> managedStudents = manageStudents(students);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
-		Future<String> f = tm.submit(new ProcessStudentsTransaction(managedStudents, operations));
+		try {
+			Future<String> f = tm.submit(new ProcessStudentsTransaction(managedStudents, operations));
 
-		System.out.println(f.get() + "\n");
+			System.out.println(f.get() + "\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	private static List<Student> buildStudentsList() {
-		List<Student> students = new ArrayList<>(10);
-
-		students.add(new Student("Georgios", 8.5));
-		students.add(new Student("Alberto", 7.5));
-		students.add(new Student("Anwar", 7));
-		students.add(new Student("Rute", 7));
-		students.add(new Student("AJ", 5));
-		students.add(new Student("Christiaan", 8));
-		students.add(new Student("Bart", 3));
-		students.add(new Student("Theo", 7));
-		students.add(new Student("Dimithrios", 8));
-		students.add(new Student("Dennis", 9));
-
-		return students;
-	}
-
-	private static List<StudentOperation> buildOperationsList() {
-		List<StudentOperation> operations = new ArrayList<>();
-
-		operations.add(new RaiseGrade(0.1));
-		// operations.add(new RaiseGrade(0.5));
-
-		return operations;
-	}
+	// private List<Student> unmanageStudents(List<ManagedResource<Student>>
+	// managedStudents) {
+	// List<Student> students = new ArrayList<>(managedStudents.size());
+	// for (ManagedResource<Student> managedStudent : managedStudents) {
+	// students.add(managedStudent.read().get());
+	// }
+	// return students;
+	// }
 
 	private List<ManagedResource<Student>> manageStudents(List<Student> students) {
 		List<ManagedResource<Student>> managedStudents = new ArrayList<>(students.size());
@@ -73,6 +75,11 @@ public class StudentsTransactionDemo {
 			managedStudents.add(ManagedResource.from(new ShadowResource<>(new StudentResource(student))));
 		}
 		return managedStudents;
+	}
+
+	private static void pause() throws IOException {
+		System.in.read();
+
 	}
 
 	private static void printStudents(List<Student> students) {

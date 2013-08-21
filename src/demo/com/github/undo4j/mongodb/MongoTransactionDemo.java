@@ -45,7 +45,7 @@ public class MongoTransactionDemo {
 	public static void main(String[] args) throws Exception {
 		MongoTransactionDemo demo = new MongoTransactionDemo();
 
-		buildDataObjectsForAdding(false);
+		buildDataObjectsForAdding(true);
 		// buildDataObjectsForAdding(true);
 
 		demo.addSnapshots(systems, snapshots);

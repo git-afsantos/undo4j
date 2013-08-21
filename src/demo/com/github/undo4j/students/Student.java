@@ -10,6 +10,11 @@ public class Student {
 		this.grade = grade;
 	}
 
+	protected Student(Student student) {
+		this.name = student.name;
+		this.grade = student.grade;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -28,18 +33,20 @@ public class Student {
 
 	public void raiseGrade(double percent) {
 		grade += grade * percent;
-
-	}
-
-	public void checIsValid() {
 		if (grade > 10) {
 			throw new RuntimeException(name + "'s grade is greater than 10!");
 		}
+
 	}
 
 	@Override
 	public String toString() {
 		return "Student [name=" + name + ", grade=" + grade + "]";
+	}
+
+	@Override
+	protected Student clone() {
+		return new Student(this);
 	}
 
 }

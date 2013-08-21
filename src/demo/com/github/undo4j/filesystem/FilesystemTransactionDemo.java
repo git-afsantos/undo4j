@@ -24,7 +24,12 @@ public class FilesystemTransactionDemo {
 		// pause execution to inspect directories
 		System.in.read();
 
-		demo.moveSrcToDst();
+		try {
+			demo.moveSrcToDst();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.in.read();
 	}
 
 	public FilesystemTransactionDemo() throws IOException {

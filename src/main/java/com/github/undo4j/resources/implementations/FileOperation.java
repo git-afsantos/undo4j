@@ -76,7 +76,7 @@ public class FileOperation {
 		copyFile();
 		removeSrcFile();
 
-		throw new IOException("simulated error!");
+		throw new RuntimeException("simulated error!");
 	}
 
 	protected void copyFile() throws IOException {

@@ -1,6 +1,6 @@
 package com.github.undo4j.students;
 
-import com.github.undo4j.resources.ImmutableState;
+import com.github.undo4j.resources.NormalState;
 import com.github.undo4j.transactions.ManagedResource;
 
 public class RaiseGrade implements StudentOperation {
@@ -15,7 +15,7 @@ public class RaiseGrade implements StudentOperation {
 	public void updateStudent(ManagedResource<Student> student) throws Exception {
 		Student s = student.read().get();
 		s.raiseGrade(raisePercent);
-		student.write(new ImmutableState<Student>(s));
+		student.write(new NormalState<Student>(s));
 	}
 
 }
