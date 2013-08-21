@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.github.undo4j.resources.implementations.FileOperation;
+import org.apache.commons.io.FileUtils;
+
 import com.github.undo4j.resources.implementations.FilesystemInterface;
 import com.github.undo4j.resources.implementations.FilesystemInternalResource;
 import com.github.undo4j.resources.implementations.FilesystemResource;
@@ -15,32 +16,31 @@ import com.github.undo4j.transactions.TransactionManagers;
 
 public class FilesystemTransactionDemo {
 
-	private File srcDir;
-	private File dstDir;
+	private static File srcDir;
+	private static File dstDir;
+	private static File finalDir;
 
 	public static void main(String[] args) throws Exception {
-		FilesystemTransactionDemo demo = new FilesystemTransactionDemo();
+		setupDirectories();
 
-		// pause execution to inspect directories
-		System.in.read();
-
-		try {
-			demo.moveSrcToDst();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.in.read();
-	}
-
-	public FilesystemTransactionDemo() throws IOException {
-		setupSrcDirectory();
-		setupDstDirectory();
-	}
-
-	public void moveSrcToDst() throws IOException, InterruptedException, ExecutionException {
 		FilesystemInterface filesystemInterface = new FilesystemInterface();
+		filesystemInterface.mv(srcDir, dstDir);
+		filesystemInterface.cp(dstDir, finalDir);
+		// filesystemInterface.rm(dstDir);
 
-		MoveDirectoryTransaction transaction = new MoveDirectoryTransaction(srcDir, dstDir,
+		pause();
+
+		FilesystemTransactionDemo.doOperations(filesystemInterface);
+
+		pause();
+
+		cleanUp();
+	}
+
+	public static void doOperations(FilesystemInterface filesystemInterface) throws IOException, InterruptedException,
+			ExecutionException {
+
+		FilesystemOperationsTransaction transaction = new FilesystemOperationsTransaction(
 				ManagedResource.from(new FilesystemResource(new FilesystemInternalResource())), filesystemInterface);
 
 		TransactionManager tm = TransactionManagers.newSynchronousManager();
@@ -50,36 +50,71 @@ public class FilesystemTransactionDemo {
 
 	}
 
-	public void setupSrcDirectory() throws IOException {
-		srcDir = FileOperation.createTempDirectory("srcDir");
+	private static void setupSrcDirectory() throws IOException {
+		srcDir = new File("/Users/mferreira/Desktop/demo/1-srcDir");
 		srcDir.delete();
 		if (!srcDir.mkdir()) {
-			throw new IOException("could not create temporary src directory " + srcDir.getAbsolutePath());
+			throw new IOException("could not create src directory " + srcDir.getAbsolutePath());
 		}
 
-		File.createTempFile("aaa", "", srcDir);
-		File.createTempFile("bbb", "", srcDir);
-		File.createTempFile("ccc", "", srcDir);
-		File.createTempFile("ddd", "", srcDir);
-		File subDir = FileOperation.createTempDirectory("subDir", srcDir);
-		File.createTempFile("eee", "", subDir);
-		File.createTempFile("fff", "", subDir);
+		new File(srcDir, "cobol").createNewFile();
+		new File(srcDir, "java").createNewFile();
+		new File(srcDir, "prolog").createNewFile();
+		new File(srcDir, "haskell").createNewFile();
+		File subDir = new File(srcDir, "subDir");
+		if (!subDir.mkdir()) {
+			throw new IOException("could not create src sub directory " + srcDir.getAbsolutePath());
+		}
+		new File(subDir, "csharp").createNewFile();
+		new File(subDir, "lisp").createNewFile();
 
 		System.out.println("Source dir: " + srcDir.getAbsolutePath());
 	}
 
-	public void setupDstDirectory() throws IOException {
-		dstDir = FileOperation.createTempDirectory("dstDir");
+	private static void setupDstDirectory() throws IOException {
+		dstDir = new File("/Users/mferreira/Desktop/demo/2-dstDir");
+		if (!dstDir.mkdir()) {
+			throw new IOException("could not create dst directory " + srcDir.getAbsolutePath());
+		}
 
-		File.createTempFile("111", "", dstDir);
-		File.createTempFile("222", "", dstDir);
-		File.createTempFile("333", "", dstDir);
-		File.createTempFile("444", "", dstDir);
-		File subDir = FileOperation.createTempDirectory("subDir", dstDir);
-		File.createTempFile("555", "", subDir);
-		File.createTempFile("666", "", subDir);
+		new File(dstDir, "apple").createNewFile();
+		new File(dstDir, "orange").createNewFile();
+		File subDir = new File(dstDir, "subDir");
+		if (!subDir.mkdir()) {
+			throw new IOException("could not create dst sub directory " + srcDir.getAbsolutePath());
+		}
+		new File(subDir, "mango").createNewFile();
 
 		System.out.println("Destination dir: " + dstDir.getAbsolutePath());
+	}
+
+	private static void setupFinalDirectory() throws IOException {
+		finalDir = new File("/Users/mferreira/Desktop/demo/3-finalDir");
+
+		System.out.println("Final dir: " + finalDir.getAbsolutePath());
+	}
+
+	private static void setupDirectories() throws IOException {
+		setupSrcDirectory();
+		setupDstDirectory();
+		setupFinalDirectory();
+	}
+
+	private static void pause() throws IOException {
+		System.in.read();
+	}
+
+	private static void cleanUp() throws IOException {
+		if (srcDir != null && srcDir.exists()) {
+			FileUtils.deleteDirectory(srcDir);
+		}
+		if (dstDir != null && dstDir.exists()) {
+			FileUtils.deleteDirectory(dstDir);
+		}
+		if (finalDir != null && finalDir.exists()) {
+			FileUtils.deleteDirectory(finalDir);
+		}
+
 	}
 
 }

@@ -69,14 +69,14 @@ public class FileOperation {
 	protected void removeSrcFile() throws IOException {
 		checkFileExists(src);
 		saveCopyOfSource();
-		src.delete();
+		deleteFileOrDirectory(src);
 	}
 
 	protected void moveFile() throws IOException {
 		copyFile();
 		removeSrcFile();
 
-		throw new RuntimeException("simulated error!");
+		// throw new RuntimeException("simulated error!");
 	}
 
 	protected void copyFile() throws IOException {
