@@ -64,7 +64,6 @@
 						<configuration>
 							<sources>
 								<source>src/demo</source>
-								<source>src/demo-test</source>
 							</sources>
 						</configuration>
 					</execution>
