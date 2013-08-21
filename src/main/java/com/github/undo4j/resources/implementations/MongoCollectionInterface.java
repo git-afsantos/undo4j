@@ -18,22 +18,6 @@ public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
 		this.objectsChanged = new ArrayList<T>(objects.size());
 	}
 
-	public void rollback() {
-		switch (action) {
-		case READ:
-			break;
-		case WRITE:
-			action = MongoAction.DELETE;
-			break;
-		case DELETE:
-			action = MongoAction.WRITE;
-			objects = objectsChanged;
-			break;
-		}
-		run();
-		this.objectsChanged = new LinkedList<T>();
-	}
-
 	public void run() {
 		switch (action) {
 		case READ:
@@ -46,7 +30,23 @@ public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
 			deletObjects();
 			break;
 		}
+	}
 
+	public void rollback() {
+		switch (action) {
+		case READ:
+			break;
+		case WRITE:
+			action = MongoAction.DELETE;
+			objects = objectsChanged;
+			break;
+		case DELETE:
+			action = MongoAction.WRITE;
+			objects = objectsChanged;
+			break;
+		}
+		run();
+		this.objectsChanged = new LinkedList<T>();
 	}
 
 	public List<T> getObjects() {
@@ -63,7 +63,6 @@ public class MongoCollectionInterface<T, D extends MongoDAO<T>> {
 		} finally {
 			objectsChanged = deletedObjects;
 		}
-
 	}
 
 	private void writeObjects() {
