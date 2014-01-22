@@ -4,7 +4,7 @@
 	<groupId>com.github</groupId>
 	<artifactId>undo4j</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>jTransaction</name>
+	<name>undo4j</name>
 	<contributors>
 		<contributor>
 			<name>Andre Filipe Faria dos Santos</name>
