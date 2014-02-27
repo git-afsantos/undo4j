@@ -1,31 +1,28 @@
 package com.github.undo4j;
 
-import com.github.undo4j.AcquireStrategy;
-
 import java.util.concurrent.TimeUnit;
 
 
 /**
- * LockStrategies
+ * WaitStrategies
  * 
  * @author afs
  * @version 2013
  */
 
-final class LockStrategies {
+final class WaitStrategies {
 
     /*************************************************************************\
      *  Fields
     \*************************************************************************/
 
-    private static final String UNSUPPORTED = "Unsupported acquire strategy";
+    private static final String UNSUPPORTED = "Unsupported wait method";
 
-    private static final long DEFAULT_TIME      = 0L;
+    private static final long DEFAULT_TIME      = 1L;
     private static final TimeUnit DEFAULT_UNIT  = TimeUnit.MILLISECONDS;
 
-    private static final LockStrategy INSTANT   = new InstantStrategy();
-    private static final LockStrategy BLOCKING  = new BlockingStrategy();
-    private static final LockStrategy INTERRUPT = new InterruptibleStrategy();
+    private static final WaitStrategy INSTANT   = new InstantStrategy();
+    private static final WaitStrategy BLOCKING  = new BlockingStrategy();
 
 
 
@@ -34,9 +31,9 @@ final class LockStrategies {
     \*************************************************************************/
 
     /**
-     *  Empty constructor of class LockStrategies.
+     *  Empty constructor of class WaitStrategies.
      */
-    private LockStrategies() { throw new AssertionError(); }
+    private WaitStrategies() { throw new AssertionError(); }
 
 
 
@@ -45,7 +42,7 @@ final class LockStrategies {
     \*************************************************************************/
 
     /** */
-    static LockStrategy newStrategy(final AcquireStrategy strat) {
+    static WaitStrategy newStrategy(final WaitMethod strat) {
         assert strat != null;
         switch (strat) {
             case INSTANT:
@@ -57,9 +54,6 @@ final class LockStrategies {
             case BLOCKING:
             return BLOCKING;
 
-            case INTERRUPTIBLE:
-            return INTERRUPT;
-
             default:
             throw new AssertionError(UNSUPPORTED);
         }
@@ -67,8 +61,8 @@ final class LockStrategies {
 
 
     /** */
-    static LockStrategy newTimedStrategy(
-            final long time, final TimeUnit unit) {
+    static WaitStrategy newTimedStrategy
+            (final long time, final TimeUnit unit) {
         assert time >= 0;
         assert unit != null;
         return new TimedStrategy(time, unit);

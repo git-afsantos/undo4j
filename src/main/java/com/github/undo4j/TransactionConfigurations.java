@@ -25,8 +25,8 @@ public final class TransactionConfigurations {
     public static final AccessMode DEFAULT_ACCESS_MODE = AccessMode.WRITE;
 
     /** */
-    public static final AcquireStrategy DEFAULT_ACQUIRE_STRATEGY =
-        AcquireStrategy.BLOCKING;
+    public static final WaitMethod DEFAULT_WAIT_METHOD =
+        WaitMethod.BLOCKING;
 
     /** */
     public static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.SECONDS;
@@ -49,7 +49,7 @@ public final class TransactionConfigurations {
     private final AccessMode mode;
 
     /** */
-    private final AcquireStrategy strategy;
+    private final WaitMethod strategy;
 
     /** */
     private final TimeUnit unit;
@@ -74,13 +74,13 @@ public final class TransactionConfigurations {
      */
     private TransactionConfigurations(
             final AccessMode accessMode,
-            final AcquireStrategy acquireStrategy,
+            final WaitMethod waitMethod,
             final TimeUnit timeUnit,
             final long timeoutDelay,
             final TransactionListener[] transactionListeners,
             final CommitOperation onCommit) {
         mode = accessMode;
-        strategy = acquireStrategy;
+        strategy = waitMethod;
         unit = timeUnit;
         timeout = timeoutDelay;
         listeners = transactionListeners;
@@ -97,7 +97,7 @@ public final class TransactionConfigurations {
     public AccessMode getAccessMode() { return mode; }
 
     /** */
-    public AcquireStrategy getAcquireStrategy() { return strategy; }
+    public WaitMethod getWaitMethod() { return strategy; }
 
     /** */
     public TimeUnit getTimeUnit() { return unit; }
@@ -136,7 +136,7 @@ public final class TransactionConfigurations {
     public static TransactionConfigurations defaults() {
         return new TransactionConfigurations
             (DEFAULT_ACCESS_MODE,
-            DEFAULT_ACQUIRE_STRATEGY,
+            DEFAULT_WAIT_METHOD,
             DEFAULT_TIME_UNIT,
             DEFAULT_TIMEOUT_DELAY,
             new TransactionListener[0],
@@ -148,7 +148,7 @@ public final class TransactionConfigurations {
     public static Builder newBuilder() {
         return new Builder
             (DEFAULT_ACCESS_MODE,
-            DEFAULT_ACQUIRE_STRATEGY,
+            DEFAULT_WAIT_METHOD,
             DEFAULT_TIME_UNIT,
             DEFAULT_TIMEOUT_DELAY,
             new TransactionListener[0],
@@ -251,7 +251,7 @@ public final class TransactionConfigurations {
         \*********************************************************************/
 
         private AccessMode mode;
-        private AcquireStrategy strategy;
+        private WaitMethod strategy;
         private TimeUnit unit;
         private long timeout;
         private List<TransactionListener> listeners;
@@ -265,13 +265,13 @@ public final class TransactionConfigurations {
         /** Parameter constructor */
         Builder(
                 final AccessMode accessMode,
-                final AcquireStrategy acquireStrategy,
+                final WaitMethod waitMethod,
                 final TimeUnit timeUnit,
                 final long timeoutDelay,
                 final TransactionListener[] transactionListeners,
                 final CommitOperation onCommit) {
             mode            = accessMode;
-            strategy        = acquireStrategy;
+            strategy        = waitMethod;
             unit            = timeUnit;
             timeout         = timeoutDelay;
             commitOperation = onCommit;
@@ -288,7 +288,7 @@ public final class TransactionConfigurations {
         public AccessMode getAccessMode() { return mode; }
 
         /** */
-        public AcquireStrategy getAcquireStrategy() { return strategy; }
+        public WaitMethod getWaitMethod() { return strategy; }
 
         /** */
         public TimeUnit getTimeUnit() { return unit; }
@@ -320,10 +320,10 @@ public final class TransactionConfigurations {
         }
 
         /** */
-        public Builder setAcquireStrategy(
-                final AcquireStrategy acquireStrategy) {
-            checkNotNull(acquireStrategy);
-            strategy = acquireStrategy;
+        public Builder setWaitMethod(
+                final WaitMethod waitMethod) {
+            checkNotNull(waitMethod);
+            strategy = waitMethod;
             return this;
         }
 

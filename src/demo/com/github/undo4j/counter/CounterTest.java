@@ -115,7 +115,9 @@ public class CounterTest {
         @Override
         public Integer call(OperationDispatcher dispatcher) {
             dispatcher.write(CounterOperations.increment(counter));
-            throw new RuntimeException("Counter rollback requested");
+            dispatcher.abort("Counter rollback requested");
+            // unreachable
+            return dispatcher.read(CounterOperations.read(counter));
         }
     }
 }

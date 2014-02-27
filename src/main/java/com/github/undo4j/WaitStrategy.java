@@ -1,27 +1,25 @@
 package com.github.undo4j;
 
-import com.github.undo4j.AcquireStrategy;
-
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.Condition;
 
 
 /**
- * LockStrategy
+ * WaitStrategy
  * 
  * @author afs
  * @version 2013
  */
 
-abstract class LockStrategy {
+abstract class WaitStrategy {
 
     /*************************************************************************\
      *  Constructors
     \*************************************************************************/
 
     /**
-     *  Empty constructor of objects of class LockStrategy.
+     *  Empty constructor of objects of class WaitStrategy.
      */
-    protected LockStrategy() {}
+    protected WaitStrategy() {}
 
 
 
@@ -30,10 +28,10 @@ abstract class LockStrategy {
     \*************************************************************************/
 
     /** */
-    protected abstract AcquireStrategy getAcquireStrategy();
+    protected abstract WaitMethod getWaitMethod();
 
 
     /** */
-    protected abstract boolean acquire(final Lock lock)
+    protected abstract boolean waitOn(final Condition condition)
         throws InterruptedException;
 }

@@ -11,14 +11,14 @@ import java.util.Map;
  * @version 2013
  */
 
-class LockPool implements LockProvider {
+class LockPool implements ResourceManager {
 
     /*************************************************************************\
      *  Attributes
     \*************************************************************************/
 
     /** Registry of resource locks. */
-    protected final Map<ResourceId, Lock> locks = new HashMap<>();
+    protected final Map<ResourceId, ResourceLock> locks = new HashMap<>();
 
 
 
@@ -34,18 +34,34 @@ class LockPool implements LockProvider {
 
 
     /*************************************************************************\
-     *  Getters
+     *  ResourceManager Methods
     \*************************************************************************/
 
     /** */
     @Override
-    public Lock getLock(final ResourceId key) {
-        assert key != null;
-        Lock lock = this.locks.get(key);
-        if (lock == null) {
-            throw new UnregisteredResourceException(key.toString());
+    public void acquire(
+            final TransactionId tid,
+            final ResourceId key,
+            final AccessMode mode,
+            final WaitStrategy strategy) {
+        assert tid != null && key != null && mode != null && strategy != null;
+        checkRegistered(key);
+        try {
+            if (!this.locks.get(key).acquire(tid, mode, strategy)) {
+                throw new ResourceAcquisitionException("Failed to acquire");
+            }
+        } catch (InterruptedException ex) {
+            throw new TransactionInterruptedException(ex);
         }
-        return lock;
+    }
+
+
+    /** */
+    @Override
+    public void release(final TransactionId tid, final ResourceId key) {
+        assert tid != null && key != null;
+        checkRegistered(key);
+        this.locks.get(key).release(tid);
     }
 
 
@@ -76,25 +92,21 @@ class LockPool implements LockProvider {
     protected void put(final IsolationLevel isolation, final ResourceId key) {
         assert isolation != null;
         checkNotRegistered(key);
-        this.locks.put(key, Locks.newLock(isolation));
+        this.locks.put(key, ResourceLocks.noLock(key));
     }
 
 
     /** */
     protected void remove(final ResourceId key) {
-        Lock lock = this.locks.remove(key);
-        if (lock != null) {
-            lock.invalidate();
-        }
+        ResourceLock lock = this.locks.remove(key);
+        if (lock != null) { lock.invalidate(); }
     }
 
     /** */
-    void remove(final Iterable<ResourceId> keys) {
+    protected void remove(final Iterable<ResourceId> keys) {
         for (ResourceId key: keys) {
-            Lock lock = this.locks.remove(key);
-            if (lock != null) {
-                lock.invalidate();
-            }
+            ResourceLock lock = this.locks.remove(key);
+            if (lock != null) { lock.invalidate(); }
         }
     }
 
@@ -105,9 +117,16 @@ class LockPool implements LockProvider {
     \*************************************************************************/
 
     /** */
-    private void checkNotRegistered(final ResourceId key) {
+    protected final void checkNotRegistered(final ResourceId key) {
         if (this.locks.containsKey(key)) {
             throw new RegisteredResourceException(key.toString());
+        }
+    }
+
+    /** */
+    protected final void checkRegistered(final ResourceId key) {
+        if (!this.locks.containsKey(key)) {
+            throw new UnregisteredResourceException(key.toString());
         }
     }
 

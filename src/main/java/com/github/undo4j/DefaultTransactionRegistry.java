@@ -17,7 +17,8 @@ final class DefaultTransactionRegistry implements TransactionRegistry {
     /** */
     private TransactionId transactionId;
 
-    /** For future use. */
+    /** */
+    @SuppressWarnings("unused")
     private Transaction<?> transaction;
 
 

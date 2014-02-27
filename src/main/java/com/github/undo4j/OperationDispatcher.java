@@ -11,4 +11,6 @@ package com.github.undo4j;
 public interface OperationDispatcher {
     <T> T read(ReadOperation<T> op);
     void write(WriteOperation op);
+    void abort();
+    void abort(String message);
 }

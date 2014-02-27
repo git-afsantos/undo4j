@@ -126,7 +126,7 @@ abstract class AbstractTransactionManager implements TransactionManager {
             final TransactionConfigurations config) {
         assert tid != null && config != null;
         return new DefaultDispatcher(tid, config.getAccessMode(),
-            this.lockPool, valueOfLockStrategy(config),
+            this.lockPool, valueOfWaitStrategy(config),
             config.getCommitOperation());
     }
 
@@ -158,14 +158,14 @@ abstract class AbstractTransactionManager implements TransactionManager {
 
 
     /** */
-    private LockStrategy valueOfLockStrategy(
+    private WaitStrategy valueOfWaitStrategy(
             final TransactionConfigurations config) {
-        AcquireStrategy strategy = config.getAcquireStrategy();
-        if (strategy == AcquireStrategy.TIMED) {
-            return LockStrategies.newTimedStrategy
+        WaitMethod method = config.getWaitMethod();
+        if (method == WaitMethod.TIMED) {
+            return WaitStrategies.newTimedStrategy
                 (config.getTimeoutDelay(), config.getTimeUnit());
         }
-        return LockStrategies.newStrategy(strategy);
+        return WaitStrategies.newStrategy(method);
     }
 
 

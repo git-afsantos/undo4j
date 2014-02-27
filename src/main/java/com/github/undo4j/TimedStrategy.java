@@ -1,9 +1,7 @@
 package com.github.undo4j;
 
-import com.github.undo4j.AcquireStrategy;
-
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.Condition;
 
 
 /**
@@ -13,7 +11,7 @@ import java.util.concurrent.locks.Lock;
  * @version 2013
  */
 
-final class TimedStrategy extends LockStrategy {
+final class TimedStrategy extends WaitStrategy {
 
     /*************************************************************************\
      *  Attributes
@@ -44,18 +42,17 @@ final class TimedStrategy extends LockStrategy {
 
     /** */
     @Override
-    protected AcquireStrategy getAcquireStrategy() {
-        return AcquireStrategy.TIMED;
-    }
+    protected WaitMethod getWaitMethod() { return WaitMethod.TIMED; }
 
 
     /**
-     * Tries to acquire the lock within the time period specified on
-     * construction. Returns true if the lock has been acquired. Returns false
-     * otherwise.
+     * Waits on the given condition for the time period specified on
+     * construction. Returns true if the thread has been signalled.
+     * Returns false otherwise.
      */
     @Override
-    protected boolean acquire(final Lock lock) throws InterruptedException {
-        return lock.tryLock(time, unit);
+    protected boolean waitOn(final Condition condition)
+            throws InterruptedException {
+        return condition.await(time, unit);
     }
 }

@@ -48,14 +48,14 @@ class DefaultDispatcher implements OperationDispatcher {
     /** The stack of write operations to rollback. */
     protected final Deque<WriteOperation> stack = new ArrayDeque<>();
 
-    /** The provider of resource locks. */
-    protected final LockProvider provider;
+    /** The resource manager. */
+    protected final ResourceManager manager;
 
-    /** The lock acquisition strategy to use. */
-    protected final LockStrategy strategy;
+    /** The lock wait strategy to use. */
+    protected final WaitStrategy strategy;
 
-    /** The set of acquired locks. */
-    protected final Set<Lock> acquired          = new HashSet<>();
+    /** The set of acquired resources. */
+    protected final Set<ResourceId> acquired    = new HashSet<>();
 
     /** The thread running the transaction of this dispatcher. */
     private volatile Thread thread              = null;
@@ -84,15 +84,15 @@ class DefaultDispatcher implements OperationDispatcher {
     protected DefaultDispatcher(
             final TransactionId     owner,
             final AccessMode        mode,
-            final LockProvider      provider,
-            final LockStrategy      strategy,
+            final ResourceManager   manager,
+            final WaitStrategy      strategy,
             final CommitOperation   onCommit) {
         assert owner != null && mode != null && onCommit != null
-            && provider != null && strategy != null;
+            && manager != null && strategy != null;
         this.owner      = owner;
         this.mode       = mode;
         this.onCommit   = onCommit;
-        this.provider   = provider;
+        this.manager    = manager;
         this.strategy   = strategy;
     }
 
@@ -139,6 +139,20 @@ class DefaultDispatcher implements OperationDispatcher {
     }
 
 
+    /** */
+    @Override
+    public final void abort() {
+        throw new AbortRequestedException("transaction aborted");
+    }
+
+
+    /** */
+    @Override
+    public final void abort(final String message) {
+        throw new AbortRequestedException(message);
+    }
+
+
 
     /*************************************************************************\
      *  Protected Methods
@@ -175,7 +189,7 @@ class DefaultDispatcher implements OperationDispatcher {
 
     /** */
     protected void release() {
-        for (Lock lock: acquired) { lock.release(); }
+        for (ResourceId r: acquired) { manager.release(owner, r); }
         this.acquired.clear();
     }
 
@@ -236,16 +250,16 @@ class DefaultDispatcher implements OperationDispatcher {
     /** */
     protected final void checkTransaction() {
         if (Thread.currentThread() != this.thread) {
-            throw new TransactionContextException("Not a transaction");
+            throw new TransactionContextException("not a transaction");
         }
     }
 
 
     /** */
     protected final void checkNotInterrupted() {
-        if (Thread.interrupted() || this.interrupted) {
+        if (this.thread.isInterrupted() || this.interrupted) {
             throw new TransactionInterruptedException
-                ("Transaction interrutped");
+                ("transaction interrupted");
         }
     }
 
@@ -259,16 +273,11 @@ class DefaultDispatcher implements OperationDispatcher {
      * Acquires locks in order, to avoid deadlocks.
      */
     private void acquire(final Iterable<ResourceId> resources) {
-        Queue<Lock> locks = getLocks(resources);
-        for (Lock lock = locks.poll(); lock != null; lock = locks.poll()) {
-            try {
-                if (!lock.acquire(mode, strategy)) {
-                    throw new ResourceAcquisitionException
-                        ("Failed to acquire");
-                }
-                this.acquired.add(lock);
-            } catch (InterruptedException ex) {
-                throw new ResourceAcquisitionException("Interrupted");
+        Queue<ResourceId> rs = sortResources(resources);
+        for (ResourceId i = rs.poll(); i != null; i = rs.poll()) {
+            if (!this.acquired.contains(i)) {
+                manager.acquire(owner, i, mode, strategy);
+                this.acquired.add(i);
             }
         }
     }
@@ -277,15 +286,13 @@ class DefaultDispatcher implements OperationDispatcher {
     /**
      * Sorts non-acquired locks, to avoid deadlocks.
      */
-    private Queue<Lock> getLocks(final Iterable<ResourceId> resources) {
+    private Queue<ResourceId> sortResources(final Iterable<ResourceId> rs) {
         boolean isEmpty = true;
-        Queue<Lock> queue = new PriorityQueue<>();
-        for (ResourceId resource: resources) {
-            checkNotNull(resource);
+        Queue<ResourceId> queue = new PriorityQueue<>();
+        for (ResourceId r: rs) {
+            checkNotNull(r);
             isEmpty = false;
-            Lock lock = this.provider.getLock(resource);
-            if (this.acquired.contains(lock)) { continue; }
-            queue.add(lock);
+            queue.add(r);
         }
         if (isEmpty) {
             throw new ResourceAcquisitionException("No resources to acquire");

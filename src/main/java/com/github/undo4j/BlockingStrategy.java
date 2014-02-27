@@ -1,8 +1,6 @@
 package com.github.undo4j;
 
-import com.github.undo4j.AcquireStrategy;
-
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.Condition;
 
 
 /**
@@ -12,7 +10,7 @@ import java.util.concurrent.locks.Lock;
  * @version 2013
  */
 
-final class BlockingStrategy extends LockStrategy {
+final class BlockingStrategy extends WaitStrategy {
 
     /*************************************************************************\
      *  Constructors
@@ -31,18 +29,17 @@ final class BlockingStrategy extends LockStrategy {
 
     /** */
     @Override
-    protected AcquireStrategy getAcquireStrategy() {
-        return AcquireStrategy.BLOCKING;
-    }
+    protected WaitMethod getWaitMethod() { return WaitMethod.BLOCKING; }
 
 
     /**
-     * Acquires the lock, blocking if necessary. Returns true if the lock has
-     * been acquired. Returns false otherwise.
+     * Blocks waiting while necessary. Returns true when the thread has
+     * been signalled.
      */
     @Override
-    protected boolean acquire(final Lock lock) {
-        lock.lock();
+    protected boolean waitOn(final Condition condition)
+            throws InterruptedException {
+        condition.await();
         return true;
     }
 }

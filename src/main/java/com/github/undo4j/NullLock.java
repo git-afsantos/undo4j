@@ -5,19 +5,29 @@ package com.github.undo4j;
  * NullLock
  * 
  * @author afs
- * @version 2013
+ * @version 2014-01-29
  */
 
-final class NullLock extends Lock {
+final class NullLock extends ResourceLock {
 
     /*************************************************************************\
      *  Constructors
     \*************************************************************************/
 
     /**
-     *  Empty constructor of class NullLock.
+     *  Parameter constructor of class NullLock.
      */
-    NullLock() { super(); }
+    NullLock(final ResourceId id) {
+        super(id);
+    }
+
+
+    /**
+     *  Parameter constructor of class NullLock.
+     */
+    NullLock(final ResourceId id, final AcquireListener listener) {
+        super(id, listener);
+    }
 
 
 
@@ -35,12 +45,20 @@ final class NullLock extends Lock {
     /** */
     @Override
     protected boolean acquire(
-            final AccessMode mode, final LockStrategy strat) {
-        return super.isValid;
+            final TransactionId tid,
+            final AccessMode mode,
+            final WaitStrategy strat) {
+        assert tid != null && mode != null && strat != null;
+        boolean valid = super.isValid();
+        if (valid) { super.notifyAcquired(tid); }
+        return valid;
     }
 
 
     /** */
     @Override
-    protected void release() {}
+    protected void release(final TransactionId tid) {
+        assert tid != null && super.hasOwner();
+        super.notifyReleased(tid);
+    }
 }

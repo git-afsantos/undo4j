@@ -9,7 +9,7 @@ package com.github.undo4j;
  * @version 2013
  */
 
-public final class ClientException extends Exception {
+public class ClientException extends Exception {
 
     /*************************************************************************\
      *  Fields

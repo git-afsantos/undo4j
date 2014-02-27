@@ -1,22 +1,23 @@
 package com.github.undo4j;
 
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Condition;
 
 
 /**
- * ExclusiveLock
+ * WARNING: not reentrant
  * 
  * @author afs
- * @version 2013
+ * @version 2014-01-29
  */
 
-final class ExclusiveLock extends Lock {
+final class ExclusiveLock extends ResourceLock {
 
     /*************************************************************************\
      *  Attributes
     \*************************************************************************/
 
-    private final ReentrantLock lock = new ReentrantLock();
+    /** */
+    private final Condition condition;
 
 
 
@@ -25,9 +26,23 @@ final class ExclusiveLock extends Lock {
     \*************************************************************************/
 
     /**
-     *  Empty constructor of class ExclusiveLock.
+     *  Parameter constructor of class ExclusiveLock.
      */
-    ExclusiveLock() { super(); }
+    ExclusiveLock(final ResourceId id, final Condition condition) {
+        super(id);
+        assert condition != null;
+        this.condition = condition;
+    }
+
+    /**
+     *  Parameter constructor of class ExclusiveLock.
+     */
+    ExclusiveLock(final ResourceId id, final AcquireListener listener,
+            final Condition condition) {
+        super(id, listener);
+        assert condition != null;
+        this.condition = condition;
+    }
 
 
 
@@ -44,14 +59,33 @@ final class ExclusiveLock extends Lock {
 
     /** */
     @Override
-    protected boolean acquire
-        (final AccessMode mode, final LockStrategy strat)
-            throws InterruptedException {
-        return super.isValid && strat.acquire(lock);
+    protected boolean acquire(
+            final TransactionId tid,
+            final AccessMode mode,
+            final WaitStrategy strat) throws InterruptedException {
+        assert tid != null && mode != null && strat != null;
+        // Fail if lock is invalid.
+        if (!super.isValid()) { return false; }
+        // Wait if there's another owner.
+        boolean success = true;
+        while (success && super.hasOwner()) {
+            super.notifyWaiting(tid);
+            try     { success = strat.waitOn(condition); }
+            finally { super.notifyNotWaiting(tid); }
+        }
+        // Register ownership, if acquired.
+        if (success) { super.notifyAcquired(tid); }
+        return success;
     }
 
 
     /** */
     @Override
-    protected void release() { lock.unlock(); }
+    protected void release(final TransactionId tid) {
+        assert tid != null && super.hasOwner();
+        // Clear ownership.
+        super.notifyReleased(tid);
+        // Wake up next contender.
+        condition.signal();
+    }
 }

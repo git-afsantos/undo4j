@@ -1,8 +1,6 @@
 package com.github.undo4j;
 
-import com.github.undo4j.AcquireStrategy;
-
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.Condition;
 
 
 /**
@@ -12,7 +10,7 @@ import java.util.concurrent.locks.Lock;
  * @version 2013
  */
 
-final class InstantStrategy extends LockStrategy {
+final class InstantStrategy extends WaitStrategy {
 
     /*************************************************************************\
      *  Constructors
@@ -31,15 +29,12 @@ final class InstantStrategy extends LockStrategy {
 
     /** */
     @Override
-    protected AcquireStrategy getAcquireStrategy() {
-        return AcquireStrategy.INSTANT;
-    }
+    protected WaitMethod getWaitMethod() { return WaitMethod.INSTANT; }
 
 
     /**
-     * Tries to instantly acquire the lock. Returns true if the lock has been
-     * acquired. Returns false otherwise.
+     * Returns false. An instant strategy fails anytime it has to wait.
      */
     @Override
-    protected boolean acquire(final Lock lock) { return lock.tryLock(); }
+    protected boolean waitOn(final Condition condition) { return false; }
 }
